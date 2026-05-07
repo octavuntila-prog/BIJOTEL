@@ -1,0 +1,30 @@
+[project]
+name = "bijotel"
+version = "0.0.1"
+description = "SpanProcessor plug-ins for OpenTelemetry GenAI: tamper-evident chain, content-addressable storage, in-process policy gate."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Octavian Untilă" }]
+dependencies = [
+    "opentelemetry-api>=1.27.0",
+    "opentelemetry-sdk>=1.27.0",
+    "opentelemetry-semantic-conventions>=0.48b0",
+]
+
+[project.optional-dependencies]
+anthropic = [
+    "anthropic>=0.40.0",
+    "opentelemetry-instrumentation-anthropic>=0.40.0",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bijotel"]
