@@ -4,23 +4,12 @@ from __future__ import annotations
 
 import io
 
-import pytest
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.util._once import Once
 
 import bijotel
 
-
-@pytest.fixture(autouse=True)
-def reset_otel_global(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Reset OTel global TracerProvider between tests (allows re-init).
-
-    OTel's set_tracer_provider() is gated by Once() — only the first call wins.
-    We reset the gate per test for isolation.
-    """
-    monkeypatch.setattr(trace, "_TRACER_PROVIDER_SET_ONCE", Once())
-    monkeypatch.setattr(trace, "_TRACER_PROVIDER", None)
+# Note: reset_otel_global fixture is autouse din tests/conftest.py
 
 
 def test_init_returns_tracer_provider() -> None:
