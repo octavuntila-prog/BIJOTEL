@@ -12,7 +12,11 @@ from pathlib import Path
 from opentelemetry.context import Context
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 
-from bijotel.processors.canonical import canonicalize, span_to_canonical_dict
+from bijotel.processors.canonical import (
+    canonicalize,
+    span_to_canonical_dict,
+    span_to_semantic_dict,
+)
 
 GENESIS_HASH = "0" * 64  # Convenție: prev_hash al primului entry
 
@@ -28,14 +32,20 @@ class HmacChainSpanProcessor(SpanProcessor):
     """SpanProcessor care sigilează spans într-un HMAC chain SQLite.
 
     Pentru fiecare span care trece filter-ul:
-        1. Extract canonical dict (span_to_canonical_dict)
-        2. JCS canonicalize -> bytes
-        3. SHA-256 -> canonical_hash
-        4. HMAC(prev_hash || canonical_hash, secret) -> hmac_hash
-        5. INSERT row în chain table
+        1. Extract canonical dict (span_to_canonical_dict) -> JCS -> SHA-256 -> canonical_hash
+        2. Extract semantic dict (input-only) -> JCS -> SHA-256 -> semantic_body_hash
+        3. HMAC(prev_hash || canonical_hash, secret) -> hmac_hash
+        4. INSERT row în chain table (cu both hashes populated)
 
     Chain integrity: pentru orice seq N, hmac_hash[N] depinde de hmac_hash[N-1].
     Mutația oricărui field în orice row -> verify() returnează (False, seq).
+
+    Cross-reference: chain.semantic_body_hash referă cas.body_hash (vezi cas.py).
+    Pentru "list spans using body X": query chain WHERE semantic_body_hash = X.
+
+    Schema migration: dacă chain.db existent NU are coloana semantic_body_hash,
+    _init_db() o adaugă via ALTER TABLE (idempotent, non-destructive). Existing
+    rows rămân cu NULL pentru semantic_body_hash; new rows se populează.
     """
 
     def __init__(
@@ -61,7 +71,7 @@ class HmacChainSpanProcessor(SpanProcessor):
         self._init_db()
 
     def _init_db(self) -> None:
-        """Create chain table if not exists."""
+        """Create chain table if not exists, migrate older schema if needed."""
         with sqlite3.connect(self._db_path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS chain (
@@ -74,11 +84,20 @@ class HmacChainSpanProcessor(SpanProcessor):
                     canonical_body BLOB NOT NULL,
                     canonical_hash TEXT NOT NULL,
                     prev_hash TEXT NOT NULL,
-                    hmac_hash TEXT NOT NULL
+                    hmac_hash TEXT NOT NULL,
+                    semantic_body_hash TEXT
                 )
             """)
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_chain_trace ON chain(trace_id)"
+            )
+            # Migration: add semantic_body_hash to existing chain tables (F2 -> F3 upgrade)
+            cols = [r[1] for r in conn.execute("PRAGMA table_info(chain)").fetchall()]
+            if "semantic_body_hash" not in cols:
+                conn.execute("ALTER TABLE chain ADD COLUMN semantic_body_hash TEXT")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_chain_semhash "
+                "ON chain(semantic_body_hash)"
             )
             conn.commit()
 
@@ -102,6 +121,10 @@ class HmacChainSpanProcessor(SpanProcessor):
         canonical_body = canonicalize(canonical_dict)
         canonical_hash = hashlib.sha256(canonical_body).hexdigest()
 
+        semantic_dict = span_to_semantic_dict(span)
+        semantic_body = canonicalize(semantic_dict)
+        semantic_hash = hashlib.sha256(semantic_body).hexdigest()
+
         with self._lock, sqlite3.connect(self._db_path) as conn:
             prev_hash = self._last_hmac_hash(conn)
             hmac_input = (prev_hash + canonical_hash).encode("utf-8")
@@ -114,8 +137,9 @@ class HmacChainSpanProcessor(SpanProcessor):
                 """
                 INSERT INTO chain (
                     timestamp_ns, trace_id, span_id, span_name, span_kind,
-                    canonical_body, canonical_hash, prev_hash, hmac_hash
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    canonical_body, canonical_hash, prev_hash, hmac_hash,
+                    semantic_body_hash
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     span.end_time,
@@ -127,6 +151,7 @@ class HmacChainSpanProcessor(SpanProcessor):
                     canonical_hash,
                     prev_hash,
                     hmac_hash,
+                    semantic_hash,
                 ),
             )
             conn.commit()

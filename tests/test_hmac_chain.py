@@ -196,3 +196,91 @@ def test_custom_filter_fn(db_path: Path) -> None:
     with sqlite3.connect(db_path) as conn:
         rows = conn.execute("SELECT COUNT(*) FROM chain").fetchone()
         assert rows[0] == 1
+
+
+def test_semantic_body_hash_populated(
+    provider_with_chain: TracerProvider, db_path: Path
+) -> None:
+    """Chain rows have semantic_body_hash populated (F3 extension)."""
+    _emit_genai_span()
+    provider_with_chain.shutdown()
+
+    with sqlite3.connect(db_path) as conn:
+        row = conn.execute(
+            "SELECT semantic_body_hash FROM chain WHERE seq = 1"
+        ).fetchone()
+        assert row[0] is not None
+        assert len(row[0]) == 64  # SHA-256 hex
+
+
+def test_semantic_body_hash_identical_for_same_input(
+    provider_with_chain: TracerProvider, db_path: Path
+) -> None:
+    """2 spans cu input identic -> același semantic_body_hash."""
+    _emit_genai_span()
+    _emit_genai_span()
+    provider_with_chain.shutdown()
+
+    with sqlite3.connect(db_path) as conn:
+        rows = conn.execute(
+            "SELECT semantic_body_hash FROM chain ORDER BY seq"
+        ).fetchall()
+        assert rows[0][0] == rows[1][0]
+
+
+def test_chain_migration_adds_semantic_body_hash_column(tmp_path: Path) -> None:
+    """ALTER TABLE migration: chain.db F2 (fără semantic_body_hash) -> upgrade F3.
+
+    NOTE: Test verifică DOAR că coloana e adăugată non-destructive.
+    Hashes-urile fake din old row NU sunt validabile cu verify_chain.
+    """
+    db_path = tmp_path / "old_chain.db"
+
+    # Create OLD F2 schema (fără semantic_body_hash)
+    with sqlite3.connect(db_path) as conn:
+        conn.execute("""
+            CREATE TABLE chain (
+                seq INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp_ns INTEGER NOT NULL,
+                trace_id TEXT NOT NULL,
+                span_id TEXT NOT NULL,
+                span_name TEXT NOT NULL,
+                span_kind TEXT,
+                canonical_body BLOB NOT NULL,
+                canonical_hash TEXT NOT NULL,
+                prev_hash TEXT NOT NULL,
+                hmac_hash TEXT NOT NULL
+            )
+        """)
+        # Insert un row vechi cu hashes fake (doar pentru a verifica preservation)
+        conn.execute(
+            """INSERT INTO chain (timestamp_ns, trace_id, span_id, span_name,
+               span_kind, canonical_body, canonical_hash, prev_hash, hmac_hash)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                1000,
+                "x" * 32,
+                "y" * 16,
+                "old.span",
+                "CLIENT",
+                b"old",
+                "h" * 64,
+                "0" * 64,
+                "h" * 64,
+            ),
+        )
+        conn.commit()
+
+    # Init HmacChainSpanProcessor -> triggerează migration
+    HmacChainSpanProcessor(db_path=db_path, secret_key=b"x" * 32)
+
+    # Verifică că coloana a fost adăugată
+    with sqlite3.connect(db_path) as conn:
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(chain)").fetchall()]
+        assert "semantic_body_hash" in cols
+        # Old row e încă acolo, semantic_body_hash NULL pentru el (M5: păstrat intact)
+        old_row = conn.execute(
+            "SELECT span_name, semantic_body_hash FROM chain WHERE seq = 1"
+        ).fetchone()
+        assert old_row[0] == "old.span"
+        assert old_row[1] is None  # NULL pentru row vechi
