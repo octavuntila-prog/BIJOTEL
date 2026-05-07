@@ -1,6 +1,7 @@
 """BIJOTEL: SpanProcessor plug-ins for OpenTelemetry GenAI."""
 
 from bijotel.core.init import init, shutdown
+from bijotel.decorators import trace_genai, wrap
 from bijotel.policy import (
     Decision,
     PolicyDeniedError,
@@ -24,4 +25,6 @@ __all__ = [
     "init",
     "model_allowlist",
     "shutdown",
+    "trace_genai",
+    "wrap",
 ]

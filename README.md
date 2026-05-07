@@ -30,6 +30,47 @@ trace.set_tracer_provider(provider)
 AnthropicInstrumentor().instrument()  # tracer rămâne upstream
 ```
 
+## Custom Code Tracing (`@trace_genai`)
+
+For LLM calls outside `instrumentation-anthropic` coverage (custom wrappers,
+non-Anthropic providers, multi-provider clients), use the `@trace_genai`
+decorator or `bijotel.wrap()` runtime equivalent:
+
+```python
+from bijotel import trace_genai
+
+# Anthropic-style API: defaults work
+@trace_genai(provider="anthropic")
+def call_claude(*, model, messages, max_tokens):
+    return client.messages.create(model=model, messages=messages, max_tokens=max_tokens)
+
+# Custom API: provide extractors (e.g. for multi-provider wrappers)
+@trace_genai(
+    name="ara.llm.call",
+    provider="ara",
+    request_extractor=lambda kw: {
+        "model": kw["cfg"].model_id,
+        "messages": kw["messages"],
+        "max_tokens": kw["cfg"].max_tokens,
+    },
+    response_extractor=lambda resp: {
+        "input_tokens": resp.input_tokens,
+        "output_tokens": resp.output_tokens,
+    },
+    extra_attrs={"ara.deployment": "prod"},  # constants only
+)
+async def complete(self, *, agent_id, messages, cfg, ...):
+    return await self._dispatch(...)
+```
+
+Auto-detects sync/async via `asyncio.iscoroutinefunction`. All emitted spans
+pass through HmacChain/CAS/Policy processors normally. Exceptions in the
+wrapped function set span status to `ERROR` and re-raise. Extractor failures
+log to `bijotel.extractor_error` attribute without crashing the call.
+
+`bijotel.wrap(fn, ...)` is the runtime alternative — same behavior, no
+source modification needed (third-party libs, dynamic dispatch).
+
 ## Install
 
 ```bash
@@ -69,7 +110,7 @@ bijotel list --db chain.db --since 2026-05-07 --limit 100
 - [x] F2: HmacChainSpanProcessor (JCS + SHA-256 + HMAC chain)
 - [x] F3: CasSpanProcessor (content-addressable span body storage)
 - [x] F4: PolicyGate (3-state Decision + 3 built-in rules + guard decorator)
-- [ ] F5: `@trace_genai` decorator (custom code path) — deferred until concrete use case
+- [x] F5: `@trace_genai` decorator + `wrap()` runtime (sync+async, custom extractors)
 - [x] F6: `bijotel` CLI (verify + inspect + stats + list)
 - [ ] F7: Provider protocol abstract + AnthropicAdapter — deferred until multi-provider
 
