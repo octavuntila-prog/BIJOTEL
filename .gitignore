@@ -15,3 +15,7 @@ build/
 .coverage
 htmlcov/
 .DS_Store
+
+# F1 schema discovery dumps (NU se comit)
+f1_spans.jsonl
+*.jsonl
