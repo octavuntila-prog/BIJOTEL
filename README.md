@@ -192,6 +192,12 @@ bijotel list --db chain.db --blocked
 bijotel list --db chain.db --rule cost_per_call_max
 bijotel list --db chain.db --model claude-haiku-4-5-20251001
 bijotel list --db chain.db --since 2026-05-07 --limit 100
+
+# Export chain to portable signed JSON (verifiable by external auditors)
+bijotel export --db chain.db --output audit_trail.json
+
+# Verify integrity of an exported JSON (no DB needed, just secret)
+bijotel verify-export audit_trail.json
 ```
 
 `--since` uses calendar date UTC (YYYY-MM-DD, lower bound 00:00:00Z), consistent with `daily_token_budget` rule.
@@ -228,6 +234,7 @@ The script validates:
 - [x] F6: `bijotel` CLI (verify + inspect + stats + list)
 - [x] Validation: `scripts/e2e_smoke.py` (full stack on real Anthropic + CLI verify)
 - [x] F7: Provider protocol + AnthropicAdapter (`@trace_genai(provider=adapter)` integration; multi-provider deferred until concrete need)
+- [x] F8: Portable signed JSON chain export (`bijotel export` + `bijotel verify-export`) + `rate_limit_calls_per_minute` rule
 
 ## License
 

@@ -11,7 +11,13 @@ import sys
 from pathlib import Path
 
 from bijotel.policy.prices import DEFAULT_PRICES
-from bijotel.processors import cas_lookup, cas_stats, verify_chain
+from bijotel.processors import (
+    cas_lookup,
+    cas_stats,
+    export_chain,
+    verify_chain,
+    verify_export,
+)
 
 # ───────────────────────── Helpers ─────────────────────────
 
@@ -318,3 +324,63 @@ def list_cmd(args: argparse.Namespace) -> int:
 
     print(f"\n({len(filtered)} spans)")
     return 0
+
+
+# ───────────────────── bijotel export ─────────────────────
+
+
+def export_cmd(args: argparse.Namespace) -> int:
+    """Export chain.db to portable signed JSON file (F8)."""
+    secret = _resolve_secret(args)
+    if secret is None:
+        print(
+            "ERROR: HMAC secret required (--secret-hex or BIJOTEL_HMAC_SECRET).",
+            file=sys.stderr,
+        )
+        return 2
+
+    db_path = Path(args.db)
+    if not db_path.exists():
+        print(f"ERROR: chain DB not found: {db_path}", file=sys.stderr)
+        return 2
+
+    try:
+        out = export_chain(db_path, args.output, secret)
+    except Exception as e:  # noqa: BLE001
+        print(f"ERROR: export failed: {e}", file=sys.stderr)
+        return 2
+
+    print(f"Exported chain to {out}")
+    # Quick stat for user feedback
+    try:
+        data = json.loads(Path(out).read_text(encoding="utf-8"))
+        print(f"  format:        {data['format']}")
+        print(f"  entries_count: {data['entries_count']}")
+        print(f"  head_hash:     {data['head_hash'][:16]}...")
+        print(f"  size:          {Path(out).stat().st_size:,} bytes")
+    except Exception:  # noqa: BLE001
+        pass
+
+    return 0
+
+
+# ─────────────────── bijotel verify-export ────────────────
+
+
+def verify_export_cmd(args: argparse.Namespace) -> int:
+    """Verify integrity of exported chain JSON file (F8)."""
+    secret = _resolve_secret(args)
+    if secret is None:
+        print(
+            "ERROR: HMAC secret required (--secret-hex or BIJOTEL_HMAC_SECRET).",
+            file=sys.stderr,
+        )
+        return 2
+
+    valid, reason = verify_export(args.path, secret)
+    if valid:
+        print(f"Export VALID: {args.path}")
+        return 0
+
+    print(f"Export INVALID: {reason}", file=sys.stderr)
+    return 1

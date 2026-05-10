@@ -5,7 +5,14 @@ from __future__ import annotations
 import argparse
 import sys
 
-from bijotel.cli.commands import inspect_cmd, list_cmd, stats_cmd, verify_cmd
+from bijotel.cli.commands import (
+    export_cmd,
+    inspect_cmd,
+    list_cmd,
+    stats_cmd,
+    verify_cmd,
+    verify_export_cmd,
+)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -67,6 +74,31 @@ def _build_parser() -> argparse.ArgumentParser:
         "--offset", type=int, default=0, help="Skip N rows."
     )
 
+    # bijotel export
+    p_export = subparsers.add_parser(
+        "export",
+        help="Export chain to portable signed JSON file (verifiable by external auditors).",
+    )
+    p_export.add_argument("--db", required=True, help="SQLite chain DB path.")
+    p_export.add_argument(
+        "--output", "-o", required=True, help="Output JSON file path."
+    )
+    p_export.add_argument(
+        "--secret-hex",
+        help="HMAC secret as hex string. Default: env BIJOTEL_HMAC_SECRET.",
+    )
+
+    # bijotel verify-export
+    p_vexp = subparsers.add_parser(
+        "verify-export",
+        help="Verify integrity of an exported chain JSON file.",
+    )
+    p_vexp.add_argument("path", help="Path to exported JSON file.")
+    p_vexp.add_argument(
+        "--secret-hex",
+        help="HMAC secret as hex string. Default: env BIJOTEL_HMAC_SECRET.",
+    )
+
     return parser
 
 
@@ -79,6 +111,8 @@ def main(argv: list[str] | None = None) -> int:
         "inspect": inspect_cmd,
         "stats": stats_cmd,
         "list": list_cmd,
+        "export": export_cmd,
+        "verify-export": verify_export_cmd,
     }
     handler = handlers[args.command]
     return handler(args)

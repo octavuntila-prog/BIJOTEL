@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import json
 import sqlite3
+import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -148,6 +149,97 @@ def daily_token_budget(
                 ON CONFLICT(date) DO UPDATE SET total_tokens = total_tokens + ?
                 """,
                 (today, request_tokens, request_tokens),
+            )
+            conn.commit()
+
+        return Decision.allow()
+
+    return rule
+
+
+def rate_limit_calls_per_minute(
+    max_calls: int,
+    *,
+    db_path: str | Path,
+    mode: str = "deny",
+) -> Rule:
+    """Block calls when rolling 60-second window already contains max_calls.
+
+    Sliding window (NOT calendar minute reset). At evaluation time:
+        1. Prune timestamps older than 60s from policy_rate_limit_state.
+        2. Count remaining; if >= max_calls -> deny.
+        3. Otherwise insert current timestamp -> allow.
+
+    State persisted in SQLite table ``policy_rate_limit_state(timestamp_ns)``.
+    Same DB recommended as HmacChain/CAS for unified storage.
+
+    Pattern adapted from substrate-guard's "api_calls_last_minute > 100"
+    deny rule (separate project, read-only access 2026-05-10).
+
+    Args:
+        max_calls: Maximum allowed calls in any rolling 60-second window.
+        db_path: SQLite path. Same DB as HmacChain/CAS recommended.
+        mode: "deny" or "warn".
+
+    Returns:
+        Rule callable.
+
+    Note: state checked AND mutated atomically per call. Concurrent calls
+    from multiple threads/processes coordinate via SQLite write lock.
+    """
+    if mode not in ("deny", "warn"):
+        raise ValueError(f"mode must be 'deny' or 'warn', got {mode!r}")
+    if max_calls < 1:
+        raise ValueError(f"max_calls must be >= 1, got {max_calls}")
+
+    db_path_resolved = Path(db_path)
+
+    with sqlite3.connect(db_path_resolved) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS policy_rate_limit_state (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp_ns INTEGER NOT NULL
+            )
+        """)
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_rl_ts "
+            "ON policy_rate_limit_state(timestamp_ns)"
+        )
+        conn.commit()
+
+    def rule(request: dict) -> Decision:  # noqa: ARG001 (request unused for this rule)
+        now_ns = time.time_ns()
+        window_start_ns = now_ns - 60 * 1_000_000_000  # 60 sec in ns
+
+        with sqlite3.connect(db_path_resolved) as conn:
+            # Prune entries older than window (cleanup in same call)
+            conn.execute(
+                "DELETE FROM policy_rate_limit_state WHERE timestamp_ns < ?",
+                (window_start_ns,),
+            )
+            # Count current window
+            count = conn.execute(
+                "SELECT COUNT(*) FROM policy_rate_limit_state"
+            ).fetchone()[0]
+
+            if count >= max_calls:
+                reason = (
+                    f"Rate limit exceeded: {count} calls in last 60s "
+                    f"(max {max_calls})"
+                )
+                conn.commit()  # Commit prune even on deny path
+                if mode == "deny":
+                    return Decision.deny(
+                        rule="rate_limit_calls_per_minute", reason=reason
+                    )
+                return Decision.warn(
+                    rule="rate_limit_calls_per_minute", reason=reason
+                )
+
+            # Allow path: record this call's timestamp
+            conn.execute(
+                "INSERT INTO policy_rate_limit_state (timestamp_ns) VALUES (?)",
+                (now_ns,),
             )
             conn.commit()
 

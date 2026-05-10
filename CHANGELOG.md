@@ -5,6 +5,61 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-05-10
+
+Patterns adapted from substrate-guard (separate project at `89.167.66.225`,
+read-only access). Two features ported with attribution: portable chain
+export and rate-limit policy rule.
+
+### Added
+
+#### Portable signed JSON export (F8)
+
+- **`export_chain(db, output_path, secret_key)`**: dump SQLite chain to
+  portable JSON file with file-level `chain_signature` (HMAC of head_hash +
+  entries_count). External auditors verify with shared secret only — no DB
+  access needed.
+- **`verify_export(path, secret_key)`**: full integrity check with
+  fail-fast diagnostics:
+  - JSON parseable
+  - Format identifier (`bijotel-chain-v1`)
+  - `chain_signature` matches recomputed
+  - Per-entry `hmac_hash` matches recomputed
+  - `prev_hash` chain links unbroken
+- **CLI**: `bijotel export --db chain.db --output audit.json` and
+  `bijotel verify-export audit.json` (both honor `BIJOTEL_HMAC_SECRET` env).
+- Schema: `bijotel-chain-v1` with base64-encoded `canonical_body` for
+  binary-safe transport.
+
+Pattern adapted from `substrate-guard/chain.py::export()` /
+`verify_export()` (separate project).
+
+#### Rate-limit policy rule (F8)
+
+- **`rate_limit_calls_per_minute(max_calls, db_path, mode)`**: sliding
+  60-second window rate limiter using SQLite-backed state.
+- Atomic prune-and-check pattern (DELETE old timestamps + COUNT + INSERT).
+- `mode="deny"` (default) blocks; `mode="warn"` audits but proceeds.
+- Persists across rule instances (state in SQLite, not in-memory).
+
+Pattern adapted from `substrate-guard/policy/policies/agent_safety.rego`
+("api_calls_last_minute > 100" deny rule), translated to Python rule
+matching BIJOTEL F4 pattern.
+
+### Changed
+
+- BIJOTEL `__version__` bumped from `0.0.1` to `0.2.0` (minor: new public
+  features, backward-compatible).
+- Top-level exports: `export_chain`, `verify_export`,
+  `rate_limit_calls_per_minute` now in `bijotel.__all__`.
+
+### Tests
+
+- 21 new tests (12 export + 9 rate_limit), 95 + 19 (F7) existing pass
+  unchanged → **135 total + 1 skipped smoke**.
+
+[0.2.0]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.2.0
+
 ## [0.1.0] — 2026-05-10
 
 First public alpha. Tamper-evident audit chain + content-addressable storage
