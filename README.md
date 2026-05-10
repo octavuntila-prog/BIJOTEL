@@ -249,6 +249,67 @@ if not valid:
 
 Schema: `bijotel-chain-v1`. Per-entry HMAC + file-level `chain_signature`. Integrity verifiable with shared secret only — no SQLite access required.
 
+## Regression Detection (F12, Bijuteria #16)
+
+Detect drift in token usage / cost over time using z-score + IQR methods on
+the BIJOTEL chain.db. Empirically motivated by patterns observed during
+GENA deployment (T+2h checkpoint revealed bimodal quality distributions
+and dimension-specific bottlenecks worth monitoring temporally).
+
+### Programmatic API
+
+```python
+from bijotel import RegressionDetector, AnomalyMethod
+
+detector = RegressionDetector(
+    db_path="chain.db",
+    baseline_window=100,        # Use last 100 spans as baseline
+    z_threshold=3.0,            # Flag values > 3σ from mean
+    iqr_multiplier=1.5,         # Tukey-style IQR outlier
+    method=AnomalyMethod.BOTH,  # Require BOTH methods to flag (low FP)
+)
+
+# Single dimension
+anomalies = detector.detect("input_tokens")
+for a in anomalies:
+    print(f"  seq={a.seq} value={a.value} z={a.z_score:.2f} severity={a.severity}")
+
+# All 3 dimensions (input_tokens, output_tokens, cost)
+results = detector.detect_all_dimensions(filter_model="claude-haiku-4-5-20251001")
+```
+
+### CLI usage
+
+```bash
+# Scan all 3 dimensions on entire chain (default: last 50 spans vs prior 100)
+bijotel regression --db chain.db
+
+# Single dimension, specific model
+bijotel regression --db chain.db --dimension cost --model claude-sonnet-4-20250514
+
+# Custom baseline window + sensitivity
+bijotel regression --db chain.db --window 200 --z-threshold 2.5
+```
+
+Exit codes: `0` no anomalies, `1` anomalies detected, `2` invalid args.
+
+### Detection methods
+
+- **z-score** (parametric): `z = (value - baseline.mean) / baseline.stdev`. Fast for Gaussian-like signals (most token counts when calls are similar).
+- **IQR** (non-parametric, Tukey): flag if `value < p25 - k·iqr` OR `value > p75 + k·iqr`. Robust to heavy-tailed distributions (cost can spike).
+- **`AnomalyMethod.BOTH`** (default): flags only when BOTH agree → minimizes false positives. Use `Z_SCORE` or `IQR` alone for broader detection.
+
+### Severity levels
+
+- `anomaly` — both z-score AND IQR triggered (high confidence drift).
+- `warning` — only one method triggered (worth review, lower confidence).
+
+### Limitations
+
+- Requires ≥5 baseline samples (`MIN_SAMPLES`); insufficient data returns empty list (no anomalies, but no false negatives surfaced either).
+- Cost dimension requires model in `DEFAULT_PRICES` price table (see `policy/prices.py`); spans with unknown models contribute no cost datapoint.
+- Single chain.db per `RegressionDetector` instance — no cross-chain analysis in v0.3.0.
+
 ## Shutting down BIJOTEL
 
 `shutdown()` flushes any pending spans and tears down the global TracerProvider. Important when running scripts that exit immediately (without flush, last spans may be lost).
@@ -334,6 +395,7 @@ The script validates:
 - [x] Validation: `scripts/e2e_smoke.py` (full stack on real Anthropic + CLI verify)
 - [x] F7: Provider protocol + AnthropicAdapter (`@trace_genai(provider=adapter)` integration; multi-provider deferred until concrete need)
 - [x] F8: Portable signed JSON chain export (`bijotel export` + `bijotel verify-export`) + `rate_limit_calls_per_minute` rule
+- [x] F12: Regression Detection (Bijuteria #16) — `RegressionDetector` + `bijotel regression` CLI (z-score + IQR over input_tokens / output_tokens / cost)
 
 ## License
 

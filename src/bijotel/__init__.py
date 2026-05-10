@@ -14,17 +14,29 @@ from bijotel.policy import (
     rate_limit_calls_per_minute,
 )
 from bijotel.processors import export_chain, verify_export
+from bijotel.regression import (
+    Anomaly,
+    AnomalyMethod,
+    DimensionStats,
+    RegressionDetector,
+    compute_baseline,
+)
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 __all__ = [
+    "Anomaly",
+    "AnomalyMethod",
     "AnthropicAdapter",
     "Decision",
+    "DimensionStats",
     "PolicyDeniedError",
     "PolicyEngine",
     "Provider",
     "ProviderResponse",
+    "RegressionDetector",
     "__version__",
+    "compute_baseline",
     "cost_per_call_max",
     "daily_token_budget",
     "export_chain",

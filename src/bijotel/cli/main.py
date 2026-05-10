@@ -9,6 +9,7 @@ from bijotel.cli.commands import (
     export_cmd,
     inspect_cmd,
     list_cmd,
+    regression_cmd,
     stats_cmd,
     verify_cmd,
     verify_export_cmd,
@@ -99,6 +100,34 @@ def _build_parser() -> argparse.ArgumentParser:
         help="HMAC secret as hex string. Default: env BIJOTEL_HMAC_SECRET.",
     )
 
+    # bijotel regression
+    p_reg = subparsers.add_parser(
+        "regression",
+        help="Detect drift in token usage / cost via z-score + IQR (F12).",
+    )
+    p_reg.add_argument("--db", required=True, help="SQLite chain DB path.")
+    p_reg.add_argument(
+        "--dimension",
+        choices=["input_tokens", "output_tokens", "cost"],
+        help="Single dimension. Default: scan all 3.",
+    )
+    p_reg.add_argument(
+        "--model",
+        help="Filter by gen_ai.request.model exact match.",
+    )
+    p_reg.add_argument(
+        "--window",
+        type=int,
+        default=100,
+        help="Baseline window size (number of recent spans, default 100).",
+    )
+    p_reg.add_argument(
+        "--z-threshold",
+        type=float,
+        default=3.0,
+        help="z-score absolute threshold for anomaly (default 3.0).",
+    )
+
     return parser
 
 
@@ -113,6 +142,7 @@ def main(argv: list[str] | None = None) -> int:
         "list": list_cmd,
         "export": export_cmd,
         "verify-export": verify_export_cmd,
+        "regression": regression_cmd,
     }
     handler = handlers[args.command]
     return handler(args)

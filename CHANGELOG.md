@@ -5,6 +5,48 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-05-10
+
+First implementation of BIJUTERII catalog #16 (Regression Detection), built
+as ``bijotel.regression`` module. Empirically motivated by patterns observed
+on GENA deployment (V4 rejection log technical_depth bottleneck, bimodal
+quality distribution at T+2h checkpoint) — patterns worth monitoring
+temporally to catch drift early.
+
+### Added
+
+#### Regression Detection (F12, Bijuteria #16)
+
+- **`RegressionDetector` class**: anomaly detection over chain.db using
+  z-score + IQR methods on universal dimensions.
+- **`compute_baseline()`**: rolling baseline aggregation (mean, stdev,
+  percentiles, IQR) over last N spans. Returns ``DimensionStats`` or ``None``
+  if insufficient samples (<5).
+- **`Anomaly` dataclass**: single detection record with severity tagging
+  (``warning`` if 1 method flagged, ``anomaly`` if both agree).
+- **`AnomalyMethod` enum**: ``Z_SCORE`` / ``IQR`` / ``BOTH``. Default
+  ``BOTH`` minimizes false positives by requiring agreement.
+- **3 universal dimensions**: ``input_tokens``, ``output_tokens``, ``cost``
+  (cost computed on-the-fly from ``DEFAULT_PRICES``).
+- **CLI**: ``bijotel regression --db chain.db`` with optional ``--dimension``,
+  ``--model``, ``--window``, ``--z-threshold``. Exit codes 0/1/2 for
+  no-anomalies / anomalies-detected / invalid-args.
+- **17 new tests** (5 baseline + 7 detector + 5 CLI).
+
+### Changed
+
+- Top-level exports: ``RegressionDetector``, ``Anomaly``, ``AnomalyMethod``,
+  ``DimensionStats``, ``compute_baseline`` now in ``bijotel.__all__``.
+- Version bumped 0.2.1 → 0.3.0 (minor: new public feature, backward-compatible).
+
+### Tests
+
+- **176 total + 1 skipped** (159 → 176, +17 from F12).
+- Coverage maintained at 94% overall (regression module: 91% baseline.py,
+  91% detector.py).
+
+[0.3.0]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.3.0
+
 ## [0.2.1] — 2026-05-10
 
 Patch release. No API changes. Bugfix + documentation + coverage push.
