@@ -2,6 +2,12 @@
 
 Auto-detect sync/async based on asyncio.iscoroutinefunction.
 Standard OTel span lifecycle (start -> set attributes -> set status -> end).
+
+F7 (2026-05-10): provider= now accepts a Provider object in addition to
+the legacy string. When a Provider is passed, request_extractor and
+response_extractor default to the provider's extract_* methods (and the
+provider name is read from provider.name). Backward-compatible — string
+provider= still works as before.
 """
 
 from __future__ import annotations
@@ -15,6 +21,7 @@ from typing import Any
 from opentelemetry import trace
 from opentelemetry.trace import SpanKind, Status, StatusCode
 
+from bijotel.adapters.base import Provider
 from bijotel.decorators.extractors import (
     DEFAULT_REQUEST_EXTRACTOR,
     DEFAULT_RESPONSE_EXTRACTOR,
@@ -95,12 +102,41 @@ def _set_extra_attrs(span: trace.Span, extra: dict[str, Any] | None) -> None:
         span.set_attribute(key, value)
 
 
+def _resolve_provider_config(
+    provider: str | Provider | None,
+    request_extractor: Callable[[dict], dict] | None,
+    response_extractor: Callable[[Any], dict] | None,
+) -> tuple[str | None, Callable[[dict], dict], Callable[[Any], dict]]:
+    """Resolve provider name + extractors based on provider= input shape.
+
+    F7 type-narrowing logic (backward-compatible):
+
+    - Provider object → name from provider.name; extractors from provider.extract_*
+      (unless explicit extractor params override).
+    - String → name as-is; extractors default to F5 DEFAULT_*.
+    - None → no provider name; extractors default to F5 DEFAULT_*.
+
+    Explicit ``request_extractor=`` / ``response_extractor=`` always win
+    over provider-supplied methods (override path stays open).
+    """
+    if isinstance(provider, Provider):
+        provider_name = provider.name
+        req_ex = request_extractor or provider.extract_request_attrs
+        resp_ex = response_extractor or provider.extract_response_attrs
+    else:
+        # str | None — F5 legacy path
+        provider_name = provider  # str or None
+        req_ex = request_extractor or DEFAULT_REQUEST_EXTRACTOR
+        resp_ex = response_extractor or DEFAULT_RESPONSE_EXTRACTOR
+    return provider_name, req_ex, resp_ex
+
+
 def trace_genai(
     *,
     name: str = "bijotel.llm.call",
-    provider: str | None = None,
-    request_extractor: Callable[[dict], dict] = DEFAULT_REQUEST_EXTRACTOR,
-    response_extractor: Callable[[Any], dict] = DEFAULT_RESPONSE_EXTRACTOR,
+    provider: str | Provider | None = None,
+    request_extractor: Callable[[dict], dict] | None = None,
+    response_extractor: Callable[[Any], dict] | None = None,
     extra_attrs: dict[str, Any] | None = None,
     operation: str = "chat",
 ) -> Callable:
@@ -110,11 +146,16 @@ def trace_genai(
 
     Args:
         name: Span name (default "bijotel.llm.call").
-        provider: Optional provider name (e.g., "anthropic", "openai", "ara").
+        provider: Either a string name (e.g., "anthropic", "openai") OR a
+            ``Provider`` object (F7). When a Provider is passed,
+            request/response extractors default to its ``extract_*`` methods
+            and ``provider.name`` is used for ``gen_ai.provider.name``.
         request_extractor: Function that extracts request dict from kwargs.
-            Defaults to Anthropic SDK style.
-        response_extractor: Function that extracts response dict from return value.
-            Defaults to Anthropic Message style.
+            Defaults: provider.extract_request_attrs if Provider, else
+            ``DEFAULT_REQUEST_EXTRACTOR`` (Anthropic SDK style).
+        response_extractor: Function that extracts response dict from return
+            value. Defaults: provider.extract_response_attrs if Provider, else
+            ``DEFAULT_RESPONSE_EXTRACTOR`` (Anthropic Message style).
         extra_attrs: Optional dict of additional span attributes (constants).
             Per-call dynamic attrs trebuie set via custom extractor.
         operation: Value pentru gen_ai.operation.name (default "chat").
@@ -122,6 +163,9 @@ def trace_genai(
     Returns:
         Decorator callable.
     """
+    provider_name, req_ex, resp_ex = _resolve_provider_config(
+        provider, request_extractor, response_extractor
+    )
 
     def decorator(fn: Callable) -> Callable:
         is_async = asyncio.iscoroutinefunction(fn)
@@ -134,10 +178,10 @@ def trace_genai(
                 with tracer.start_as_current_span(name, kind=SpanKind.CLIENT) as span:
                     # Pre-call: extract request, set attributes
                     span.set_attribute("gen_ai.operation.name", operation)
-                    _set_provider_attr(span, provider)
+                    _set_provider_attr(span, provider_name)
                     _set_extra_attrs(span, extra_attrs)
                     try:
-                        request_data = request_extractor(kwargs)
+                        request_data = req_ex(kwargs)
                         _set_request_attrs(span, request_data)
                     except Exception as e:  # noqa: BLE001
                         span.set_attribute("bijotel.extractor_error", str(e))
@@ -152,7 +196,7 @@ def trace_genai(
 
                     # Post-call: extract response, set attributes
                     try:
-                        response_data = response_extractor(result)
+                        response_data = resp_ex(result)
                         _set_response_attrs(span, response_data)
                     except Exception as e:  # noqa: BLE001
                         span.set_attribute("bijotel.extractor_error", str(e))
@@ -167,10 +211,10 @@ def trace_genai(
             tracer = trace.get_tracer("bijotel.decorators")
             with tracer.start_as_current_span(name, kind=SpanKind.CLIENT) as span:
                 span.set_attribute("gen_ai.operation.name", operation)
-                _set_provider_attr(span, provider)
+                _set_provider_attr(span, provider_name)
                 _set_extra_attrs(span, extra_attrs)
                 try:
-                    request_data = request_extractor(kwargs)
+                    request_data = req_ex(kwargs)
                     _set_request_attrs(span, request_data)
                 except Exception as e:  # noqa: BLE001
                     span.set_attribute("bijotel.extractor_error", str(e))
@@ -183,7 +227,7 @@ def trace_genai(
                     raise
 
                 try:
-                    response_data = response_extractor(result)
+                    response_data = resp_ex(result)
                     _set_response_attrs(span, response_data)
                 except Exception as e:  # noqa: BLE001
                     span.set_attribute("bijotel.extractor_error", str(e))
@@ -200,9 +244,9 @@ def wrap(
     fn: Callable,
     *,
     name: str = "bijotel.llm.call",
-    provider: str | None = None,
-    request_extractor: Callable[[dict], dict] = DEFAULT_REQUEST_EXTRACTOR,
-    response_extractor: Callable[[Any], dict] = DEFAULT_RESPONSE_EXTRACTOR,
+    provider: str | Provider | None = None,
+    request_extractor: Callable[[dict], dict] | None = None,
+    response_extractor: Callable[[Any], dict] | None = None,
     extra_attrs: dict[str, Any] | None = None,
     operation: str = "chat",
 ) -> Callable:
@@ -210,6 +254,9 @@ def wrap(
 
     Useful pentru cases unde NU poți modifica codul original (third-party libs,
     dynamic dispatch, monkey-patching scenarios).
+
+    Same provider/extractor resolution rules as @trace_genai (F7): pass a
+    Provider object to auto-bind extractors, or string for legacy F5 path.
 
     Returns:
         Wrapped callable cu același comportament ca @trace_genai applied.

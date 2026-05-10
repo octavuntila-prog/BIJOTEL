@@ -94,6 +94,76 @@ If you want only one audit layer, choose one approach:
 Storage cost of dual audit: ~2× span count. For most workloads this is
 trivial; for high-volume production, pick one layer.
 
+## Provider Adapters (F7)
+
+Provider Protocol unifies LLM provider integration. Adapters implement
+contract methods, enabling clean `@trace_genai` integration via
+`provider=adapter` shorthand:
+
+```python
+from bijotel import trace_genai
+from bijotel.adapters import AnthropicAdapter
+
+adapter = AnthropicAdapter()
+
+@trace_genai(provider=adapter)
+async def my_call(*, model, messages, max_tokens):
+    return await adapter.complete(
+        messages=messages, model=model, max_tokens=max_tokens
+    )
+```
+
+The decorator auto-extracts:
+- `gen_ai.provider.name` from `adapter.name`
+- Request attrs from `adapter.extract_request_attrs()`
+- Response attrs from `adapter.extract_response_attrs()`
+
+Explicit `request_extractor=` / `response_extractor=` always override
+adapter-supplied methods (escape hatch preserved).
+
+Calling the adapter directly returns a normalized `ProviderResponse`:
+
+```python
+response = await adapter.complete(
+    messages=[{"role": "user", "content": "hi"}],
+    model="claude-haiku-4-5-20251001",
+    max_tokens=20,
+)
+print(response.text, response.input_tokens, response.output_tokens)
+```
+
+**Available adapters:**
+- `AnthropicAdapter` — Anthropic Claude (uses `anthropic.AsyncAnthropic`)
+
+**Adding new providers** — subclass `Provider`:
+
+```python
+from bijotel.adapters import Provider, ProviderResponse
+
+class OpenAIAdapter(Provider):
+    @property
+    def name(self) -> str:
+        return "openai"
+
+    def extract_request_attrs(self, kwargs): ...
+    def extract_response_attrs(self, response): ...
+
+    async def complete(self, *, messages, model, max_tokens, **kwargs):
+        raw = await self.client.chat.completions.create(...)
+        return ProviderResponse(
+            text=raw.choices[0].message.content,
+            model=raw.model,
+            input_tokens=raw.usage.prompt_tokens,
+            output_tokens=raw.usage.completion_tokens,
+            response_id=raw.id,
+            finish_reason=raw.choices[0].finish_reason,
+            raw_response=raw,
+        )
+```
+
+Backward-compatible: passing `provider="anthropic"` (string) still works
+exactly as in F5 — Provider object is opt-in.
+
 ## Install
 
 ```bash
@@ -157,7 +227,7 @@ The script validates:
 - [x] F5: `@trace_genai` decorator + `wrap()` runtime (sync+async, custom extractors)
 - [x] F6: `bijotel` CLI (verify + inspect + stats + list)
 - [x] Validation: `scripts/e2e_smoke.py` (full stack on real Anthropic + CLI verify)
-- [ ] F7: Provider protocol abstract + AnthropicAdapter — deferred until multi-provider
+- [x] F7: Provider protocol + AnthropicAdapter (`@trace_genai(provider=adapter)` integration; multi-provider deferred until concrete need)
 
 ## License
 
