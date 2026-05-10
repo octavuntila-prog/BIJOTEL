@@ -34,7 +34,7 @@ def small_chain(tmp_path: Path) -> Path:
     trace.set_tracer_provider(provider)
 
     tracer = trace.get_tracer("test")
-    for i in range(2):
+    for _i in range(2):
         with tracer.start_as_current_span("anthropic.chat") as s:
             s.set_attribute("gen_ai.request.model", "claude-haiku-4-5-20251001")
             s.set_attribute("gen_ai.usage.input_tokens", 10)
