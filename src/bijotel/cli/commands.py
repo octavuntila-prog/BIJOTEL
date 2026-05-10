@@ -57,7 +57,25 @@ def _detect_status(body_dict: dict) -> str:
 
 
 def _calc_cost(body_dict: dict) -> str:
-    """Calculate real cost from gen_ai.usage attrs. Returns '—' if missing."""
+    """Calculate real cost from gen_ai.usage attrs.
+
+    Returns:
+        - "-"            if usage tokens missing (cannot compute)
+        - "?<model>"     if model not in DEFAULT_PRICES (unknown pricing).
+                         Includes model name fragment so user knows WHICH model
+                         is missing — actionable feedback vs opaque "?".
+        - "$0.0000"      ONLY when both input and output tokens are 0
+                         (e.g. blocked span with no real call)
+        - "<$0.0001"     when computed cost > 0 but < $0.0001
+                         (preserves signal: real call, just tiny — vs zero)
+        - "$0.NNNN"      4-decimal format for normal costs
+
+    Fixes v0.2.0 inconsistency where:
+        - Sonnet 4 (claude-sonnet-4-20250514) returned "?" because not in
+          price table (now added in prices.py).
+        - Tiny Haiku calls returned "$0.0000" (indistinguishable from
+          truly-zero blocked spans). Now distinguished as "<$0.0001".
+    """
     attrs = body_dict.get("attributes", {})
     model = attrs.get("gen_ai.request.model", "")
     input_tokens = attrs.get("gen_ai.usage.input_tokens")
@@ -66,12 +84,20 @@ def _calc_cost(body_dict: dict) -> str:
     if input_tokens is None or output_tokens is None:
         return "-"
     if model not in DEFAULT_PRICES:
-        return "?"
+        # Include short model fragment for actionable feedback
+        model_short = model[:30] if model else "(none)"
+        return f"?{model_short}"
 
     cost = (
         input_tokens * DEFAULT_PRICES[model]["input"]
         + output_tokens * DEFAULT_PRICES[model]["output"]
     ) / 1000
+
+    if cost == 0:
+        return "$0.0000"
+    if cost < 0.0001:
+        # Real call, but rounds to zero at 4 decimals — distinguish signal
+        return "<$0.0001"
     return f"${cost:.4f}"
 
 

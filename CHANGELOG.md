@@ -5,6 +5,46 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] — 2026-05-10
+
+Patch release. No API changes. Bugfix + documentation + coverage push.
+
+### Fixed
+
+- **Cost field calculation in `bijotel inspect` / `bijotel list`**
+  Pre-v0.2.1, `_calc_cost` had two bugs discovered empirically post-deploy:
+
+  1. `claude-sonnet-4-20250514` (production model on GENA) was missing from
+     `DEFAULT_PRICES` — every Sonnet 4 call returned `?`. Fixed: added
+     `claude-sonnet-4-20250514` and `claude-sonnet-4` aliases to the price
+     table in `policy/prices.py`.
+
+  2. Tiny Haiku calls (~14 input + 4 output tokens, $0.0000272) rounded to
+     `$0.0000` at 4-decimal precision, indistinguishable from blocked spans
+     (which truly have zero cost). Fixed: `<$0.0001` is now returned for
+     real-but-tiny costs; `$0.0000` reserved for actually-zero (zero tokens).
+     `?` enriched with model name fragment for actionable feedback when a
+     model is missing from the price table.
+
+### Documented
+
+- README sections added for 6 previously-undocumented public API exports:
+  `PolicyDeniedError`, `PolicyEngine`, `model_allowlist`, `shutdown`,
+  `export_chain` (Python API), `verify_export` (Python API).
+- "Policy Gate" section with `PolicyEngine` direct-usage example.
+- "Chain export — programmatic API" section with code example.
+- "Shutting down BIJOTEL" section with rationale.
+
+### Improved
+
+- `cli/commands.py` coverage: **75.1% → 90%** (+58 missing lines tested).
+  Added `tests/test_cli_export.py` (8 tests) and `tests/test_cli_helpers.py`
+  (7 tests) covering CLI subcommand paths, error handling, edge cases.
+- Overall package coverage: **91.1% → 95%** (964 → 969 statements).
+- Test suite: **135 → 159** tests (+24, all green).
+
+[0.2.1]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.2.1
+
 ## [0.2.0] — 2026-05-10
 
 Patterns adapted from substrate-guard (separate project at `89.167.66.225`,

@@ -164,6 +164,105 @@ class OpenAIAdapter(Provider):
 Backward-compatible: passing `provider="anthropic"` (string) still works
 exactly as in F5 — Provider object is opt-in.
 
+## Policy Gate
+
+The `PolicyEngine` evaluates pre-call rules against request payload (model, messages, max_tokens, …) and returns a `Decision` (allow / warn / deny). Use the `guard` decorator for the typical "wrap an LLM call" pattern, or call `PolicyEngine` directly for custom integration.
+
+### `PolicyEngine` direct usage
+
+```python
+from bijotel import PolicyEngine, cost_per_call_max, model_allowlist
+
+engine = PolicyEngine(rules=[
+    cost_per_call_max(usd=0.50),
+    model_allowlist("claude-haiku-4-5", "claude-sonnet-4-20250514"),
+])
+
+request = {"model": "claude-haiku-4-5", "messages": [...], "max_tokens": 100}
+decision = engine.evaluate(request)
+
+if decision.is_deny:
+    print(f"Blocked by {decision.rule}: {decision.reason}")
+elif decision.is_warn:
+    print(f"Warning from {decision.rule}: {decision.reason}")  # call still proceeds
+else:
+    print("Allowed")
+```
+
+`engine.evaluate()` short-circuits on first deny. Warnings are collected and attached as `bijotel.policy.warning` attributes on emitted spans. See `Decision` and `State` classes in `bijotel.policy.decision`.
+
+### `model_allowlist`
+
+Restrict which models can be called via your wrapper. Useful for cost control + audit.
+
+```python
+from bijotel import model_allowlist
+
+# Deny if model not in list
+rule = model_allowlist("claude-haiku-4-5", "claude-sonnet-4-20250514", mode="deny")
+
+# Warn-only mode (audit + proceed)
+rule_audit = model_allowlist("claude-haiku-4-5", mode="warn")
+```
+
+### `PolicyDeniedError`
+
+Raised by `guard()` decorator when a rule returns `Decision.deny`. Catch it in your application code to surface a useful message:
+
+```python
+from bijotel import guard, PolicyDeniedError, cost_per_call_max
+
+@guard(rules=[cost_per_call_max(usd=0.10)])
+def call_llm(*, model, messages, max_tokens):
+    return client.messages.create(model=model, messages=messages, max_tokens=max_tokens)
+
+try:
+    response = call_llm(model="claude-opus-4-7", messages=[...], max_tokens=4000)
+except PolicyDeniedError as e:
+    print(f"Policy denied: rule={e.rule!r}, reason={e.reason!r}")
+    # → returns to user instead of leaking expensive call
+```
+
+## Chain export — programmatic API
+
+CLI is the typical use, but `export_chain` and `verify_export` are exposed as public functions for programmatic integration (e.g. scheduled audit-trail uploads, CI verification jobs):
+
+```python
+from pathlib import Path
+from bijotel import export_chain, verify_export
+
+secret = bytes.fromhex("<your hex secret>")  # min 16 bytes
+
+# Export
+out = export_chain(
+    db_path=Path("/data/bijotel_chain.db"),
+    output_path=Path("/var/audit/audit_2026-05-10.json"),
+    secret_key=secret,
+)
+# → "/var/audit/audit_2026-05-10.json"
+
+# Verify (auditor side, only needs secret + JSON file)
+valid, reason = verify_export(out, secret)
+if not valid:
+    raise RuntimeError(f"Audit trail tampered: {reason}")
+```
+
+Schema: `bijotel-chain-v1`. Per-entry HMAC + file-level `chain_signature`. Integrity verifiable with shared secret only — no SQLite access required.
+
+## Shutting down BIJOTEL
+
+`shutdown()` flushes any pending spans and tears down the global TracerProvider. Important when running scripts that exit immediately (without flush, last spans may be lost).
+
+```python
+from bijotel import init, shutdown
+
+init(...)
+# ... do work, emit spans ...
+shutdown()  # flushes processors, releases resources
+```
+
+`shutdown()` is idempotent — safe to call multiple times.
+
 ## Install
 
 ```bash

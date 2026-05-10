@@ -18,6 +18,8 @@ ANTHROPIC_PRICES_2026_05: dict[str, dict[str, float]] = {
     # USD per 1k tokens (input / output)
     "claude-haiku-4-5-20251001": {"input": 0.0008, "output": 0.0040},
     "claude-haiku-4-5": {"input": 0.0008, "output": 0.0040},
+    "claude-sonnet-4-20250514": {"input": 0.0030, "output": 0.0150},  # Sonnet 4 (2025-05-14)
+    "claude-sonnet-4": {"input": 0.0030, "output": 0.0150},
     "claude-sonnet-4-6": {"input": 0.0030, "output": 0.0150},
     "claude-opus-4-7": {"input": 0.0150, "output": 0.0750},
     "claude-opus-4-6": {"input": 0.0150, "output": 0.0750},
