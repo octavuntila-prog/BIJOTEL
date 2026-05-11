@@ -1,6 +1,11 @@
 """BIJOTEL: SpanProcessor plug-ins for OpenTelemetry GenAI."""
 
-from bijotel.adapters import AnthropicAdapter, Provider, ProviderResponse
+from bijotel.adapters import (
+    AnthropicAdapter,
+    OpenAIAdapter,
+    Provider,
+    ProviderResponse,
+)
 from bijotel.core.init import init, shutdown
 from bijotel.decorators import trace_genai, wrap
 from bijotel.policy import (
@@ -22,7 +27,7 @@ from bijotel.regression import (
     compute_baseline,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "Anomaly",
@@ -30,6 +35,7 @@ __all__ = [
     "AnthropicAdapter",
     "Decision",
     "DimensionStats",
+    "OpenAIAdapter",
     "PolicyDeniedError",
     "PolicyEngine",
     "Provider",

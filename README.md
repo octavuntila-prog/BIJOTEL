@@ -133,7 +133,30 @@ print(response.text, response.input_tokens, response.output_tokens)
 ```
 
 **Available adapters:**
-- `AnthropicAdapter` — Anthropic Claude (uses `anthropic.AsyncAnthropic`)
+- `AnthropicAdapter` — Anthropic Claude (uses `anthropic.AsyncAnthropic`). Install: `pip install bijotel[anthropic]`.
+- `OpenAIAdapter` — OpenAI GPT (uses `openai.AsyncOpenAI`). Install: `pip install bijotel[openai]`.
+
+```python
+from bijotel import trace_genai
+from bijotel.adapters import OpenAIAdapter
+
+adapter = OpenAIAdapter()
+
+@trace_genai(provider=adapter)
+async def call_gpt(*, model, messages, max_tokens):
+    return await adapter.complete(
+        messages=messages, model=model, max_tokens=max_tokens
+    )
+
+# Direct call:
+response = await adapter.complete(
+    messages=[{"role": "user", "content": "hi"}],
+    model="gpt-4o-mini",
+    max_tokens=20,
+)
+```
+
+Same `Provider` Protocol, same `ProviderResponse` shape — only the SDK underneath differs. F7 validated empirical with two consumers (Anthropic + OpenAI).
 
 **Adding new providers** — subclass `Provider`:
 
@@ -396,6 +419,7 @@ The script validates:
 - [x] F7: Provider protocol + AnthropicAdapter (`@trace_genai(provider=adapter)` integration; multi-provider deferred until concrete need)
 - [x] F8: Portable signed JSON chain export (`bijotel export` + `bijotel verify-export`) + `rate_limit_calls_per_minute` rule
 - [x] F12: Regression Detection (Bijuteria #16) — `RegressionDetector` + `bijotel regression` CLI (z-score + IQR over input_tokens / output_tokens / cost)
+- [x] F9: `OpenAIAdapter` — second concrete Provider implementation, validates F7 Protocol design empiric (zero F7 changes required). Install: `pip install bijotel[openai]`.
 
 ## License
 

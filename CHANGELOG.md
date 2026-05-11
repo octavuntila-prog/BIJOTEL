@@ -5,6 +5,81 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] — 2026-05-11
+
+Second concrete `Provider` adapter (OpenAI), validating the F7 Provider
+Protocol design empirically. The F7 abstraction added in v0.1.0 with a
+single consumer (Anthropic) is now stress-tested with a second consumer
+whose SDK shape differs substantially:
+
+| | Anthropic SDK | OpenAI SDK |
+|---|---|---|
+| Call path | `client.messages.create(...)` | `client.chat.completions.create(...)` |
+| Response text | `response.content[0].text` | `response.choices[0].message.content` |
+| Input tokens | `response.usage.input_tokens` | `response.usage.prompt_tokens` |
+| Output tokens | `response.usage.output_tokens` | `response.usage.completion_tokens` |
+| Stop reason | `response.stop_reason` | `response.choices[0].finish_reason` |
+| Max tokens param | `max_tokens` | `max_tokens` / `max_completion_tokens` |
+
+**F7 design verdict: VALIDATED. Zero F7 base.py changes required.**
+
+### Added
+
+#### F9: OpenAIAdapter
+
+- **`bijotel.adapters.openai_adapter.OpenAIAdapter`**: implements `Provider`
+  ABC using OpenAI's `chat.completions.create` API. Lazy client init
+  (importable without `openai` package; SDK resolved at first call).
+  Same canonical `complete(*, messages, model, max_tokens, **kwargs)`
+  signature as `AnthropicAdapter`.
+- **`bijotel.adapters.openai_extractors`**: `extract_openai_request` and
+  `extract_openai_response` normalize OpenAI SDK shape to BIJOTEL's
+  `gen_ai.*` dict contract. Handles `max_tokens` and the newer
+  `max_completion_tokens` parameter. Extracts system messages from the
+  `messages[role=system]` list (OpenAI's convention).
+- **`@trace_genai(provider=OpenAIAdapter())`** integration verified
+  empirically: emits `gen_ai.provider.name="openai"` plus all request /
+  response attributes through the existing F5 decorator. Same code path,
+  different provider — proof of F7 abstraction.
+
+#### Optional dependencies
+
+- New extras in `pyproject.toml`:
+  - `pip install bijotel[anthropic]` — Anthropic SDK
+  - `pip install bijotel[openai]` — OpenAI SDK
+  - `pip install bijotel[all]` — both
+- `openai_adapter.py` raises `RuntimeError` with actionable install hint
+  (`pip install bijotel[openai]`) if `openai` package is missing at first
+  client access — adapter is importable even without the SDK.
+
+### Tests
+
+- 18 new tests in `tests/test_openai_adapter.py` (17 + 1 smoke skipped
+  without `OPENAI_API_KEY`).
+- Total **193 + 2 skipped** (176 → 193 from F9, +17 verified).
+- Existing F7 tests (AnthropicAdapter, trace_genai integration) all pass
+  unchanged — backward compatibility preserved.
+
+### Changed
+
+- Top-level exports: `OpenAIAdapter` added to `bijotel.__all__`.
+- Version bumped 0.3.0 → 0.4.0 (minor: new public feature, fully
+  backward-compatible).
+
+### F7 design implications
+
+The F7 Provider Protocol is now empirically validated with two consumers
+spanning the two major SDK shapes (Anthropic-style `messages.create` and
+OpenAI-style `chat.completions.create`). Adding more providers in F9.x
+should follow the same pattern with zero changes to `Provider` ABC or
+`ProviderResponse`:
+
+- `GeminiAdapter` (Google) — similar to OpenAI shape
+- `BedrockAdapter` (AWS) — wrapper around multiple model families
+- `MistralAdapter` — OpenAI-compatible API typically
+
+[0.4.0]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.4.0
+
 ## [0.3.0] — 2026-05-10
 
 First implementation of BIJUTERII catalog #16 (Regression Detection), built
