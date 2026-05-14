@@ -5,6 +5,90 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] — 2026-05-14
+
+Third pattern adapted from substrate-guard (separate project at
+`89.167.66.225`, read-only access). Adds a regex-based prompt-injection /
+jailbreak detection rule to the policy gate. Same shape as the existing
+F4 / F8 built-in rules: composable into `PolicyEngine`, supports
+`deny` / `warn` modes, validates fail-safe (no patterns → `ValueError`,
+not silent allow).
+
+### Added
+
+#### F11: `prompt_pattern_deny` rule
+
+- **`bijotel.policy.prompt_patterns.DEFAULT_JAILBREAK_PATTERNS`**: 15
+  conservative regex patterns covering 5 attack categories:
+  1. Instruction override (`"ignore previous instructions"`,
+     `"forget everything"`)
+  2. System prompt extraction (`"reveal your system prompt"`,
+     `"what are your instructions"`)
+  3. Role override (`"you are now a different AI"`,
+     `"pretend you are different"`)
+  4. Jailbreak framing (`"DAN mode"`, `"developer mode"`,
+     `"hypothetically"`)
+  5. Encoding bypass (`base64:`, `rot13`, `"reverse the text"`)
+- **`bijotel.policy.prompt_patterns.CompiledPatternMatcher`**: lazy-compiled
+  matcher (defers `re.compile()` until first `match()` call). Case-insensitive
+  by default — attacks commonly use mixed-case to evade naive string matching.
+- **`bijotel.policy.prompt_patterns.get_default_patterns()`**: helper returning
+  a fresh copy of `DEFAULT_JAILBREAK_PATTERNS` (callers can extend without
+  mutating module state).
+- **`bijotel.policy.rules.prompt_pattern_deny`**: rule factory matching the
+  `PolicyEngine` `Rule` contract. Parameters:
+  - `patterns: list[str] | None = None` — custom regex strings, appended after
+    defaults (defaults checked first).
+  - `mode: str = "deny"` — `"deny"` blocks via `PolicyDeniedError`, `"warn"`
+    audits but allows.
+  - `use_defaults: bool = True` — set `False` for purely custom matching.
+  - **Fail-safe**: `patterns=None` + `use_defaults=False` raises `ValueError`
+    rather than silently allowing everything.
+- Handles three message formats: plain string content (OpenAI-style),
+  multipart `[{"type": "text", "text": "..."}]` (Anthropic-style), and
+  pre-serialized string `messages`. Concatenates text from all roles before
+  matching.
+- Truncates matched pattern in `Decision.reason` to 80 chars to avoid leaking
+  giant regexes into chain.db audit records.
+
+Pattern catalog adapted from `substrate-guard/policy/policies/agent_safety.rego`
+`dangerous_patterns` concept (separate project at `89.167.66.225`, read-only
+access 2026-05-10). The substrate-guard version targets filesystem / network /
+shell actions; this BIJOTEL adaptation targets LLM prompts (instruction
+overrides, system-prompt extraction, role overrides, jailbreak framings,
+encoding bypass).
+
+### Changed
+
+- Top-level exports: `prompt_pattern_deny` added to `bijotel.__all__` and
+  `bijotel.policy.__all__`.
+- Version bumped 0.4.0 → 0.5.0 (minor: new public feature,
+  backward-compatible).
+
+### Tests
+
+- 16 new tests in `tests/test_prompt_pattern_deny.py`: default-allow on safe
+  prompt, default-deny on each of 3 categories (instruction override, system
+  prompt extraction, role override), warn-mode flagging, custom-patterns
+  composition with defaults, custom-only no-defaults path, no-patterns
+  `ValueError`, invalid-mode `ValueError`, Anthropic multipart format,
+  OpenAI string format, empty-prompt allow, case-insensitive matching,
+  lazy-compilation verification, PolicyEngine integration, and
+  `get_default_patterns()` mutation-safety.
+- Total **209 + 2 skipped** (193 → 209, +16 from F11).
+- ruff clean, coverage maintained.
+
+### Deployment guidance
+
+Suggested rollout: deploy in `mode="warn"` first to surface false positives
+via `bijotel.policy.warning` span attributes, review for ~1 week (zero
+false-positive review against production traffic), then flip to
+`mode="deny"`. The defaults err on the side of detection — false positives
+are easier to diagnose than false negatives in this domain (security
+tradeoff favors detection).
+
+[0.5.0]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.5.0
+
 ## [0.4.0] — 2026-05-11
 
 Second concrete `Provider` adapter (OpenAI), validating the F7 Provider

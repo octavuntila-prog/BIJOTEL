@@ -228,6 +228,36 @@ rule = model_allowlist("claude-haiku-4-5", "claude-sonnet-4-20250514", mode="den
 rule_audit = model_allowlist("claude-haiku-4-5", mode="warn")
 ```
 
+### `prompt_pattern_deny` (F11)
+
+Block prompts matching jailbreak / prompt-injection regex patterns *before* the SDK call is made. Five attack categories covered out of the box: instruction override (`"ignore previous instructions"`), system prompt extraction (`"reveal your system prompt"`), role override (`"you are now a different AI"`), jailbreak framing (`"DAN mode"`, `"developer mode"`), encoding bypass (`base64:`, `rot13`). Defaults are case-insensitive and applied via `re.search`.
+
+```python
+from bijotel import prompt_pattern_deny
+
+# Defaults only (DEFAULT_JAILBREAK_PATTERNS, ~15 patterns, 5 categories)
+rule = prompt_pattern_deny()
+
+# Custom patterns appended to defaults (defaults checked first)
+rule = prompt_pattern_deny(
+    patterns=[r"my_company_secret", r"\bAPI[_-]KEY\b"],
+)
+
+# Custom patterns only — defaults disabled
+rule = prompt_pattern_deny(
+    patterns=[r"sensitive_term"], use_defaults=False
+)
+
+# Warn mode — audit but allow (recommended for first deployment)
+rule_audit = prompt_pattern_deny(mode="warn")
+```
+
+Handles both Anthropic SDK (`messages=[{"role": "user", "content": "..."}]`) and Anthropic multipart format (`content=[{"type": "text", "text": "..."}]`), plus OpenAI-style messages — extracts and concatenates text content from all roles before matching.
+
+Suggested rollout: deploy in `mode="warn"` first to surface false positives via `bijotel.policy.warning` span attributes, review for ~1 week, then flip to `mode="deny"`. False positives are easier to diagnose than false negatives in this domain.
+
+Pattern catalog adapted from substrate-guard's `agent_safety.rego` `dangerous_patterns` concept (separate project, read-only access). The substrate-guard version targets filesystem / network / shell actions; this BIJOTEL adaptation targets LLM prompts (instruction overrides, system-prompt extraction, role overrides, jailbreak framings, encoding bypass).
+
 ### `PolicyDeniedError`
 
 Raised by `guard()` decorator when a rule returns `Decision.deny`. Catch it in your application code to surface a useful message:
@@ -420,6 +450,7 @@ The script validates:
 - [x] F8: Portable signed JSON chain export (`bijotel export` + `bijotel verify-export`) + `rate_limit_calls_per_minute` rule
 - [x] F12: Regression Detection (Bijuteria #16) — `RegressionDetector` + `bijotel regression` CLI (z-score + IQR over input_tokens / output_tokens / cost)
 - [x] F9: `OpenAIAdapter` — second concrete Provider implementation, validates F7 Protocol design empiric (zero F7 changes required). Install: `pip install bijotel[openai]`.
+- [x] F11: `prompt_pattern_deny` rule — regex-based jailbreak / prompt-injection detection over `request["messages"]`. Defaults cover 5 attack categories (instruction override, system prompt extraction, role override, jailbreak framing, encoding bypass). Custom patterns + defaults composable; warn / deny mode switch. Pattern catalog adapted from substrate-guard's `agent_safety.rego` (separate project, read-only).
 
 ## License
 

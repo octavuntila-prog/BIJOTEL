@@ -7,6 +7,7 @@ from bijotel.policy.rules import (
     cost_per_call_max,
     daily_token_budget,
     model_allowlist,
+    prompt_pattern_deny,
     rate_limit_calls_per_minute,
 )
 
@@ -18,5 +19,6 @@ __all__ = [
     "daily_token_budget",
     "guard",
     "model_allowlist",
+    "prompt_pattern_deny",
     "rate_limit_calls_per_minute",
 ]

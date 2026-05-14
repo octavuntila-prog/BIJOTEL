@@ -16,6 +16,7 @@ from bijotel.policy import (
     daily_token_budget,
     guard,
     model_allowlist,
+    prompt_pattern_deny,
     rate_limit_calls_per_minute,
 )
 from bijotel.processors import export_chain, verify_export
@@ -27,7 +28,7 @@ from bijotel.regression import (
     compute_baseline,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "Anomaly",
@@ -49,6 +50,7 @@ __all__ = [
     "guard",
     "init",
     "model_allowlist",
+    "prompt_pattern_deny",
     "rate_limit_calls_per_minute",
     "shutdown",
     "trace_genai",

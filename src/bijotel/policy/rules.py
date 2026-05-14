@@ -11,6 +11,10 @@ from pathlib import Path
 
 from bijotel.policy.decision import Decision
 from bijotel.policy.prices import DEFAULT_PRICES
+from bijotel.policy.prompt_patterns import (
+    CompiledPatternMatcher,
+    get_default_patterns,
+)
 
 # Type alias pentru clarity
 Rule = Callable[[dict], Decision]
@@ -271,5 +275,112 @@ def model_allowlist(*allowed_models: str, mode: str = "deny") -> Rule:
                 return Decision.deny(rule="model_allowlist", reason=reason)
             return Decision.warn(rule="model_allowlist", reason=reason)
         return Decision.allow()
+
+    return rule
+
+
+def prompt_pattern_deny(
+    patterns: list[str] | None = None,
+    *,
+    mode: str = "deny",
+    use_defaults: bool = True,
+) -> Rule:
+    """Deny calls whose prompt matches known jailbreak / injection patterns.
+
+    Inspects ``request["messages"]`` (Anthropic-style list of dicts, supports
+    both string content and multipart ``[{"type": "text", "text": "..."}]``
+    format). Returns ``Decision.deny`` (or ``warn``) on first matching pattern.
+
+    Args:
+        patterns: Custom regex strings. If ``None`` and ``use_defaults=True``,
+            uses ``DEFAULT_JAILBREAK_PATTERNS`` only. If both provided,
+            customs are appended after defaults (defaults checked first).
+        mode: ``"deny"`` (block, raise via guard) or ``"warn"`` (allow, audit).
+        use_defaults: Include ``DEFAULT_JAILBREAK_PATTERNS``. Default ``True``.
+            Set ``False`` for purely custom matching.
+
+    Returns:
+        Rule callable matching ``PolicyEngine`` contract.
+
+    Raises:
+        ValueError: if ``mode`` is neither ``"deny"`` nor ``"warn"``.
+        ValueError: if both ``patterns=None`` and ``use_defaults=False``
+            (no patterns to match — would silently allow everything).
+
+    Examples::
+
+        # Defaults only
+        rule = prompt_pattern_deny()
+
+        # Custom + defaults (defaults checked first)
+        rule = prompt_pattern_deny(
+            patterns=[r"my_company_secret", r"\\bAPI[_-]KEY"]
+        )
+
+        # Custom only, no defaults
+        rule = prompt_pattern_deny(
+            patterns=[r"sensitive_term"], use_defaults=False
+        )
+
+        # Warn mode — audit but allow
+        rule = prompt_pattern_deny(mode="warn")
+
+    Pattern adapted from substrate-guard ``agent_safety.rego``
+    ``dangerous_patterns`` concept (separate project, read-only access
+    2026-05-10).
+    """
+    if mode not in ("deny", "warn"):
+        raise ValueError(f"mode must be 'deny' or 'warn', got {mode!r}")
+
+    effective_patterns: list[str] = []
+    if use_defaults:
+        effective_patterns.extend(get_default_patterns())
+    if patterns:
+        effective_patterns.extend(patterns)
+
+    if not effective_patterns:
+        raise ValueError(
+            "No patterns to match. Provide patterns= or set use_defaults=True."
+        )
+
+    matcher = CompiledPatternMatcher(effective_patterns)
+
+    def rule(request: dict) -> Decision:
+        # Extract user prompt text from request.messages
+        messages = request.get("messages", [])
+
+        prompt_text_parts: list[str] = []
+        if isinstance(messages, str):
+            # Edge case: messages already serialized as string (post-extractor)
+            prompt_text_parts.append(messages)
+        elif isinstance(messages, list):
+            for msg in messages:
+                if not isinstance(msg, dict):
+                    continue
+                content = msg.get("content", "")
+                if isinstance(content, str):
+                    prompt_text_parts.append(content)
+                elif isinstance(content, list):
+                    # Multipart format (Anthropic): [{"type": "text", "text": "..."}]
+                    for part in content:
+                        if isinstance(part, dict):
+                            txt = part.get("text", "")
+                            if isinstance(txt, str):
+                                prompt_text_parts.append(txt)
+
+        prompt_text = " ".join(prompt_text_parts).strip()
+        if not prompt_text:
+            return Decision.allow()
+
+        matched = matcher.match(prompt_text)
+        if matched is None:
+            return Decision.allow()
+
+        # Truncate pattern in reason if very long (avoid leaking giant regex into chain)
+        pattern_display = matched if len(matched) <= 80 else matched[:77] + "..."
+        reason = f"prompt matched jailbreak pattern: {pattern_display!r}"
+        if mode == "deny":
+            return Decision.deny(rule="prompt_pattern_deny", reason=reason)
+        return Decision.warn(rule="prompt_pattern_deny", reason=reason)
 
     return rule
