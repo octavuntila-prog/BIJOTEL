@@ -5,6 +5,90 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] — 2026-05-23 — React dashboard (Chain Explorer + Policy + Regression)
+
+Frontend release. The Python wheel is **unchanged** from v1.1.0 (no
+backend code touched), so PyPI does not need a re-upload. Day 8 + Day 9
+combined.
+
+The release ships a complete React/Vite dashboard at
+``src/bijotel/dashboard/`` with four pages mounted against the v1.1.0
+REST surface. Built artifacts land at ``dashboard_dist/`` (gitignored);
+Day 12 will wire ``bijotel serve --dashboard`` to mount them as static
+files.
+
+### Added — Dashboard
+
+* **Chain Explorer** (``/chain``) — paginated chain rows, 4 stats cards
+  (entries / CAS / dedup / age), client-side filter, click-row → detail
+  side panel with collapsible canonical body / prompt / completion;
+  ``Verify chain`` button (smoke default, full escalation) and
+  ``Export`` button that triggers a blob download.
+* **Policy Decisions** (``/policy``) — active rules grid with
+  closure-introspected detail (pattern counts, limits, allowlists); a
+  live ``Evaluate`` form that dry-runs a (model, prompt, max_tokens)
+  triple through the engine and renders the decision + warnings list +
+  evaluation latency; a Bijuterii layers grid below.
+* **Regression Monitor** (``/regression``) — current-status / total-runs /
+  last-anomaly cards; ``recharts`` AreaChart timeline of anomaly counts
+  across the last 24h / 7d / 30d / all; dimension breakdown table for
+  the latest run; "Run Now" panel with window + z-threshold controls.
+* **System Status** (``/system``) — full bijuterii manifest table
+  (active / available / planned).
+* **Layout shell** — dark sidebar + light content + top bar with live
+  ``/health`` pill and an API-key drawer (writes
+  ``localStorage["bijotel_api_key"]``). Mobile-responsive hamburger.
+
+### Added — Tech stack
+
+* Vite 5 + React 18 + React Router 6 (BrowserRouter)
+* Tailwind v4 via ``@tailwindcss/vite`` plugin (single-line ``@import``;
+  ``@theme`` block for ``bijotel-*`` semantic colors)
+* ``lucide-react`` icons; ``recharts`` for the regression timeline
+* Route-level code splitting (``React.lazy`` + ``Suspense``) so the
+  heavy recharts chunk only downloads on first ``/regression`` visit
+
+### API client (``src/api/client.js``)
+
+* Typed wrappers for all 12 v1.1.0 endpoints
+* ``ApiError`` class so components can branch on ``err.status === 401``
+* Bearer auth header read from ``localStorage`` per request
+* ``FormData`` branch for ``POST /export/verify`` (file upload)
+* Blob-download branch for ``POST /export`` (parses
+  ``Content-Disposition`` filename)
+
+### Build numbers
+
+* npm install: 119 packages
+* npm run build: 2382 modules transformed
+* Initial JS chunk: 179.72 KB raw / **58.73 KB gzip** (under 100 KB budget)
+* RegressionView chunk (recharts): 395.74 KB / 109.59 KB gzip (lazy)
+* All other page chunks: < 18 KB raw each
+* Total CSS: 24.66 KB / 5.61 KB gzip
+* Vite dev server cold-start: 631 ms
+
+### Honest design choices (M2)
+
+* ``hmac_valid`` shown as **UNKNOWN** (amber) when the backend returns
+  ``false`` *and* no API key is set, matching the v1.1.0 backend
+  convention — "couldn't verify" must remain distinct from "verified
+  and bad".
+* Filter input is **client-side only** (operates on currently loaded
+  rows). Server-side filter would need a new ``?search=`` query param
+  on ``GET /chain`` — deferred to v1.3+.
+* Dashboard is NOT served by ``bijotel serve`` yet. Dev mode runs Vite
+  on :5173 with a proxy to FastAPI on :8080. Day 12 polish wires the
+  static mount.
+* "Last anomaly" card scans only the loaded history page (default
+  limit=100). Older anomalies require explicit history pagination.
+
+### Tests
+
+Backend tests **unchanged** (474 passed, 7 skipped, 0 failed). Frontend
+component tests are deferred to v1.3 polish — the production build
+running locally against a real BIJOTEL chain is the v1.2.0 acceptance
+gate.
+
 ## [1.1.0] — 2026-05-22 — Complete REST API + Bearer auth
 
 Combined Day 6 + Day 7 of the harvest plan. Day 6 landed chain / policy /
