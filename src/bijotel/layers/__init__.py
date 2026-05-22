@@ -12,6 +12,11 @@ Layers harvested from upstream Aisophical projects preserve attribution
 in the module-level docstring (provenance + MIT license inheritance).
 """
 
+from bijotel.layers.ast_safety import (
+    ASTSafetyChecker,
+    ASTViolation,
+    ast_safety_check,
+)
 from bijotel.layers.fingerprint import (
     DeterministicFingerprinter,
     FingerprintSpanProcessor,
@@ -20,8 +25,11 @@ from bijotel.layers.fingerprint import (
 )
 
 __all__ = [
+    "ASTSafetyChecker",
+    "ASTViolation",
     "DeterministicFingerprinter",
     "FingerprintSpanProcessor",
     "SemanticFingerprinter",
+    "ast_safety_check",
     "similarity_search",
 ]

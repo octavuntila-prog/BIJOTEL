@@ -5,6 +5,122 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] — 2026-05-22 — Layers: F13 Fingerprint + F14 AST Safety
+
+First minor release on the v0.6.x hardened foundation. Introduces
+``bijotel.layers/`` — a pluggable namespace for specialty SpanProcessors
+beyond the core HMAC chain + CAS + policy gate. Two layers ship in 0.7.0,
+both harvested with attribution from sister Aisophical projects:
+
+### Added — F13 / Bijuteria #7: Fingerprint layer (shipped in Day 2 commit)
+
+- ``bijotel.layers.fingerprint.DeterministicFingerprinter`` — 384-dim
+  SHA-256-based embeddings (no ML dep, CI-friendly, reproducible).
+  Harvested from ``substrate-guard.comply.fingerprinter``.
+- ``bijotel.layers.fingerprint.SemanticFingerprinter`` —
+  ``all-MiniLM-L6-v2`` 384-dim sentence embeddings.
+  Optional dep: ``pip install bijotel[fingerprint]``.
+- ``bijotel.layers.fingerprint.FingerprintSpanProcessor`` —
+  BIJOTEL-original SpanProcessor that on_end extracts text and persists
+  fingerprints into SQLite. Same hardening pattern as hmac_chain
+  (WAL + busy_timeout + DDL-in-IMMEDIATE + crash-isolated on_end).
+- ``bijotel.layers.fingerprint.similarity_search`` — query the store
+  for spans similar to input above a threshold. Linear scan (suitable
+  to ~100K rows).
+- Encoder ``protocol_id`` strings persisted with each fingerprint;
+  ``similarity_search`` skips rows whose encoder differs from the query
+  (embeddings from different vector spaces are not comparable).
+- 28 new tests in ``tests/test_fingerprint.py``.
+
+### Added — F14 / Bijuteria #5: AST-First Safety layer
+
+Detects dangerous code constructs structurally rather than via string
+matching. The killer-example proven in tests: string matching catches
+``rm -rf`` but misses ``rm -r -f``, ``rm -fr``, ``rm -rfv``,
+``rm --recursive --force``, ``rm -R -f`` — AST matching catches the
+entire variant family via structural pattern (command name=rm AND args
+contain BOTH a recursive flag AND a force flag).
+
+- ``bijotel.layers.ast_safety.ASTSafetyChecker`` — pluggable scanner
+  for ``"python"`` (stdlib ``ast``, always available) and ``"bash"``
+  (tree-sitter, optional ``[ast]`` extra). ``check_code(code, language)``
+  for direct scanning, ``check_prompt(text)`` for fenced-code-block
+  extraction from LLM prompts.
+- ``bijotel.layers.ast_safety.ast_safety_check`` — PolicyEngine rule
+  factory. Composes naturally with F11 ``prompt_pattern_deny``:
+  regex catches classic jailbreak phrasings; AST catches structural
+  code-execution patterns the regex misses.
+- ``bijotel.layers.ast_safety.ASTViolation`` — frozen dataclass
+  recording pattern, language, node type, line, snippet (truncated 80
+  chars), severity.
+- Built-in pattern catalog:
+  * **Python** (stdlib ast, always): ``exec``/``eval`` calls,
+    ``subprocess.{run,Popen,call,...}(..., shell=True)``,
+    ``pickle.{loads,load}``, ``os.{system,popen,exec*,spawn*}``,
+    ``__import__(...)``.
+  * **Bash** (tree-sitter, optional): ``rm`` with both r and f flags
+    in any combination, ``chmod`` world-writable (octal 7XX/6XX/3XX/2XX
+    or symbolic a+w/o+w), ``curl|wget URL | sh|bash|zsh`` pipe-to-shell,
+    ``sudo`` (warning severity).
+- Graceful optional-dep handling: bash checks silently skip if
+  ``tree-sitter`` / ``tree-sitter-bash`` not installed (logged once at
+  INFO level with actionable install hint). Python checks always work.
+- 60 new tests in ``tests/test_ast_safety.py`` (parametrized covers
+  the variant family for ``dangerous_rm``, ``chmod_world_writable``,
+  ``curl_pipe_to_shell``).
+
+### Changed
+
+- New top-level exports (+7): ``ASTSafetyChecker``, ``ASTViolation``,
+  ``DeterministicFingerprinter``, ``FingerprintSpanProcessor``,
+  ``SemanticFingerprinter``, ``ast_safety_check``, ``similarity_search``.
+  Public ``bijotel.__all__`` now contains 34 names (was 27).
+- New optional extras: ``[fingerprint]`` (``sentence-transformers``),
+  ``[ast]`` (``tree-sitter`` + ``tree-sitter-bash``). ``[all]`` updated
+  to pull both.
+- New core dependency: ``numpy>=1.24`` (required by Fingerprint layer's
+  DeterministicFingerprinter; standard in any LLM stack).
+- ``__version__`` bumped 0.6.1 → 0.7.0 (minor: new features, fully
+  backward-compatible).
+
+### Tests
+
+- **305 passed, 6 skipped** (was 245 + 6; +60 AST tests from
+  parametrized expansion of 27 unique test functions).
+- Coverage maintained at ~92% (new modules at lower initial coverage;
+  Python AST patterns near-fully covered, bash patterns covered for
+  positive + negative cases).
+- ruff clean.
+- pip-audit: 0 vulnerabilities.
+
+### Bijuterii coverage progress
+
+- Pre-0.7.0: 7/20 implemented (F0–F12 + F11 prompt_pattern_deny)
+- v0.7.0 ships: **9/20** (+#7 Fingerprint, +#5 AST-First)
+- 11 remain catalogued-not-yet-implemented (target v0.8.x / v1.0.0
+  per the 12-day plan)
+
+### Provenance preserved
+
+- Fingerprinter classes harvested from
+  ``substrate-guard.comply.fingerprinter`` (Aisophical SRL, MIT, same
+  author).
+- tree-sitter-bash grammar from upstream
+  ``tree-sitter/tree-sitter-bash`` (MIT).
+- BIJOTEL-original additions: SpanProcessor wrappers, Stores,
+  similarity_search, ASTSafetyChecker class structure, PolicyEngine
+  integration via ``ast_safety_check``.
+
+### Not yet deployed
+
+GENA deploy of v0.7.0 is **deferred** — numpy + tree-sitter rebuild
+warrants a planned window. The hardened v0.6.1 remains in production
+on GENA. Layers are additive (FingerprintSpanProcessor + the
+ast_safety_check rule are both opt-in; existing v0.6.1 deployment is
+unaffected by the v0.7.0 wheel sitting unused on disk).
+
+[0.7.0]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.7.0
+
 ## [0.6.1] — 2026-05-22 — Hardening fixup (concurrent _init_db)
 
 Patch release fixing TWO multi-process races introduced by v0.6.0's

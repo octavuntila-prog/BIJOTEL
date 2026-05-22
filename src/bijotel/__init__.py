@@ -9,9 +9,12 @@ from bijotel.adapters import (
 from bijotel.core.init import init, shutdown
 from bijotel.decorators import trace_genai, wrap
 from bijotel.layers import (
+    ASTSafetyChecker,
+    ASTViolation,
     DeterministicFingerprinter,
     FingerprintSpanProcessor,
     SemanticFingerprinter,
+    ast_safety_check,
     similarity_search,
 )
 from bijotel.policy import (
@@ -34,9 +37,11 @@ from bijotel.regression import (
     compute_baseline,
 )
 
-__version__ = "0.6.1"
+__version__ = "0.7.0"
 
 __all__ = [
+    "ASTSafetyChecker",
+    "ASTViolation",
     "Anomaly",
     "AnomalyMethod",
     "AnthropicAdapter",
@@ -52,6 +57,7 @@ __all__ = [
     "RegressionDetector",
     "SemanticFingerprinter",
     "__version__",
+    "ast_safety_check",
     "compute_baseline",
     "cost_per_call_max",
     "daily_token_budget",
