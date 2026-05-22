@@ -90,11 +90,25 @@ class HmacChainSpanProcessor(SpanProcessor):
         (Windows, some special filesystems).
         """
         db_existed = self._db_path.exists()
-        conn = sqlite3.connect(self._db_path)
+        # Autocommit mode so we control transaction boundaries explicitly.
+        conn = sqlite3.connect(self._db_path, isolation_level=None)
         try:
-            # WAL persists at database level; safe to set repeatedly
-            conn.execute("PRAGMA journal_mode=WAL")
+            # busy_timeout MUST be set before journal_mode AND before any DDL,
+            # so all subsequent operations retry up to 5s under contention.
             conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
+            # Idempotent WAL set: only invoke PRAGMA journal_mode=WAL if not
+            # already WAL (avoids re-acquiring the brief EXCLUSIVE lock on
+            # every process startup; combined with BEGIN IMMEDIATE below,
+            # serializes concurrent _init_db calls cleanly).
+            current_mode = conn.execute("PRAGMA journal_mode").fetchone()[0]
+            if current_mode.lower() != "wal":
+                conn.execute("PRAGMA journal_mode=WAL")
+            # All DDL inside a single BEGIN IMMEDIATE transaction so concurrent
+            # _init_db calls from sibling processes serialize at the RESERVED
+            # lock with busy_timeout retry, AND the resulting table is visible
+            # to all readers immediately after COMMIT (eliminates the post-init
+            # "no such table" window observed on GENA Linux 22 mai).
+            conn.execute("BEGIN IMMEDIATE")
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS chain (
                     seq INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -121,7 +135,7 @@ class HmacChainSpanProcessor(SpanProcessor):
                 "CREATE INDEX IF NOT EXISTS idx_chain_semhash "
                 "ON chain(semantic_body_hash)"
             )
-            conn.commit()
+            conn.execute("COMMIT")
         finally:
             conn.close()
 

@@ -77,10 +77,16 @@ class CasSpanProcessor(SpanProcessor):
         files; existing perms preserved.
         """
         db_existed = self._db_path.exists()
-        conn = sqlite3.connect(self._db_path)
+        # Autocommit + busy_timeout + BEGIN IMMEDIATE for DDL serialization
+        # across concurrent processes (see hmac_chain.py _init_db for full
+        # rationale; same fix applied here for shared-db consistency).
+        conn = sqlite3.connect(self._db_path, isolation_level=None)
         try:
-            conn.execute("PRAGMA journal_mode=WAL")
             conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
+            current_mode = conn.execute("PRAGMA journal_mode").fetchone()[0]
+            if current_mode.lower() != "wal":
+                conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("BEGIN IMMEDIATE")
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS cas (
                     body_hash TEXT PRIMARY KEY,
@@ -89,7 +95,7 @@ class CasSpanProcessor(SpanProcessor):
                     ref_count INTEGER NOT NULL DEFAULT 1
                 )
             """)
-            conn.commit()
+            conn.execute("COMMIT")
         finally:
             conn.close()
 

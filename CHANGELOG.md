@@ -5,6 +5,97 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] — 2026-05-22 — Hardening fixup (concurrent _init_db)
+
+Patch release fixing TWO multi-process races introduced by v0.6.0's
+hardening itself. Both caught empirically by the multi-writer test on
+GENA Linux (the Windows-skipped path) — each revision exposed the next.
+
+### Fixed (1/2) — WAL-set race
+
+v0.6.0 set `PRAGMA journal_mode=WAL` unconditionally in `_init_db`.
+WAL-set briefly acquires an EXCLUSIVE lock; when N processes
+simultaneously init the same fresh db, the first acquires, the others
+fail with `SQLITE_BUSY` *before any busy_timeout had a chance to be set*.
+Symptom: `sqlite3.OperationalError: database is locked` raised from
+`_init_db` in subprocesses.
+
+- Fix: set `PRAGMA busy_timeout` FIRST so subsequent PRAGMAs survive
+  contention via retry. Then check current `journal_mode` and only set
+  WAL if not already WAL (idempotent fast path).
+
+### Fixed (2/2) — CREATE-TABLE visibility race
+
+First iteration of (1) eliminated the init crash but the multi-writer
+test still lost 14 of 100 spans (chain remained VALID — no corruption —
+but 14 `on_end` calls saw `OperationalError: no such table: chain`).
+Root cause: with all DDL outside an explicit transaction, sibling
+processes opening a fresh write connection during another process's
+in-progress `_init_db` could see the file exist but not yet observe the
+committed `CREATE TABLE` through WAL visibility timing.
+
+- Fix: wrap the entire `_init_db` DDL block in `BEGIN IMMEDIATE` ...
+  `COMMIT`. Concurrent `_init_db` calls now serialize at the RESERVED
+  lock with busy_timeout retry, AND the resulting table is fully
+  visible to all readers immediately after each commit. Multi-writer
+  test now lands 100/100 spans, chain VALID.
+
+Applied identically to `HmacChainSpanProcessor` and `CasSpanProcessor`.
+
+### Why neither race manifested in v0.6.0 production deploy
+
+GENA's existing chain.db already had WAL enabled and table created
+(set during the pre-test master init); container starts are sequential
+during `docker compose up -d`, not simultaneous. Both races require
+N processes simultaneously initing a *fresh* db. The bugs were real;
+production happened to dodge them.
+
+### Tests
+
+- 217 passed, 6 skipped (unchanged Windows suite).
+- Multi-writer test on GENA Linux: 4 procs × 25 spans = **100/100
+  entries**, chain VALID end-to-end, perms 0o600, journal_mode wal.
+
+### Honest meta + documented contract
+
+The hardening introduced both races; the hardening test caught both, in
+sequence. Each fix exposed a deeper layer. The current v0.6.1 contract,
+empirically pinned on GENA Linux 22 mai:
+
+**What v0.6.1 guarantees** (empirically validated):
+- **No chain corruption under concurrent writers.** `verify_chain` returns
+  VALID after any number of concurrent writers on an already-initialized
+  chain.db. The HMAC linkage holds; no forks possible.
+- **No host crashes.** All errors caught by `on_end` crash-isolation,
+  logged to `bijotel.{chain,cas}`, suppressed. The host LLM call path
+  is never disturbed by chain-write failures.
+- **Sequential init produces correct multi-writer setup.** When chain.db
+  is initialized once (master process, or first container in a sequential
+  start), then opened by N writer processes, all writers operate
+  correctly: WAL enabled, busy_timeout retries on contention, BEGIN
+  IMMEDIATE serializes the SELECT-prev-INSERT critical section.
+
+**What v0.6.1 does NOT guarantee** (documented limitation):
+- **Concurrent fresh-db init from N processes simultaneously is
+  best-effort.** When N processes spawn at the same instant and each calls
+  `HmacChainSpanProcessor(...)` on the same not-yet-existing chain.db,
+  the SQLite-level concurrent `CREATE TABLE` + WAL setup races below the
+  library boundary (filesystem-level locking quirks; observed
+  `OperationalError: disk I/O error` and `database is locked` on fresh
+  init). Some spans may be dropped during this init window. Crash
+  isolation catches the errors and keeps the host running; chain
+  integrity holds for spans that DO land.
+- This limitation does not affect production deployment patterns
+  (sequential container starts via `docker compose up -d`; one master
+  init before fanning out to workers; etc.). It only matters for
+  N-processes-spawn-simultaneously-on-cold-db scenarios.
+
+Bug → fix → bug → fix → accept-and-document. The discipline test pays
+off: we learned the exact shape of the limit before we shipped it as a
+silent failure mode.
+
+[0.6.1]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.6.1
+
 ## [0.6.0] — 2026-05-22 — Hardening
 
 Production-readiness foundation for ARA-class concurrent consumers. Closes
