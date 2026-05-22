@@ -5,6 +5,51 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] — 2026-05-23 — Documentation release (no code change)
+
+Pure documentation / packaging release. The Python wheel produced from
+this commit is **byte-identical to v1.1.0's bijotel package code**;
+only README, CHANGELOG, ARCHITECTURE.md, and the GENA-derived
+``INTEGRATION_TEST_20260523.md`` change. If you're already on v1.1.0
+you do not need to upgrade — the difference is metadata only.
+
+### Added
+
+* **README.md** rewritten for PyPI render. Tagline, install matrix
+  (6 extras), 15-line quickstart, full CLI table, 18-endpoint REST API
+  table, 4-page dashboard description, **13-layer bijuterii table**
+  with `active` / `available` / `planned` status, USP comparison
+  section, production-validated section with the Day-10 GENA numbers,
+  honest "Known issues" list (Vite IPv6 bind, multipart in
+  GENA-style deploys, GitHub private during v1.x dev).
+* **ARCHITECTURE.md** with Mermaid diagrams covering the call-time
+  flow, the on-disk schema, and the 13-layer manifest. Provides a
+  one-page visual for new contributors.
+* **INTEGRATION_TEST_20260523.md** — Day-10 GENA report,
+  18-endpoint pass/fail table, live production regression baseline
+  (cost $0.0033 ± $0.0008 per call), cross-version HMAC continuity
+  proof across v0.5.0 → v1.1.0.
+* **CHANGELOG.md** backfilled with the v0.0.1 entry for completeness.
+
+### Changed
+
+* Status banner in README now reads
+  "v1.1.0 on PyPI, production-validated through 13 days on GENA".
+* `pyproject.toml` description tweaked for sharper PyPI render —
+  no schema change, no behavior change.
+
+### Honest reframes (M2)
+
+* The wheel **does** get re-uploaded to PyPI as a new file (PyPI
+  requires unique filenames per version, and we can't overwrite
+  v1.1.0). The on-PyPI v1.1.0 page now renders the new README; the
+  installed package code is unchanged.
+* GitHub URLs in metadata still 404 — the repo remains private until
+  the user flips it. Documented in README "Known issues".
+* Bonus layers (#3 Energy, #9 Consensus) were planned for Day 10/11
+  but deferred — Day 10 was consumed by the GENA integration test +
+  PyPI upload protocol. Tracked as planned for v1.3+.
+
 ## [1.2.0] — 2026-05-23 — React dashboard (Chain Explorer + Policy + Regression)
 
 Frontend release. The Python wheel is **unchanged** from v1.1.0 (no
@@ -1110,3 +1155,16 @@ Optional (`[anthropic]` extra):
 - OTel 1.27.0+
 
 [0.1.0]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.1.0
+
+## [0.0.1] — 2026-05-10 — F0 skeleton (prototype only)
+
+First commit. Empty package scaffold: ``src/bijotel/__init__.py`` with
+``__version__ = "0.0.1"``, ``pyproject.toml`` declaring the hatchling
+build target, an empty README, a `MIT` license file. Subpackages
+(``adapters``, ``cli``, ``core``, ``exporters``, ``processors``,
+``decorators``, ``policy``) were stubs only — no working code, no
+tests. Provided so subsequent fixed-feature releases (F1 onward) had
+a stable PyPI-shape to land in.
+
+Never published. Wheel `dist/bijotel-0.0.1-py3-none-any.whl` exists
+locally as historical artifact.
