@@ -1,0 +1,45 @@
+/* Tailwind v4 — single-line import is the new pattern (replaces v3's
+ * @tailwind base/components/utilities triple).
+ */
+@import "tailwindcss";
+
+/* App-wide custom tokens. Tailwind v4 lets us declare semantic colors
+ * inline in @theme so utilities like `bg-bijotel-sidebar` resolve.
+ */
+@theme {
+  --color-bijotel-sidebar: #1a1a2e;
+  --color-bijotel-sidebar-hover: #252544;
+  --color-bijotel-accent: #4f46e5;
+  --color-bijotel-content: #f8f9fa;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Code blocks (canonical body JSON viewer) need a smaller mono font. */
+pre,
+code,
+.font-mono {
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+}
+
+/* Stat-card hover lift — purely cosmetic. */
+.stat-card {
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+}

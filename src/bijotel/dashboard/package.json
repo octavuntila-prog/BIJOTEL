@@ -1,0 +1,26 @@
+{
+  "name": "bijotel-dashboard",
+  "private": true,
+  "version": "1.2.0-dev",
+  "type": "module",
+  "description": "BIJOTEL dashboard — Chain Explorer, Policy, Regression Monitor.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "recharts": "^2.13.3",
+    "lucide-react": "^0.454.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-react": "^4.3.3",
+    "tailwindcss": "^4.0.0",
+    "vite": "^5.4.10"
+  }
+}

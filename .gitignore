@@ -21,3 +21,8 @@ htmlcov/
 # F1 schema discovery dumps (NU se comit)
 f1_spans.jsonl
 *.jsonl
+
+# Dashboard (Day 8+): node deps + build output
+node_modules/
+dashboard_dist/
+.vite/
