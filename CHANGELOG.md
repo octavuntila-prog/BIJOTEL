@@ -5,6 +5,96 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] — 2026-05-22 — Hardening
+
+Production-readiness foundation for ARA-class concurrent consumers. Closes
+the three CRITICAL-latent gaps surfaced by the T+7d audit (DOC 03 F1, F2,
+E2). No new features; all changes are correctness, isolation, and security.
+
+The chain wire-protocol is unchanged: pre-0.6.0 chain.db files are read,
+verified, and continued seamlessly. Empirically validated on GENA (4,889
+existing entries → continued VALID after deploy).
+
+### Hardened — A. Crash isolation in `on_end`
+
+- `HmacChainSpanProcessor.on_end` and `CasSpanProcessor.on_end` now wrap
+  the full body in `try/except Exception`. Any failure
+  (canonicalization, hashing, sqlite write) is logged at ERROR level to
+  the `bijotel.chain` / `bijotel.cas` loggers and **suppressed** — the
+  host application's LLM call path is never disturbed by chain-write
+  failures.
+- A failed write leaves a gap of one entry; subsequent entries continue
+  from the still-valid `prev_hash` of the last sealed row. Test:
+  `test_chain_continues_after_failed_entry` (3 ok → 1 dropped → 3 ok,
+  verify still VALID).
+
+### Hardened — B. Multi-writer correctness (WAL + BEGIN IMMEDIATE)
+
+- `PRAGMA journal_mode=WAL` set at db init (persists at db level).
+- `PRAGMA busy_timeout=5000` on every write connection (5s retry budget
+  under contention vs immediate `SQLITE_BUSY`).
+- The SELECT-prev-hash → compute-hmac → INSERT critical section in
+  `on_end` is now wrapped in explicit `BEGIN IMMEDIATE` (autocommit
+  connection + explicit transaction). The RESERVED lock is acquired
+  **before** the SELECT, eliminating the read-modify-write race across
+  concurrent processes sharing the same chain.db. Without IMMEDIATE,
+  two writers could read the same `prev_hash` and produce a chain fork
+  caught only by `verify_chain`'s linkage check.
+- Per-process `threading.Lock` retained as in-process defense-in-depth.
+- Test: `test_concurrent_writers_no_chain_corruption` — 4 processes ×
+  25 spans each → 100 entries, chain VALID end-to-end. (POSIX-only;
+  Windows skipped due to multiprocessing spawn-fixture friction.)
+
+### Hardened — D. Restrictive file permissions on new chain.db
+
+- Newly-created chain.db files get mode `0o600` (owner r/w only).
+  Prevents world-readable leak of prompt/response BLOBs stored in
+  `canonical_body`.
+- Applied **only on first creation**; existing chain.db files are
+  preserved at their current permissions (M5 nothing-deleted).
+- POSIX-only; silently skipped on Windows / filesystems without chmod
+  semantics (logged elsewhere via the host's audit).
+
+### Hardened — C. Reproducible builds (lockfile)
+
+- New `requirements-lock.txt` (40 packages, pip-freeze of the verified
+  venv). `pyproject.toml` keeps `>=` ranges for flexibility; lockfile
+  pins exact versions for reproducible deploys.
+
+### Hardened — E. CVE scan clean
+
+- `pip-audit -r requirements-lock.txt --no-deps`: **0 known
+  vulnerabilities**. Fixed in this release: `idna 3.13` → `3.16`
+  (CVE-2026-45409, transitive via httpx/anthropic).
+
+### Tests
+
+- 12 new tests in `tests/test_hardening.py` (8 pass on Windows, 4
+  POSIX-only skipped; full 12/12 run on GENA Linux at deploy).
+- Total: **217 passed, 6 skipped** (was 209 + 2; +8 hardening +
+  4 platform-skipped).
+- Coverage maintained at **94%** (1404 statements / 91 missing).
+- `ruff check`: all checks passed.
+
+### Changed
+
+- `bijotel.__version__` bumped 0.5.0 → 0.6.0.
+- Version bump is **minor**: API surface unchanged, public exports
+  identical, schema unchanged, wire-protocol compatible. The hardening
+  is internal to processor on_end paths.
+
+### Migration notes
+
+- No code changes required by consumers. `bijotel.processors` exports
+  unchanged.
+- Existing chain.db files: read as-is, continue normally, WAL mode
+  enabled on first open (one-time db-level upgrade), perms NOT changed
+  (preserved). New chain.db files get 0o600.
+- If your host application catches exceptions from BIJOTEL's on_end and
+  reacts to them, that code is now dead: on_end never raises in 0.6.0.
+
+[0.6.0]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.6.0
+
 ## [0.5.0] — 2026-05-14
 
 Third pattern adapted from substrate-guard (separate project at

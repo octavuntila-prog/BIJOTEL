@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import hmac
+import logging
 import sqlite3
 import threading
 from collections.abc import Callable
@@ -19,6 +21,10 @@ from bijotel.processors.canonical import (
 )
 
 GENESIS_HASH = "0" * 64  # Convenție: prev_hash al primului entry
+BUSY_TIMEOUT_MS = 5000  # SQLite per-connection retry budget under contention
+DB_FILE_MODE = 0o600    # Owner read/write only; chain.canonical_body holds prompt BLOBs
+
+_LOG = logging.getLogger("bijotel.chain")
 
 
 def _default_filter(span: ReadableSpan) -> bool:
@@ -71,8 +77,24 @@ class HmacChainSpanProcessor(SpanProcessor):
         self._init_db()
 
     def _init_db(self) -> None:
-        """Create chain table if not exists, migrate older schema if needed."""
-        with sqlite3.connect(self._db_path) as conn:
+        """Create chain table if not exists, enable WAL, migrate older schema if needed.
+
+        WAL mode (``PRAGMA journal_mode=WAL``) is set once and persists at the
+        database level, enabling safe concurrent reads + serialized writes.
+        Combined with ``BEGIN IMMEDIATE`` in ``on_end``, this gives multi-writer
+        correctness without per-process lock coordination.
+
+        ``DB_FILE_MODE`` (0o600) is applied only to newly-created files;
+        existing chain.db permissions are preserved (M5 nothing-deleted).
+        Best-effort: silently skipped on platforms without chmod semantics
+        (Windows, some special filesystems).
+        """
+        db_existed = self._db_path.exists()
+        conn = sqlite3.connect(self._db_path)
+        try:
+            # WAL persists at database level; safe to set repeatedly
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS chain (
                     seq INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,6 +122,26 @@ class HmacChainSpanProcessor(SpanProcessor):
                 "ON chain(semantic_body_hash)"
             )
             conn.commit()
+        finally:
+            conn.close()
+
+        # Apply restrictive perms only on newly-created files; never alter existing.
+        # Best-effort: Windows / some filesystems lack POSIX chmod semantics.
+        if not db_existed and self._db_path.exists():
+            with contextlib.suppress(OSError):
+                self._db_path.chmod(DB_FILE_MODE)
+
+    def _connect_for_write(self) -> sqlite3.Connection:
+        """Open a write-mode connection with explicit transaction control.
+
+        Uses ``isolation_level=None`` (autocommit) so ``BEGIN IMMEDIATE`` can be
+        issued explicitly before the SELECT-then-INSERT critical section.
+        Sets ``busy_timeout`` so concurrent writers wait up to 5s rather than
+        immediately raising ``SQLITE_BUSY``.
+        """
+        conn = sqlite3.connect(self._db_path, isolation_level=None)
+        conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
+        return conn
 
     def _last_hmac_hash(self, conn: sqlite3.Connection) -> str:
         """Return hmac_hash al ultimului entry, sau GENESIS_HASH dacă chain e gol."""
@@ -113,48 +155,81 @@ class HmacChainSpanProcessor(SpanProcessor):
         pass
 
     def on_end(self, span: ReadableSpan) -> None:
-        """Sigilează span în chain dacă trece filter-ul."""
-        if not self._filter(span):
-            return
+        """Sigilează span în chain dacă trece filter-ul.
 
-        canonical_dict = span_to_canonical_dict(span)
-        canonical_body = canonicalize(canonical_dict)
-        canonical_hash = hashlib.sha256(canonical_body).hexdigest()
+        Crash-isolated: any exception during canonicalization, hashing, or
+        SQLite write is caught, logged at ERROR level, and SUPPRESSED. The
+        host application's LLM call path is never disturbed by chain-write
+        failures. The chain may have a gap (one missing entry); subsequent
+        entries continue normally with the still-valid ``prev_hash`` of the
+        last successfully sealed row.
 
-        semantic_dict = span_to_semantic_dict(span)
-        semantic_body = canonicalize(semantic_dict)
-        semantic_hash = hashlib.sha256(semantic_body).hexdigest()
+        Multi-writer safe: the SELECT-prev-hash → compute → INSERT critical
+        section is wrapped in ``BEGIN IMMEDIATE`` so the RESERVED lock is
+        acquired before the SELECT, eliminating the read-modify-write race
+        across concurrent processes sharing the same chain.db.
+        """
+        try:
+            if not self._filter(span):
+                return
 
-        with self._lock, sqlite3.connect(self._db_path) as conn:
-            prev_hash = self._last_hmac_hash(conn)
-            hmac_input = (prev_hash + canonical_hash).encode("utf-8")
-            hmac_hash = hmac.new(self._secret, hmac_input, hashlib.sha256).hexdigest()
+            canonical_dict = span_to_canonical_dict(span)
+            canonical_body = canonicalize(canonical_dict)
+            canonical_hash = hashlib.sha256(canonical_body).hexdigest()
 
-            trace_id_hex = format(span.context.trace_id, "032x")
-            span_id_hex = format(span.context.span_id, "016x")
+            semantic_dict = span_to_semantic_dict(span)
+            semantic_body = canonicalize(semantic_dict)
+            semantic_hash = hashlib.sha256(semantic_body).hexdigest()
 
-            conn.execute(
-                """
-                INSERT INTO chain (
-                    timestamp_ns, trace_id, span_id, span_name, span_kind,
-                    canonical_body, canonical_hash, prev_hash, hmac_hash,
-                    semantic_body_hash
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    span.end_time,
-                    trace_id_hex,
-                    span_id_hex,
-                    span.name,
-                    span.kind.name if span.kind else None,
-                    canonical_body,
-                    canonical_hash,
-                    prev_hash,
-                    hmac_hash,
-                    semantic_hash,
-                ),
+            with self._lock:
+                conn = self._connect_for_write()
+                try:
+                    conn.execute("BEGIN IMMEDIATE")
+                    prev_hash = self._last_hmac_hash(conn)
+                    hmac_input = (prev_hash + canonical_hash).encode("utf-8")
+                    hmac_hash = hmac.new(
+                        self._secret, hmac_input, hashlib.sha256
+                    ).hexdigest()
+
+                    trace_id_hex = format(span.context.trace_id, "032x")
+                    span_id_hex = format(span.context.span_id, "016x")
+
+                    conn.execute(
+                        """
+                        INSERT INTO chain (
+                            timestamp_ns, trace_id, span_id, span_name, span_kind,
+                            canonical_body, canonical_hash, prev_hash, hmac_hash,
+                            semantic_body_hash
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            span.end_time,
+                            trace_id_hex,
+                            span_id_hex,
+                            span.name,
+                            span.kind.name if span.kind else None,
+                            canonical_body,
+                            canonical_hash,
+                            prev_hash,
+                            hmac_hash,
+                            semantic_hash,
+                        ),
+                    )
+                    conn.execute("COMMIT")
+                except Exception:
+                    # Best-effort rollback; OperationalError = no active txn
+                    with contextlib.suppress(sqlite3.OperationalError):
+                        conn.execute("ROLLBACK")
+                    raise
+                finally:
+                    conn.close()
+        except Exception as e:
+            _LOG.error(
+                "bijotel chain write failed (span not chained, host unaffected): "
+                "%s: %s",
+                type(e).__name__,
+                e,
             )
-            conn.commit()
 
     def shutdown(self) -> None:
         """SpanProcessor interface: no-op (SQLite connection per call)."""

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
+import logging
 import sqlite3
 import threading
 from collections.abc import Callable
@@ -12,6 +14,11 @@ from opentelemetry.context import Context
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 
 from bijotel.processors.canonical import canonicalize, span_to_semantic_dict
+
+BUSY_TIMEOUT_MS = 5000  # SQLite per-connection retry budget under contention
+DB_FILE_MODE = 0o600    # Owner read/write only; cas.body holds prompt BLOBs
+
+_LOG = logging.getLogger("bijotel.cas")
 
 
 def _default_filter(span: ReadableSpan) -> bool:
@@ -62,8 +69,18 @@ class CasSpanProcessor(SpanProcessor):
         self._init_db()
 
     def _init_db(self) -> None:
-        """Create cas table if not exists."""
-        with sqlite3.connect(self._db_path) as conn:
+        """Create cas table if not exists, enable WAL, apply restrictive perms.
+
+        WAL + ``busy_timeout`` are idempotent at the database level; safe to set
+        even if ``HmacChainSpanProcessor`` shares the same db_path and already
+        configured them. ``DB_FILE_MODE`` (0o600) applied only to newly-created
+        files; existing perms preserved.
+        """
+        db_existed = self._db_path.exists()
+        conn = sqlite3.connect(self._db_path)
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS cas (
                     body_hash TEXT PRIMARY KEY,
@@ -73,30 +90,72 @@ class CasSpanProcessor(SpanProcessor):
                 )
             """)
             conn.commit()
+        finally:
+            conn.close()
+
+        # Best-effort: Windows / some filesystems lack POSIX chmod semantics.
+        if not db_existed and self._db_path.exists():
+            with contextlib.suppress(OSError):
+                self._db_path.chmod(DB_FILE_MODE)
+
+    def _connect_for_write(self) -> sqlite3.Connection:
+        """Open a write-mode connection with explicit transaction control."""
+        conn = sqlite3.connect(self._db_path, isolation_level=None)
+        conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
+        return conn
 
     def on_start(self, span: Span, parent_context: Context | None = None) -> None:
         """SpanProcessor interface: no-op pe start."""
         pass
 
     def on_end(self, span: ReadableSpan) -> None:
-        """Store input-only semantic body în CAS, increment ref_count on duplicate."""
-        if not self._filter(span):
-            return
+        """Store input-only semantic body în CAS, increment ref_count on duplicate.
 
-        semantic_dict = span_to_semantic_dict(span)
-        semantic_body = canonicalize(semantic_dict)
-        body_hash = hashlib.sha256(semantic_body).hexdigest()
+        Crash-isolated: any exception during canonicalization, hashing, or
+        SQLite write is caught, logged at ERROR level, and SUPPRESSED. The
+        host application's LLM call path is never disturbed by CAS-write
+        failures. A missed entry just means dedup is one-short for that body;
+        subsequent identical inputs still bump ref_count.
 
-        with self._lock, sqlite3.connect(self._db_path) as conn:
-            conn.execute(
-                """
-                INSERT INTO cas (body_hash, body, first_seen_ns, ref_count)
-                VALUES (?, ?, ?, 1)
-                ON CONFLICT(body_hash) DO UPDATE SET ref_count = ref_count + 1
-                """,
-                (body_hash, semantic_body, span.end_time),
+        Single-statement INSERT + ON CONFLICT DO UPDATE is atomic in SQLite,
+        but ``BEGIN IMMEDIATE`` is used for consistent multi-writer semantics
+        with HmacChainSpanProcessor (same db, same lock model).
+        """
+        try:
+            if not self._filter(span):
+                return
+
+            semantic_dict = span_to_semantic_dict(span)
+            semantic_body = canonicalize(semantic_dict)
+            body_hash = hashlib.sha256(semantic_body).hexdigest()
+
+            with self._lock:
+                conn = self._connect_for_write()
+                try:
+                    conn.execute("BEGIN IMMEDIATE")
+                    conn.execute(
+                        """
+                        INSERT INTO cas (body_hash, body, first_seen_ns, ref_count)
+                        VALUES (?, ?, ?, 1)
+                        ON CONFLICT(body_hash) DO UPDATE SET ref_count = ref_count + 1
+                        """,
+                        (body_hash, semantic_body, span.end_time),
+                    )
+                    conn.execute("COMMIT")
+                except Exception:
+                    # Best-effort rollback; OperationalError = no active txn
+                    with contextlib.suppress(sqlite3.OperationalError):
+                        conn.execute("ROLLBACK")
+                    raise
+                finally:
+                    conn.close()
+        except Exception as e:
+            _LOG.error(
+                "bijotel cas write failed (body not stored, host unaffected): "
+                "%s: %s",
+                type(e).__name__,
+                e,
             )
-            conn.commit()
 
     def shutdown(self) -> None:
         """SpanProcessor interface: no-op (SQLite connection per call)."""

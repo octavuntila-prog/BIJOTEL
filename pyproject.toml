@@ -1,6 +1,6 @@
 [project]
 name = "bijotel"
-version = "0.5.0"
+version = "0.6.0"
 description = "SpanProcessor plug-ins for OpenTelemetry GenAI: tamper-evident chain, content-addressable storage, in-process policy gate."
 readme = "README.md"
 requires-python = ">=3.11"
