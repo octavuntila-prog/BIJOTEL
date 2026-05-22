@@ -5,6 +5,75 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] — 2026-05-22 — PyPI publish + Docker + serve API
+
+First public stable release. No new layers vs v0.8.0 — Day 5 focuses on
+the **packaging surface**: PyPI metadata, FastAPI ``bijotel serve``
+command, Docker image, README rewrite for PyPI render.
+
+The API surface (48 public symbols in ``bijotel.__all__``) is frozen for
+the v1.x line. Breaking changes require v2.0.0.
+
+### Added
+
+- ``bijotel.api`` package — lazy-import shim that exposes
+  ``create_app()``. Importing ``bijotel.api`` works without the ``[api]``
+  extra installed; only resolving ``create_app`` requires fastapi.
+- ``bijotel.api.app.create_app(db_path)`` — minimal FastAPI factory with
+  ``GET /health`` (liveness + db existence), ``GET /version``, plus
+  501-placeholder routes for ``/chain``, ``/policy``, ``/regression``
+  (full endpoints arrive in v1.1.0). OpenAPI / Swagger UI served at
+  ``/docs`` and ``/redoc``.
+- ``bijotel serve`` CLI subcommand. Flags:
+  ``--host``, ``--port``, ``--db``, ``--log-level``. Falls back to
+  ``$BIJOTEL_DB_PATH`` when ``--db`` omitted. Exit codes: 0 clean,
+  2 missing ``[api]`` extra (with remediation message), 3 uvicorn
+  startup failure.
+- ``Dockerfile`` — multi-stage build (builder with build-essential +
+  gcc + git for tree-sitter compile; slim runtime with only ca-certs +
+  curl). Bundles ``[api,fingerprint,ast]`` extras. Runs as
+  non-root ``bijotel:1000``. Healthcheck via ``curl /health``.
+- ``docker-compose.yml`` — reference deploy with ``/data`` bind mount
+  and required ``BIJOTEL_HMAC_SECRET`` env var (compose interpolation
+  fails fast if unset).
+- ``.dockerignore`` — keeps the build context small and prevents
+  ``.env`` / ``*.bak.*`` / ``*.db`` from entering the image.
+- PyPI metadata in ``pyproject.toml``: classifiers (Beta / MIT /
+  Python 3.11–3.12 / Security / Logging / Monitoring / Typed),
+  keywords (12 entries), ``project.urls`` (Documentation / Issues /
+  Changelog / Source). Added ``build`` and ``twine`` to ``[dev]``
+  extras.
+- ``[api]`` optional dependency: ``fastapi>=0.100``, ``uvicorn>=0.20``.
+  Also added to ``[all]``.
+
+### Changed
+
+- ``bijotel.__version__`` bumped 0.8.0 → 1.0.0.
+- README rewritten for PyPI render: clear status line ("v1.0.0 —
+  production-ready core"), pip-install quickstart with all extras
+  documented, feature list mapping 13 catalog bijuterii, Docker
+  one-liner, full CLI table including ``serve``, updated roadmap
+  showing what's shipped (v1.0.0) vs planned (v1.1.0 / v1.2.0 /
+  v1.3.0).
+
+### Tests
+
+- ``tests/test_serve.py`` — 16 tests covering: lazy ``__getattr__`` on
+  the api package, ``create_app`` shape, ``db_path`` storage + pathlib
+  acceptance, ``/health`` (with file-exists flag), ``/version``,
+  501-placeholder routes, OpenAPI route registration, CLI subparser
+  args, env-var DB path resolution, graceful exit on missing fastapi.
+  Module-level ``pytest.importorskip("fastapi")`` so the file no-ops
+  when ``[api]`` isn't installed.
+- ``tests/test_smoke.py`` — version assertion bumped to 1.0.0.
+
+### Provenance
+
+Pure packaging release — no algorithmic changes. The wheel built at
+this commit is the same code that ran the 409-pass test suite at v0.8.0
+plus the 16 new serve tests. Existing forensic guarantees (chain
+continuity, CAS dedup, policy gate) are preserved bit-for-bit.
+
 ## [0.8.0] — 2026-05-22 — 4 layers + Combo D orchestration
 
 Second minor release of Day 4. Adds one new layer (Routing), completes

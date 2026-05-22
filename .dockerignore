@@ -1,0 +1,36 @@
+# Source / dev artefacts not needed inside the image
+.git
+.github
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.ruff_cache
+.coverage
+.coverage.*
+htmlcov
+*.egg-info
+build
+
+# Local config / secrets — MUST NOT enter the image
+.env
+.env.*
+*.key
+*.pem
+*.hmac_secret
+
+# Backup files from audit/scrubbing scripts
+*.bak.*
+
+# Local data — DBs are bind-mounted at runtime, not baked in
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Docs / scripts not needed in runtime
+docs/
+scripts/
+tests/
+.audit_tmp/

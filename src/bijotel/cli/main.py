@@ -10,6 +10,7 @@ from bijotel.cli.commands import (
     inspect_cmd,
     list_cmd,
     regression_cmd,
+    serve_cmd,
     stats_cmd,
     verify_cmd,
     verify_export_cmd,
@@ -19,7 +20,10 @@ from bijotel.cli.commands import (
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="bijotel",
-        description="BIJOTEL CLI: audit chain verify, inspect, stats, list.",
+        description=(
+            "BIJOTEL CLI: forensic audit chain — verify, inspect, stats, list, "
+            "export, regression, serve."
+        ),
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -128,6 +132,34 @@ def _build_parser() -> argparse.ArgumentParser:
         help="z-score absolute threshold for anomaly (default 3.0).",
     )
 
+    # bijotel serve
+    p_serve = subparsers.add_parser(
+        "serve",
+        help="Start the BIJOTEL HTTP API server (FastAPI + uvicorn).",
+    )
+    p_serve.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Bind host (default 127.0.0.1; use 0.0.0.0 for all interfaces).",
+    )
+    p_serve.add_argument(
+        "--port",
+        type=int,
+        default=8080,
+        help="Bind port (default 8080).",
+    )
+    p_serve.add_argument(
+        "--db",
+        default=None,
+        help="Chain DB path (default: $BIJOTEL_DB_PATH or chain.db).",
+    )
+    p_serve.add_argument(
+        "--log-level",
+        default="info",
+        choices=["critical", "error", "warning", "info", "debug", "trace"],
+        help="uvicorn log level (default info).",
+    )
+
     return parser
 
 
@@ -143,6 +175,7 @@ def main(argv: list[str] | None = None) -> int:
         "export": export_cmd,
         "verify-export": verify_export_cmd,
         "regression": regression_cmd,
+        "serve": serve_cmd,
     }
     handler = handlers[args.command]
     return handler(args)

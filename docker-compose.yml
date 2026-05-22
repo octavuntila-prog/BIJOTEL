@@ -1,0 +1,41 @@
+# BIJOTEL — example self-hosted deploy.
+#
+# Quickstart:
+#   1. Build the wheel:           python -m build
+#   2. Generate an HMAC secret:   openssl rand -hex 32 > .hmac_secret
+#   3. Export to environment:     export BIJOTEL_HMAC_SECRET=$(cat .hmac_secret)
+#   4. Launch:                    docker compose up -d
+#   5. Verify:                    curl http://localhost:8080/health
+#
+# The chain.db lives at ./data/chain.db on the host (bind-mounted to /data).
+# Persisting it outside the container is mandatory — without that mount,
+# every restart loses the audit trail.
+
+services:
+  bijotel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bijotel:1.0.0
+    container_name: bijotel
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Chain DB + CAS storage. MUST persist across container restarts.
+      - ./data:/data
+    environment:
+      # Chain DB path (matches the Dockerfile default; explicit for clarity)
+      BIJOTEL_DB_PATH: /data/chain.db
+      # HMAC secret — REQUIRED for chain processors to seal spans.
+      # Set in your shell or .env file BEFORE `docker compose up`.
+      # Never bake the value into this file.
+      BIJOTEL_HMAC_SECRET: ${BIJOTEL_HMAC_SECRET:?Set BIJOTEL_HMAC_SECRET in your env}
+    # Healthcheck is also defined in the Dockerfile; compose-level mirror so
+    # `docker compose ps` shows the same status.
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

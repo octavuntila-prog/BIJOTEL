@@ -1,11 +1,44 @@
 [project]
 name = "bijotel"
-version = "0.8.0"
-description = "SpanProcessor plug-ins for OpenTelemetry GenAI: tamper-evident chain, content-addressable storage, in-process policy gate."
+version = "1.0.0"
+description = "Forensic-grade tamper-evident audit chain for LLM applications. HMAC-SHA256 chain, content-addressable storage, pre-call policy gate, regression detection."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Octavian Untilă" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Security",
+    "Topic :: System :: Logging",
+    "Topic :: System :: Monitoring",
+    "Typing :: Typed",
+]
+keywords = [
+    "llm",
+    "audit",
+    "hmac",
+    "tamper-evident",
+    "observability",
+    "opentelemetry",
+    "ai-safety",
+    "compliance",
+    "eu-ai-act",
+    "policy-gate",
+    "regression-detection",
+    "forensic",
+    "genai",
+    "anthropic",
+    "openai",
+]
 dependencies = [
     "opentelemetry-api>=1.27.0",
     "opentelemetry-sdk>=1.27.0",
@@ -29,6 +62,10 @@ ast = [
     "tree-sitter>=0.21",
     "tree-sitter-bash>=0.21",
 ]
+api = [
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
+]
 all = [
     "anthropic>=0.40.0",
     "opentelemetry-instrumentation-anthropic>=0.40.0",
@@ -36,12 +73,22 @@ all = [
     "sentence-transformers>=2.7",
     "tree-sitter>=0.21",
     "tree-sitter-bash>=0.21",
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
 ]
 dev = [
     "pytest>=8.0",
     "ruff>=0.6.0",
     "python-dotenv>=1.0.0",
+    "build>=1.0",
+    "twine>=5.0",
 ]
+
+[project.urls]
+Documentation = "https://github.com/octavuntila-prog/BIJOTEL"
+Issues = "https://github.com/octavuntila-prog/BIJOTEL/issues"
+Changelog = "https://github.com/octavuntila-prog/BIJOTEL/blob/main/CHANGELOG.md"
+Source = "https://github.com/octavuntila-prog/BIJOTEL"
 
 [project.scripts]
 bijotel = "bijotel.cli.main:main"

@@ -1,10 +1,87 @@
 # BIJOTEL
 
-SpanProcessor plug-ins for OpenTelemetry GenAI applications.
+**Forensic-grade tamper-evident audit chain for LLM applications.**
 
-BIJOTEL adds tamper-evidence, content-addressable storage, and in-process policy gating to existing OTel pipelines (OpenLLMetry, custom instrumentations, etc.). It does NOT replace your tracer — it extends it.
+BIJOTEL adds tamper-evidence (HMAC-SHA256 chain), content-addressable storage,
+and pre-call policy gating to existing OpenTelemetry GenAI pipelines
+(OpenLLMetry, custom instrumentations, etc.). It does NOT replace your tracer
+— it extends it.
 
-**Status:** alpha (F0 skeleton). API will change. Not for production use.
+**Status:** v1.0.0 — production-ready core (chain + CAS + policy + regression).
+Layers (fingerprint, AST safety, routing, misalignment probes, Combo D
+containment) are stable. API surface frozen for v1.x.
+
+## Install
+
+```bash
+pip install bijotel
+```
+
+Optional extras:
+
+```bash
+pip install bijotel[anthropic]     # Anthropic SDK + instrumentation
+pip install bijotel[openai]        # OpenAI SDK
+pip install bijotel[api]           # FastAPI + uvicorn (for `bijotel serve`)
+pip install bijotel[fingerprint]   # sentence-transformers (semantic dedup)
+pip install bijotel[ast]           # tree-sitter (bash AST safety)
+pip install bijotel[all]           # everything above
+```
+
+## Quickstart
+
+```python
+import os
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+
+from bijotel.processors import HmacChainSpanProcessor, CasSpanProcessor
+
+provider = TracerProvider()
+provider.add_span_processor(
+    HmacChainSpanProcessor(
+        secret_key=bytes.fromhex(os.environ["BIJOTEL_HMAC_SECRET"]),
+        db_path="chain.db",
+    )
+)
+provider.add_span_processor(CasSpanProcessor(db_path="chain.db"))
+trace.set_tracer_provider(provider)
+
+# Now any OTel-instrumented LLM call is sealed in the chain.
+```
+
+Verify integrity later:
+
+```bash
+bijotel verify --db chain.db
+```
+
+## Features (13/20 bijuterii catalog patterns covered)
+
+* **#1 Permitted/Safe/Sealed** — three-question safety frame (Combo D)
+* **#2 Content-Addressable Storage + Merkle DAG** — dedup + reference graph
+* **#5 AST-First Code Safety** — tree-sitter bash + stdlib Python AST scan
+* **#7 Deterministic + Semantic Fingerprinting** — SHA-256 + embeddings
+* **#10 Compliance-as-Code** — PII / output-length / model-pin / cost rules
+* **#11 Forensic-First (HMAC chain)** — JCS + SHA-256 + HMAC tamper-evidence
+* **#15 Inference Routing** — Pareto cost/quality/latency selector + budget
+* **#16 Regression Detection** — z-score + IQR drift detection on tokens/cost
+* **#18 Misalignment Probes** — 29 builtin probes across 8 attack categories
+* Plus: provider adapters (Anthropic, OpenAI), `@trace_genai` decorator,
+  portable signed JSON chain export.
+
+## Docker
+
+```bash
+docker run -p 8080:8080 \
+    -v $(pwd)/data:/data \
+    -e BIJOTEL_HMAC_SECRET=$(openssl rand -hex 32) \
+    bijotel/bijotel:1.0.0
+```
+
+See `docker-compose.yml` in the repo for the full reference deploy.
+
+---
 
 ## Architecture
 
@@ -377,10 +454,13 @@ shutdown()  # flushes processors, releases resources
 
 `shutdown()` is idempotent — safe to call multiple times.
 
-## Install
+## Development install
 
 ```bash
-pip install -e ".[anthropic]"
+git clone <repo>
+cd BIJOTEL
+pip install -e ".[anthropic,api,fingerprint,ast,dev]"
+pytest
 ```
 
 ## CLI
@@ -411,6 +491,10 @@ bijotel export --db chain.db --output audit_trail.json
 
 # Verify integrity of an exported JSON (no DB needed, just secret)
 bijotel verify-export audit_trail.json
+
+# Run the HTTP API server (requires `pip install bijotel[api]`)
+bijotel serve --port 8080 --db chain.db
+# GET /health, /version, /docs (OpenAPI / Swagger UI)
 ```
 
 `--since` uses calendar date UTC (YYYY-MM-DD, lower bound 00:00:00Z), consistent with `daily_token_budget` rule.
@@ -438,19 +522,30 @@ The script validates:
 
 ## Roadmap
 
-- [x] F0: Skeleton
-- [x] F1: End-to-end smallest (init + AnthropicInstrumentor + ConsoleExporter)
-- [x] F2: HmacChainSpanProcessor (JCS + SHA-256 + HMAC chain)
-- [x] F3: CasSpanProcessor (content-addressable span body storage)
-- [x] F4: PolicyGate (3-state Decision + 3 built-in rules + guard decorator)
-- [x] F5: `@trace_genai` decorator + `wrap()` runtime (sync+async, custom extractors)
-- [x] F6: `bijotel` CLI (verify + inspect + stats + list)
-- [x] Validation: `scripts/e2e_smoke.py` (full stack on real Anthropic + CLI verify)
-- [x] F7: Provider protocol + AnthropicAdapter (`@trace_genai(provider=adapter)` integration; multi-provider deferred until concrete need)
-- [x] F8: Portable signed JSON chain export (`bijotel export` + `bijotel verify-export`) + `rate_limit_calls_per_minute` rule
-- [x] F12: Regression Detection (Bijuteria #16) — `RegressionDetector` + `bijotel regression` CLI (z-score + IQR over input_tokens / output_tokens / cost)
-- [x] F9: `OpenAIAdapter` — second concrete Provider implementation, validates F7 Protocol design empiric (zero F7 changes required). Install: `pip install bijotel[openai]`.
-- [x] F11: `prompt_pattern_deny` rule — regex-based jailbreak / prompt-injection detection over `request["messages"]`. Defaults cover 5 attack categories (instruction override, system prompt extraction, role override, jailbreak framing, encoding bypass). Custom patterns + defaults composable; warn / deny mode switch. Pattern catalog adapted from substrate-guard's `agent_safety.rego` (separate project, read-only).
+**Shipped in v1.0.0:**
+
+- [x] F0–F6: Core (skeleton → init → HMAC chain → CAS → policy gate → decorator → CLI)
+- [x] F7: Provider protocol + AnthropicAdapter + OpenAIAdapter
+- [x] F8: Portable signed JSON chain export
+- [x] F11: `prompt_pattern_deny` (regex jailbreak/injection detection)
+- [x] F12: Regression detection (z-score + IQR over tokens/cost)
+- [x] F13: Deterministic + semantic fingerprinting layer
+- [x] F14: AST safety layer (tree-sitter bash + stdlib Python ast)
+- [x] F15: Inference routing (Pareto cost/quality/latency + budget)
+- [x] F16: CAS Merkle DAG (content-addressable + reference graph)
+- [x] F17: Misalignment probe library (29 probes × 8 attack categories)
+- [x] F18: Combo D containment guard (Policy + AST + chain seal)
+- [x] Compliance rules: PII / output-length / model-pin
+- [x] CLI: verify + inspect + stats + list + export + verify-export + regression + serve
+- [x] Hardening: WAL + busy_timeout + BEGIN IMMEDIATE, crash isolation, perms, lockfile
+- [x] FastAPI `bijotel serve` (health + version, full chain/policy/regression in v1.1.0)
+- [x] Docker image + docker-compose example
+
+**Planned:**
+
+- [ ] v1.1.0 — FastAPI chain/policy/regression endpoints
+- [ ] v1.2.0 — Dashboard (chain explorer + policy + regression)
+- [ ] v1.3.0 — Consensus voting (Bijuteria #9) + energy accounting (#3)
 
 ## License
 
