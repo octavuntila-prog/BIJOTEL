@@ -384,3 +384,153 @@ def prompt_pattern_deny(
         return Decision.warn(rule="prompt_pattern_deny", reason=reason)
 
     return rule
+
+
+# ============================================================================
+# Compliance-as-code completions (F16 / Bijuteria #10)
+# ============================================================================
+
+import re as _re  # noqa: E402
+
+# PII patterns — conservative, English-centric. Override via `patterns=`
+# kwarg for domain-specific PII (medical record numbers, IBANs, etc.).
+DEFAULT_PII_PATTERNS: dict[str, str] = {
+    "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
+    "phone_us": r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b",
+    "ssn_us": r"\b\d{3}-\d{2}-\d{4}\b",
+    "credit_card": r"\b(?:\d[ -]*?){13,16}\b",  # rough; Luhn check optional
+    "ipv4": r"\b(?:\d{1,3}\.){3}\d{1,3}\b",
+}
+
+
+def pii_detection(
+    *,
+    patterns: dict[str, str] | None = None,
+    mode: str = "warn",
+) -> Rule:
+    """Detect PII patterns in prompt content. Composes additively with F11.
+
+    Args:
+        patterns: Override the default PII regex set. Keys are pattern
+            names (shown in :class:`Decision` reason); values are regex
+            strings compiled with case-insensitive flag. Default:
+            :data:`DEFAULT_PII_PATTERNS` (email, US phone, US SSN,
+            credit card, IPv4).
+        mode: ``"warn"`` (audit + allow) or ``"deny"`` (block).
+
+    Returns:
+        Rule callable matching the PolicyEngine contract.
+
+    Raises:
+        ValueError: if ``mode`` is invalid.
+    """
+    if mode not in ("deny", "warn"):
+        raise ValueError(f"mode must be 'deny' or 'warn', got {mode!r}")
+
+    compiled = [
+        (name, _re.compile(pat, _re.IGNORECASE))
+        for name, pat in (patterns or DEFAULT_PII_PATTERNS).items()
+    ]
+
+    def rule(request: dict) -> Decision:
+        messages = request.get("messages", [])
+        text_parts: list[str] = []
+        if isinstance(messages, list):
+            for m in messages:
+                if not isinstance(m, dict):
+                    continue
+                content = m.get("content")
+                if isinstance(content, str):
+                    text_parts.append(content)
+                elif isinstance(content, list):
+                    for p in content:
+                        if isinstance(p, dict):
+                            t = p.get("text") or p.get("content") or ""
+                            if isinstance(t, str):
+                                text_parts.append(t)
+        text = " ".join(text_parts)
+        if not text:
+            return Decision.allow()
+
+        for pii_name, regex in compiled:
+            if regex.search(text):
+                reason = f"PII detected in prompt: {pii_name}"
+                if mode == "deny":
+                    return Decision.deny(rule="pii_detection", reason=reason)
+                return Decision.warn(rule="pii_detection", reason=reason)
+        return Decision.allow()
+
+    return rule
+
+
+def output_length_limit(*, max_tokens: int = 4096, mode: str = "warn") -> Rule:
+    """Enforce a ceiling on requested ``max_tokens`` per call.
+
+    Useful for: cost control without full-budget logic, safety against
+    runaway generation, compliance with downstream context-window limits.
+
+    Args:
+        max_tokens: Maximum allowed value of ``request["max_tokens"]``.
+            Requests with a higher max_tokens trigger the rule.
+        mode: ``"deny"`` or ``"warn"``.
+
+    Note: this checks the REQUESTED max_tokens, not actual output tokens
+    (which are only known post-call). For post-call output enforcement,
+    use ``cost_per_call_max`` or implement a custom rule.
+    """
+    if mode not in ("deny", "warn"):
+        raise ValueError(f"mode must be 'deny' or 'warn', got {mode!r}")
+    if max_tokens < 1:
+        raise ValueError(f"max_tokens must be >= 1, got {max_tokens}")
+
+    def rule(request: dict) -> Decision:
+        requested = request.get("max_tokens", 0)
+        if not isinstance(requested, int) or requested <= max_tokens:
+            return Decision.allow()
+        reason = (
+            f"Requested max_tokens={requested} exceeds policy ceiling "
+            f"of {max_tokens}"
+        )
+        if mode == "deny":
+            return Decision.deny(rule="output_length_limit", reason=reason)
+        return Decision.warn(rule="output_length_limit", reason=reason)
+
+    return rule
+
+
+def model_version_pin(*, allowed_versions: list[str], mode: str = "deny") -> Rule:
+    """Pin requests to specific model versions (not just model families).
+
+    Stricter than ``model_allowlist``: must match the *exact* string in
+    ``allowed_versions`` (typically date-suffixed identifiers like
+    ``claude-sonnet-4-20250514``). Prevents silent provider upgrades
+    where ``"claude-sonnet"`` would point to a new revision next month.
+
+    Args:
+        allowed_versions: Exact-match allowlist of model version strings.
+        mode: ``"deny"`` (default; pinning is usually enforced strictly)
+            or ``"warn"``.
+
+    Raises:
+        ValueError: on empty allowlist or invalid mode.
+    """
+    if mode not in ("deny", "warn"):
+        raise ValueError(f"mode must be 'deny' or 'warn', got {mode!r}")
+    if not allowed_versions:
+        raise ValueError("allowed_versions must be a non-empty list")
+
+    allowed = frozenset(allowed_versions)
+
+    def rule(request: dict) -> Decision:
+        model = request.get("model", "")
+        if model in allowed:
+            return Decision.allow()
+        reason = (
+            f"Model {model!r} not in pinned versions "
+            f"{sorted(allowed)} — provider silent-upgrade risk"
+        )
+        if mode == "deny":
+            return Decision.deny(rule="model_version_pin", reason=reason)
+        return Decision.warn(rule="model_version_pin", reason=reason)
+
+    return rule

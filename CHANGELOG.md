@@ -5,6 +5,153 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] — 2026-05-22 — 4 layers + Combo D orchestration
+
+Second minor release of Day 4. Adds one new layer (Routing), completes
+three existing concerns (CAS DAG, compliance rules, misalignment probes),
+and ships Combo D — the catalog's Agent Containment Stack orchestrator.
+
+Bijuterii coverage: **9/20 → 13/20** (+4 layers, +Combo D wrapper).
+
+### Added — F15 / Bijuteria #15: Inference Routing
+
+- ``bijotel.layers.routing.TaskClassifier`` — heuristic complexity scorer
+  over messages. Returns ``[0.0, 1.0]``. Weighted features: token-count
+  proxy, code-block presence, math-symbol density, multi-step reasoning
+  markers. Override the whole classifier for domain-specific routing.
+- ``bijotel.layers.routing.ModelRegistry`` — cost/quality/latency profiles
+  for 9 default models (Anthropic Haiku/Sonnet/Opus + OpenAI gpt-4o
+  family, profiles normalized to Opus=1.0 cost). Extensible.
+- ``bijotel.layers.routing.ParetoRouter`` — pick model on Pareto frontier
+  given complexity + optional :class:`Budget`. Simple → cheapest usable;
+  medium → best quality/cost ratio; complex → highest quality.
+- ``bijotel.layers.routing.Budget`` — per-agent daily USD ceiling,
+  SQLite-backed with v0.6.x hardening (WAL + busy_timeout + atomic
+  INSERT-or-UPDATE + UTC date reset). Exhausted budget downgrades the
+  router to the cheapest usable model.
+- ``routing_recommendation(...)`` — PolicyEngine rule factory: warn
+  (or deny) when requested model differs from optimal recommendation.
+- 31 tests (``tests/test_routing.py``).
+
+### Added — F16 / Bijuteria #2 completion: Merkle DAG + resolver
+
+- ``bijotel.processors.dag.MerkleDAG`` — SQLite-backed Merkle DAG over
+  content hashes. Nodes carry ``refs`` (other content hashes), enabling
+  cross-reference / dependency tracking / portable export-with-closure.
+- ``resolve(content_hash)`` walks the DAG via DFS with visited-set cycle
+  protection, returns ``{root, nodes, order, missing, cycle_breaks}``.
+- Denormalized ``dag_refs`` table for fast inbound-reference queries
+  (``who references hash X?``) without per-call JSON parsing.
+- Same hardening pattern as core processors.
+- 11 tests (``tests/test_dag.py``).
+
+### Added — F16 / Bijuteria #10 completion: 3 compliance policy rules
+
+- ``pii_detection(patterns, mode)`` — regex over default PII patterns
+  (email, US phone, US SSN, credit card, IPv4). Composable with custom
+  ``patterns`` dict for domain-specific PII (IBANs, medical IDs, etc.).
+- ``output_length_limit(max_tokens, mode)`` — enforce ceiling on
+  requested ``max_tokens``. Cheap pre-call cost / safety guard.
+- ``model_version_pin(allowed_versions, mode)`` — stricter than
+  ``model_allowlist``: exact-match against date-suffixed identifiers
+  (e.g. ``claude-sonnet-4-20250514``). Prevents silent provider upgrades.
+- 16 tests (``tests/test_compliance_rules.py``).
+
+### Added — F17 / Bijuteria #18 completion: Misalignment probe library
+
+- ``bijotel.layers.misalignment.ProbeLibrary`` — 29 hand-curated
+  adversarial probes across 8 categories (instruction_override,
+  system_prompt_extraction, role_override_dan, encoding_bypass,
+  multi_turn_manipulation, hypothetical_scenarios,
+  authority_impersonation, control_benign). Each :class:`Probe` tagged
+  with expected_behavior and severity.
+- ``run_probe(probe, evaluator)`` + ``run_all(evaluator)`` — research
+  workflow: pass a wrapped LLM client as ``evaluator``, get a
+  :class:`MisalignmentReport` with per-category detection rates.
+- Heuristic refusal scoring via REFUSAL_TOKENS substring match
+  (intentionally broad; supplement with managed firewall for production).
+- ``misalignment_check(probe_categories, mode)`` — PolicyEngine rule
+  that matches incoming prompts against probe-shape signatures (first
+  5 words). Extends F11 ``prompt_pattern_deny`` (regex) with substring
+  matching over the broader probe catalog.
+- 20 tests (``tests/test_misalignment.py``).
+
+### Added — F18 / Combo D: Containment Guard
+
+- ``bijotel.layers.containment.ContainmentGuard`` — orchestrates
+  Policy + AST + chain-seal into one ``evaluate_action(action)`` call.
+  Answers the 3-question safety frame: **permitted** (PolicyEngine),
+  **safe** (ASTSafetyChecker), **sealed** (chain_writer callback).
+- ``ContainmentDecision`` carries all three answers + full warnings
+  list + ast violations + ``seal_record`` dict ready for chain persistence.
+- ``guard_or_raise(action)`` — convenience one-liner gate that raises
+  :class:`PolicyDeniedError` on policy deny; lets host code stay simple.
+- Short-circuit: policy deny skips AST check; chain_writer failure is
+  caught and recorded as ``sealed=False`` (doesn't propagate).
+- Optional ast_checker (without → ``safe=True`` by definition); optional
+  chain_writer (without → ``sealed=None``).
+- 10 tests (``tests/test_containment.py``).
+
+### Changed
+
+- Public API +16 exports (``__all__`` 32 → 48):
+  ``ASTSafetyChecker``, ``ASTViolation`` (re-exported), ``Budget``,
+  ``ContainmentDecision``, ``ContainmentGuard``, ``DAGNode``,
+  ``MerkleDAG``, ``MisalignmentReport``, ``ModelRegistry``,
+  ``ParetoRouter``, ``Probe``, ``ProbeLibrary``, ``TaskClassifier``,
+  ``ast_safety_check`` (re-exported), ``misalignment_check``,
+  ``model_version_pin``, ``output_length_limit``, ``pii_detection``,
+  ``routing_recommendation``.
+- ``processors/__init__.py`` re-exports ``DAGNode`` + ``MerkleDAG``.
+- ``layers/__init__.py`` re-exports all routing + misalignment +
+  containment symbols.
+- ``policy/__init__.py`` re-exports the 3 new compliance rules.
+- ``__version__`` bumped 0.7.0 → 0.8.0 (minor: new features,
+  backward-compatible; no API removals).
+
+### Fixed (caught by tests, fixed before tag)
+
+- ``ModelRegistry({})`` and ``ParetoRouter(registry=ModelRegistry({}))``
+  used to silently substitute defaults because ``{}`` and an empty
+  registry are falsy under ``or``-fallback. Fixed via explicit
+  ``None`` checks; empty registries now stay empty (tested).
+
+### Tests
+
+- **394 passed, 6 skipped** (was 305+6; +89 from the 5 new test files).
+- Coverage: **92%** (2446 statements / 185 missing; new modules at
+  lower initial coverage, expected).
+- ruff clean.
+- pip-audit: 0 vulnerabilities.
+
+### Bijuterii coverage detail
+
+| # | Name | Status |
+|---|---|---|
+| #2 | Content-Addressable Everything | implemented (CAS + DAG) |
+| #5 | AST-First Safety | implemented |
+| #7 | Fingerprinting | implemented |
+| #10 | Compliance-as-Code | extended (3 new rules) |
+| #11 | Forensic-First | implemented (chain + CAS) |
+| #15 | Inference Routing | implemented |
+| #16 | Regression Detection | implemented |
+| #18 | Misalignment | implemented (regex + probes) |
+| #19 | OpenTelemetry GenAI | implemented (Layer 0) |
+| Combo D | Agent Containment Stack | implemented (Containment Guard) |
+
+**13/20 catalogued bijuterii now have working code paths**, vs 9/20
+before this commit. Remaining 7 (ZK-SNM, eBPF, Hardware Trust,
+Offline-First, Transactional Sandbox, plus 2 others) are deferred to
+post-v1.0 per the 12-day plan.
+
+### Not deployed to GENA tonight
+
+Per plan: v0.6.1 stays in production. v0.7.0 + v0.8.0 wheels accumulate
+in dist/ for a single combined deploy window. The 4 new layers are all
+opt-in (instantiate to use), existing deployment unaffected.
+
+[0.8.0]: https://github.com/octavuntila-prog/BIJOTEL/releases/tag/v0.8.0
+
 ## [0.7.0] — 2026-05-22 — Layers: F13 Fingerprint + F14 AST Safety
 
 First minor release on the v0.6.x hardened foundation. Introduces

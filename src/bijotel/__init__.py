@@ -11,10 +11,21 @@ from bijotel.decorators import trace_genai, wrap
 from bijotel.layers import (
     ASTSafetyChecker,
     ASTViolation,
+    Budget,
+    ContainmentDecision,
+    ContainmentGuard,
     DeterministicFingerprinter,
     FingerprintSpanProcessor,
+    MisalignmentReport,
+    ModelRegistry,
+    ParetoRouter,
+    Probe,
+    ProbeLibrary,
     SemanticFingerprinter,
+    TaskClassifier,
     ast_safety_check,
+    misalignment_check,
+    routing_recommendation,
     similarity_search,
 )
 from bijotel.policy import (
@@ -25,10 +36,13 @@ from bijotel.policy import (
     daily_token_budget,
     guard,
     model_allowlist,
+    model_version_pin,
+    output_length_limit,
+    pii_detection,
     prompt_pattern_deny,
     rate_limit_calls_per_minute,
 )
-from bijotel.processors import export_chain, verify_export
+from bijotel.processors import DAGNode, MerkleDAG, export_chain, verify_export
 from bijotel.regression import (
     Anomaly,
     AnomalyMethod,
@@ -37,7 +51,7 @@ from bijotel.regression import (
     compute_baseline,
 )
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -45,17 +59,28 @@ __all__ = [
     "Anomaly",
     "AnomalyMethod",
     "AnthropicAdapter",
+    "Budget",
+    "ContainmentDecision",
+    "ContainmentGuard",
+    "DAGNode",
     "Decision",
     "DeterministicFingerprinter",
     "DimensionStats",
     "FingerprintSpanProcessor",
+    "MerkleDAG",
+    "MisalignmentReport",
+    "ModelRegistry",
     "OpenAIAdapter",
+    "ParetoRouter",
     "PolicyDeniedError",
     "PolicyEngine",
+    "Probe",
+    "ProbeLibrary",
     "Provider",
     "ProviderResponse",
     "RegressionDetector",
     "SemanticFingerprinter",
+    "TaskClassifier",
     "__version__",
     "ast_safety_check",
     "compute_baseline",
@@ -64,9 +89,14 @@ __all__ = [
     "export_chain",
     "guard",
     "init",
+    "misalignment_check",
     "model_allowlist",
+    "model_version_pin",
+    "output_length_limit",
+    "pii_detection",
     "prompt_pattern_deny",
     "rate_limit_calls_per_minute",
+    "routing_recommendation",
     "shutdown",
     "similarity_search",
     "trace_genai",
