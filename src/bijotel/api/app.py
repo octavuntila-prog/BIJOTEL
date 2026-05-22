@@ -45,6 +45,7 @@ except ImportError as e:  # pragma: no cover
     ) from e
 
 from bijotel import __version__
+from bijotel.api.auth import APIKeyMiddleware
 from bijotel.policy.engine import PolicyEngine
 from bijotel.policy.rules import (
     output_length_limit,
@@ -74,6 +75,7 @@ def create_app(
     *,
     policy_engine: PolicyEngine | None = None,
     cors_origins: list[str] | None = None,
+    api_key: str | None = None,
 ) -> FastAPI:
     """Build a fresh FastAPI app bound to ``db_path`` and ``policy_engine``.
 
@@ -88,6 +90,11 @@ def create_app(
         cors_origins: List of allowed CORS origins for the dashboard.
             Defaults to ``["*"]`` for dev simplicity; set explicit origins
             in production (e.g. ``["https://dashboard.example.com"]``).
+        api_key: Optional Bearer-token key. If ``None``, falls back to
+            ``$BIJOTEL_API_KEY``. If still unset, the API runs without
+            authentication (dev mode). When set, every endpoint except
+            ``/health``, ``/version``, ``/docs``, ``/redoc`` and
+            ``/openapi.json`` requires ``Authorization: Bearer <key>``.
 
     Returns:
         Configured :class:`FastAPI` instance.
@@ -109,6 +116,14 @@ def create_app(
             {"name": "chain", "description": "BIJOTEL HMAC chain (read-only)."},
             {"name": "policy", "description": "PolicyEngine introspection + dry-run."},
             {"name": "layers", "description": "Bijuterii catalog status."},
+            {
+                "name": "regression",
+                "description": "Drift detection runs + history.",
+            },
+            {
+                "name": "export",
+                "description": "Portable signed JSON export + verification.",
+            },
         ],
     )
 
@@ -116,7 +131,15 @@ def create_app(
     app.state.db_path = db_path_str
     app.state.policy_engine = policy_engine or _default_policy_engine()
 
-    # ----- CORS middleware -----
+    # ----- Middleware -----
+    # IMPORTANT: middleware order matters and FastAPI executes them in REVERSE
+    # of registration order. We add CORS first so it sits on the OUTSIDE
+    # (handles preflight before the auth check, which is what browsers
+    # expect — preflight requests must succeed without credentials).
+    app.add_middleware(
+        APIKeyMiddleware,
+        api_key=api_key,
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins or ["*"],
@@ -147,12 +170,16 @@ def create_app(
 
     # ----- Route modules (defer import so missing extras don't break /health) -----
     from bijotel.api.routes import chain as chain_routes
+    from bijotel.api.routes import export as export_routes
     from bijotel.api.routes import layers as layers_routes
     from bijotel.api.routes import policy as policy_routes
+    from bijotel.api.routes import regression as regression_routes
 
     app.include_router(chain_routes.router)
     app.include_router(policy_routes.router)
     app.include_router(layers_routes.router)
+    app.include_router(regression_routes.router)
+    app.include_router(export_routes.router)
 
     return app
 

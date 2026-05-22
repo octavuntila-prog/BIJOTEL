@@ -5,6 +5,109 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-05-22 — Complete REST API + Bearer auth
+
+Combined Day 6 + Day 7 of the harvest plan. Day 6 landed chain / policy /
+layers routers; Day 7 adds regression history, signed export download,
+and an opt-in Bearer-token auth middleware. ``bijotel serve`` now
+exposes a complete 18-route REST surface suitable for the v1.2.0
+React dashboard.
+
+### Added — Routes
+
+* ``GET  /chain``                paginated list with since/until filters
+* ``GET  /chain/stats``          aggregate counters (total / cas / dedup / age)
+* ``GET  /chain/{seq}``          full entry detail (canonical body parsed)
+* ``POST /chain/verify``         smoke (default) or full canonical re-verify
+* ``GET  /policy/rules``         active rules with closure-introspected detail
+* ``POST /policy/evaluate``      dry-run a request through PolicyEngine
+* ``GET  /layers``               14-layer manifest (active/available/planned)
+* ``GET  /regression/latest``    most recent persisted regression run
+* ``GET  /regression/history``   paginated timeline of past runs
+* ``POST /regression/run``       execute fresh run (optionally persist)
+* ``POST /export``               download a signed JSON snapshot (chain-v1)
+* ``POST /export/verify``        upload a signed file, return validity + reason
+
+Total ``v1.1.0`` surface: **18 routes** (12 above + ``/health``,
+``/version``, ``/docs``, ``/redoc``, ``/openapi.json``,
+``/docs/oauth2-redirect``).
+
+### Added — Modules
+
+* ``bijotel/api/models.py``           Pydantic response models (shared)
+* ``bijotel/api/routes/chain.py``     chain endpoints
+* ``bijotel/api/routes/policy.py``    policy endpoints (closure introspection)
+* ``bijotel/api/routes/layers.py``    bijuterii manifest
+* ``bijotel/api/routes/regression.py``  drift detection + persistence layer
+                                        (``regression_runs`` table created
+                                        lazily inside chain.db; multi-writer
+                                        safe via BEGIN IMMEDIATE)
+* ``bijotel/api/routes/export.py``    signed JSON export + verify
+* ``bijotel/api/auth.py``             :class:`APIKeyMiddleware` (Bearer token,
+                                       opt-in via ``BIJOTEL_API_KEY`` env or
+                                       ``api_key=`` arg, ``hmac.compare_digest``
+                                       constant-time check, public-path
+                                       allow-list for /health, /version,
+                                       /docs, /redoc, /openapi.json)
+
+### Added — App wiring
+
+* ``create_app()`` gains optional ``policy_engine``, ``cors_origins``,
+  ``api_key`` parameters. Defaults preserved: warn-mode policy engine,
+  ``["*"]`` CORS, no auth.
+* Middleware order documented (CORS outer, auth inner — preflight
+  requests succeed without credentials).
+* OpenAPI ``tags`` extended to 6 (meta / chain / policy / layers /
+  regression / export); spec at ``/openapi.json`` is the source for the
+  v1.2.0 React dashboard's typed TS bindings.
+
+### Honest design choices (M2)
+
+* ``hmac_valid`` on chain endpoints is ``null`` when the server doesn't
+  have ``BIJOTEL_HMAC_SECRET`` — the auditor sees we couldn't check, not
+  a misleading ``false``.
+* ``/chain/verify`` ``full=true`` requires the env secret; smoke mode
+  (default) checks tail prev_hash linkage only — fast for dashboard
+  polling, parity with CLI for forensic-grade.
+* Layer ``status="active"`` requires runtime evidence (chain rows > 0
+  for forensic_chain; cas rows > 0 for CAS, ≥5 rows for regression).
+  Just shipping the code doesn't make a layer active.
+* ``POST /export`` requires ``BIJOTEL_HMAC_SECRET`` (it signs the file
+  with it). The ``/chain/verify`` distinction is intentional: a chain
+  page can render without the secret, an export cannot.
+* Auth empty string (``BIJOTEL_API_KEY=""``) treated as "unset" — set
+  but blank is almost always a misconfiguration.
+
+### Tests (+66 new, 474 total)
+
+* ``tests/test_api_chain.py``       16 (paginated list, filters, detail,
+                                       stats, verify smoke + full)
+* ``tests/test_api_policy.py``      11 (rules introspection, evaluate
+                                       benign / jailbreak / deny / 422)
+* ``tests/test_api_layers.py``      7  (manifest envelope, planned set,
+                                       active-when-populated, extras
+                                       detection)
+* ``tests/test_api_regression.py``  10 (run persist / no-persist /
+                                       defaults / invalid window;
+                                       latest 404→200 after run;
+                                       history empty / accumulate /
+                                       pagination)
+* ``tests/test_api_export.py``      9  (JSON attachment headers, v1
+                                       schema validity, secret missing
+                                       400, db missing 503, roundtrip,
+                                       tampered-signature, tampered-entry,
+                                       wrong-secret, verify-without-secret)
+* ``tests/test_api_auth.py``        13 (no-auth-when-key-unset,
+                                       required-when-set, correct passes,
+                                       wrong 401, malformed header,
+                                       lowercase Bearer accepted, env
+                                       var fallback, empty env no-op,
+                                       /health /version /docs
+                                       /openapi.json bypass, all
+                                       protected endpoints 401)
+
+Quality gates: 474 passed, 7 skipped, 0 failed; ruff clean.
+
 ## [1.0.0] — 2026-05-22 — PyPI publish + Docker + serve API
 
 First public stable release. No new layers vs v0.8.0 — Day 5 focuses on

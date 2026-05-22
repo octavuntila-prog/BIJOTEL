@@ -1,6 +1,6 @@
 [project]
 name = "bijotel"
-version = "1.0.0"
+version = "1.1.0"
 description = "Forensic-grade tamper-evident audit chain for LLM applications. HMAC-SHA256 chain, content-addressable storage, pre-call policy gate, regression detection."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -65,6 +65,7 @@ ast = [
 api = [
     "fastapi>=0.100",
     "uvicorn>=0.20",
+    "python-multipart>=0.0.6",
 ]
 all = [
     "anthropic>=0.40.0",
@@ -75,6 +76,7 @@ all = [
     "tree-sitter-bash>=0.21",
     "fastapi>=0.100",
     "uvicorn>=0.20",
+    "python-multipart>=0.0.6",
 ]
 dev = [
     "pytest>=8.0",

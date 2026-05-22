@@ -233,3 +233,127 @@ class LayersResponse(BaseModel):
     active: int
     available: int
     planned: int
+
+
+# ───────────────────────── /regression ─────────────────────────
+
+
+class AnomalyDetail(BaseModel):
+    """One anomaly detected in a single dimension."""
+
+    dimension: str = Field(..., description="input_tokens / output_tokens / cost.")
+    seq: int = Field(..., description="Chain seq where the anomaly fired.")
+    timestamp: str = Field(..., description="ISO-8601 UTC.")
+    value: float = Field(..., description="Observed value at the span.")
+    baseline_mean: float = Field(..., description="Mean of the baseline window.")
+    z_score: float | None = Field(
+        None,
+        description="z-score against baseline; null when baseline stdev is 0.",
+    )
+    iqr_distance: float | None = Field(
+        None, description="Tukey IQR distance; null when IQR is 0."
+    )
+    method_triggered: str = Field(
+        ..., description="'z_score' / 'iqr' / 'both' — which detection fired."
+    )
+    severity: str = Field(
+        ..., description="'warning' (single method) or 'anomaly' (both)."
+    )
+
+
+class RegressionDimensionResult(BaseModel):
+    """Per-dimension result inside a regression run."""
+
+    baseline_mean: float | None = Field(
+        None, description="null when not enough baseline data."
+    )
+    baseline_std: float | None = Field(
+        None, description="null when not enough baseline data."
+    )
+    samples: int = Field(..., description="Spans evaluated against baseline.")
+    anomalies: int = Field(..., description="Anomaly count for this dimension.")
+    status: str = Field(
+        ...,
+        description="'clean' (0 anomalies) / 'anomaly' (>=1) / 'insufficient_data'.",
+    )
+
+
+class RegressionRunResponse(BaseModel):
+    """Body of ``GET /regression/latest`` and ``POST /regression/run``."""
+
+    run_id: int | None = Field(
+        None,
+        description="Persisted regression_runs.id when from history; null on "
+        "synchronous run when ``persist=false`` is used.",
+    )
+    timestamp: str = Field(..., description="When the run was executed (ISO-8601 UTC).")
+    window: int = Field(..., description="Baseline window size used.")
+    z_threshold: float = Field(..., description="z-score threshold used.")
+    dimensions: dict[str, RegressionDimensionResult] = Field(
+        ..., description="Keyed by dimension name."
+    )
+    details: list[AnomalyDetail] = Field(
+        default_factory=list,
+        description="All anomaly records across dimensions (flat list).",
+    )
+    total_anomalies: int
+    status: str = Field(..., description="'clean' / 'anomaly' / 'insufficient_data'.")
+
+
+class RegressionHistoryEntry(BaseModel):
+    """One row in ``GET /regression/history``."""
+
+    run_id: int
+    timestamp: str
+    window: int
+    total_anomalies: int
+    status: str
+
+
+class RegressionHistoryResponse(BaseModel):
+    """Body of ``GET /regression/history``."""
+
+    runs: list[RegressionHistoryEntry]
+    total_runs: int
+
+
+class RegressionRunRequest(BaseModel):
+    """Body of ``POST /regression/run``."""
+
+    window: int = Field(100, ge=5, le=10000, description="Baseline window size.")
+    z_threshold: float = Field(
+        3.0, gt=0, le=10.0, description="z-score absolute threshold for anomaly."
+    )
+    filter_model: str | None = Field(
+        None, description="Optional gen_ai.request.model exact-match filter."
+    )
+    persist: bool = Field(
+        True,
+        description="If true, the run is written to the regression_runs table and "
+        "becomes visible at /regression/history. False = ad-hoc dry-run.",
+    )
+
+
+# ───────────────────────── /export ─────────────────────────
+
+
+class ExportVerifyResponse(BaseModel):
+    """Body of ``POST /export/verify``."""
+
+    valid: bool
+    reason: str | None = Field(
+        None,
+        description="null on success; on failure, human-readable explanation "
+        "(e.g. 'chain_signature mismatch', 'hmac_hash mismatch at seq=42').",
+    )
+    entries_count: int | None = Field(
+        None,
+        description="Number of entries declared in the export envelope. Reported "
+        "even on failure when the value could be parsed.",
+    )
+    head_hash: str | None = Field(
+        None, description="Last hmac_hash in the chain export."
+    )
+    format: str | None = Field(
+        None, description="Export schema version, e.g. 'bijotel-chain-v1'."
+    )
