@@ -1,11 +1,15 @@
 # BIJOTEL — example self-hosted deploy.
 #
 # Quickstart:
-#   1. Build the wheel:           python -m build
-#   2. Generate an HMAC secret:   openssl rand -hex 32 > .hmac_secret
-#   3. Export to environment:     export BIJOTEL_HMAC_SECRET=$(cat .hmac_secret)
-#   4. Launch:                    docker compose up -d
-#   5. Verify:                    curl http://localhost:8080/health
+#   1. Build the wheel:        cd src/bijotel/dashboard && npm run build
+#                              cd ../../.. && python -m build
+#   2. Generate secrets:       openssl rand -hex 32 > .hmac_secret
+#                              openssl rand -hex 16 > .api_key   # optional
+#   3. Export to environment:  export BIJOTEL_HMAC_SECRET=$(cat .hmac_secret)
+#                              export BIJOTEL_API_KEY=$(cat .api_key)
+#   4. Launch:                 docker compose up -d
+#   5. Visit dashboard:        http://localhost:8080/
+#   6. Verify API:             curl http://localhost:8080/api/health
 #
 # The chain.db lives at ./data/chain.db on the host (bind-mounted to /data).
 # Persisting it outside the container is mandatory — without that mount,
@@ -16,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: bijotel:1.0.0
+    image: bijotel:latest
     container_name: bijotel
     restart: unless-stopped
     ports:
@@ -31,6 +35,11 @@ services:
       # Set in your shell or .env file BEFORE `docker compose up`.
       # Never bake the value into this file.
       BIJOTEL_HMAC_SECRET: ${BIJOTEL_HMAC_SECRET:?Set BIJOTEL_HMAC_SECRET in your env}
+      # Optional Bearer-token auth for the API. Unset → API is open
+      # (development mode). Set → Authorization: Bearer <key> is required
+      # on every endpoint except /health, /version, /docs, /redoc,
+      # /openapi.json, and the SPA assets.
+      BIJOTEL_API_KEY: ${BIJOTEL_API_KEY:-}
     # Healthcheck is also defined in the Dockerfile; compose-level mirror so
     # `docker compose ps` shows the same status.
     healthcheck:

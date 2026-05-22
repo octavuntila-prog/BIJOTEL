@@ -33,12 +33,16 @@ from starlette.responses import JSONResponse, Response
 # Kept as a frozenset for O(1) lookup on the hot path.
 PUBLIC_PATHS: frozenset[str] = frozenset(
     {
+        # Root-level (default mode + --dashboard mode k8s probes)
         "/health",
         "/version",
         "/docs",
         "/redoc",
         "/openapi.json",
         "/docs/oauth2-redirect",
+        # /api-prefixed mirrors (--dashboard mode, dashboard client uses these)
+        "/api/health",
+        "/api/version",
     }
 )
 
@@ -49,7 +53,12 @@ def _is_public(path: str) -> bool:
         return True
     # Swagger UI loads a few static assets under /docs/* — keep them open
     # so the documentation page renders for unauthenticated visitors.
-    return path.startswith("/docs/")
+    if path.startswith("/docs/"):
+        return True
+    # In --dashboard mode, the SPA root + its hashed asset bundles must
+    # render without a Bearer token (login is keyed by the dashboard's
+    # own API key drawer that posts to /api/* afterwards).
+    return path == "/" or path.startswith("/assets/")
 
 
 class APIKeyMiddleware(BaseHTTPMiddleware):

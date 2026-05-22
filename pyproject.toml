@@ -1,6 +1,6 @@
 [project]
 name = "bijotel"
-version = "1.1.0"
+version = "1.4.0"
 description = "Forensic-grade tamper-evident audit chain for LLM applications. HMAC-SHA256 chain, content-addressable storage, pre-call policy gate, regression detection."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -101,3 +101,22 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/bijotel"]
+# Force-include the prebuilt dashboard so `bijotel serve --dashboard`
+# finds index.html / assets/* at runtime. Build step:
+#     cd src/bijotel/dashboard && npm run build
+# (this is a wheel-time include; the SOURCE files in dashboard/ are not
+# shipped — only the built `dashboard_dist/`.)
+artifacts = ["src/bijotel/dashboard_dist/**/*"]
+
+[tool.hatch.build.targets.sdist]
+# Exclude the heavy raw dashboard tree (519KB of node-source) from the
+# sdist, but keep the built dashboard_dist so the sdist is self-contained
+# and `pip install <sdist>` works without needing npm.
+exclude = [
+    "src/bijotel/dashboard/node_modules",
+    "src/bijotel/dashboard/src",
+    "src/bijotel/dashboard/index.html",
+    "src/bijotel/dashboard/package.json",
+    "src/bijotel/dashboard/vite.config.js",
+]
+artifacts = ["src/bijotel/dashboard_dist/**/*"]

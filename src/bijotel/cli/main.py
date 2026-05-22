@@ -159,6 +159,16 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=["critical", "error", "warning", "info", "debug", "trace"],
         help="uvicorn log level (default info).",
     )
+    p_serve.add_argument(
+        "--dashboard",
+        action="store_true",
+        help=(
+            "Mount the prebuilt React dashboard at /. API routes shift to "
+            "/api/* in this mode. Requires the dashboard bundle to be "
+            "present at src/bijotel/dashboard_dist/ — included in the "
+            "official PyPI wheel."
+        ),
+    )
 
     return parser
 

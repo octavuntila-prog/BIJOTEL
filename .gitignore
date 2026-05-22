@@ -23,6 +23,10 @@ f1_spans.jsonl
 *.jsonl
 
 # Dashboard (Day 8+): node deps + build output
+# dashboard_dist/ lives at src/bijotel/dashboard_dist/ (inside the package,
+# included in the wheel by hatchling). Build it via:
+#     cd src/bijotel/dashboard && npm run build
 node_modules/
 dashboard_dist/
+src/bijotel/dashboard_dist/
 .vite/

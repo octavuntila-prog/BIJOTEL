@@ -6,9 +6,11 @@
 //     so the dashboard never has to think about CORS or origins.
 //
 // Production:
-//   - `npm run build` writes the static bundle to ../../../dashboard_dist
-//     (alongside src/bijotel/, i.e. project root / dashboard_dist).
-//   - Day 12 will wire `bijotel serve --dashboard` to mount these.
+//   - `npm run build` writes the static bundle to ../dashboard_dist
+//     (i.e. src/bijotel/dashboard_dist/). The output sits *inside* the
+//     Python package so hatchling automatically includes it in the wheel.
+//   - `bijotel serve --dashboard` (added Day 12) mounts these files at /
+//     and shifts the API routes to /api/*.
 
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -29,7 +31,9 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../../../dashboard_dist',
+    // Land the bundle INSIDE src/bijotel/ so hatchling picks it up
+    // automatically when building the wheel.
+    outDir: '../dashboard_dist',
     emptyOutDir: true,
     sourcemap: false,
   },

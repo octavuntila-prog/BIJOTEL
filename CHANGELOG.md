@@ -5,6 +5,95 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] — 2026-05-23 — Launch-ready: dashboard served by `bijotel serve --dashboard`
+
+Last day of the 12-day harvest plan. After this release,
+``pip install bijotel[api] && bijotel serve --dashboard`` is the
+**single command** that turns a fresh laptop into a forensic-grade
+LLM audit UI + REST API.
+
+### Added
+
+* **``--dashboard`` flag on ``bijotel serve``.** When set, FastAPI:
+  1. Mounts all API routers under ``/api/*`` (instead of root).
+  2. Serves the React/Vite bundle from
+     ``src/bijotel/dashboard_dist/`` at ``/``.
+  3. Serves hashed asset chunks from ``/assets/<hash>.js``.
+  4. Falls back to ``index.html`` for any unmatched GET (so React
+     Router client-side routes — ``/chain``, ``/policy``,
+     ``/regression``, ``/system`` — render correctly when deep-linked).
+* **``create_app(serve_dashboard=False)``** new keyword. Default
+  preserves v1.1.0 behavior (API at root, no SPA). Pass ``True`` to
+  flip to dashboard mode.
+* **``GET /api/health`` and ``GET /api/version``** mirror the root
+  endpoints when ``--dashboard`` is on, so the dashboard's API client
+  uses one consistent prefix without losing k8s probe contract at /.
+* **Auth public-path allow-list** extended for ``/`` and
+  ``/assets/*`` (so the unauthenticated dashboard SPA loads; the
+  user-facing API-key drawer signs subsequent ``/api/*`` calls).
+* **Smoke script** ``scripts/launch_smoke.sh`` — fresh venv, pip
+  install from PyPI, seed a chain, start the server, curl every
+  endpoint, report pass/fail.
+* **README badges** (PyPI version, Python versions, MIT license,
+  test count, coverage). Documents both serve modes in the CLI table.
+* **Dockerfile** now uses a wheel glob (``bijotel-*-py3-none-any.whl``)
+  so version bumps don't need image-file edits. Default ``CMD`` is
+  ``serve --host 0.0.0.0 --port 8080 --dashboard`` — `docker run -p
+  8080:8080 bijotel:latest` boots a working API + UI.
+* **docker-compose.yml** now wires the optional ``BIJOTEL_API_KEY``
+  env var (interpolated as empty when unset = open dev mode).
+* **LAUNCH_CHECKLIST.md** — full Day-12 acceptance gate document.
+
+### Changed
+
+* **Dashboard build output relocated** from ``./dashboard_dist`` (repo
+  root, gitignored, NOT in wheel) to
+  ``src/bijotel/dashboard_dist`` (inside the Python package). The
+  ``hatchling`` ``artifacts = ["src/bijotel/dashboard_dist/**/*"]``
+  hint includes the bundle in the wheel so PyPI installers ship the
+  prebuilt UI. sdist excludes ``src/bijotel/dashboard/{src,node_modules
+  ,etc}`` to keep size reasonable but still includes the built bundle
+  so ``pip install <sdist>`` works without npm.
+* ``pyproject.toml`` version bumped 1.1.0 → 1.4.0 to reflect a real
+  feature delta. The Python code touched in v1.4.0 is purely in
+  ``api/app.py`` + ``api/auth.py`` (CLI shim already in v1.1.0).
+
+### Tests (+11 new, 485 total)
+
+* ``tests/test_serve_dashboard.py`` — 11 tests:
+  - Default mode: routes at root, ``/api/chain`` returns 404, ``/``
+    returns 404.
+  - Dashboard mode: ``/api/health`` 200, ``/api/chain`` 503 (no db),
+    ``/api/policy/rules`` 200, root ``/health`` still 200 (k8s probe).
+  - Index served when bundle present; SPA fallback (``/system``) returns
+    ``index.html``.
+  - CLI ``--dashboard`` flag parsed; default ``False``; propagated to
+    ``create_app(serve_dashboard=...)``.
+  - Auth interaction: ``/`` and ``/api/health`` bypass Bearer; ``/api/
+    layers`` requires it.
+
+### Honest reframes (M2)
+
+* **The /api prefix is opt-in, not default.** Existing v1.1.0 callers
+  hitting ``/chain`` keep working unchanged. The dashboard mode
+  introduces ``/api/chain`` as a parallel address. If you want both
+  to coexist permanently on the same server, run two ``bijotel
+  serve`` processes (one with ``--dashboard``, one without).
+* **The dashboard bundle is shipped in the wheel.** This bloats the
+  wheel from 121 KB (v1.1.0) to ~280 KB. The trade is that the
+  flagship one-line install works without requiring an extra npm
+  step from the end user. Anyone who wants the API-only wheel can
+  ``pip install --no-deps bijotel`` and the SPA won't activate
+  unless ``--dashboard`` is passed.
+* **GitHub source repo stays private** during the v1.x development
+  window per user decision. PyPI URLs to docs/issues/source still
+  404; documented in README "Known issues". Will flip when the user
+  decides; no PyPI re-upload needed at flip time (URLs just start
+  working).
+* **No new bijuterii (#3 Energy, #9 Consensus).** Day 10 / 11 / 12
+  consumed by integration test + docs + launch wiring. Tracked as
+  planned for v1.5+.
+
 ## [1.3.0] — 2026-05-23 — Documentation release (no code change)
 
 Pure documentation / packaging release. The Python wheel produced from

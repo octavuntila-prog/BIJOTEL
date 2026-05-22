@@ -31,12 +31,14 @@ base package still imports without the ``[api]`` extra.
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
 try:
-    from fastapi import FastAPI
+    from fastapi import APIRouter, FastAPI
     from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.staticfiles import StaticFiles
 except ImportError as e:  # pragma: no cover
     raise ImportError(
         "bijotel.api requires the [api] extra. Install with:\n"
@@ -52,6 +54,8 @@ from bijotel.policy.rules import (
     pii_detection,
     prompt_pattern_deny,
 )
+
+_LOG = logging.getLogger("bijotel.api")
 
 
 def _default_policy_engine() -> PolicyEngine:
@@ -76,6 +80,7 @@ def create_app(
     policy_engine: PolicyEngine | None = None,
     cors_origins: list[str] | None = None,
     api_key: str | None = None,
+    serve_dashboard: bool = False,
 ) -> FastAPI:
     """Build a fresh FastAPI app bound to ``db_path`` and ``policy_engine``.
 
@@ -95,6 +100,11 @@ def create_app(
             authentication (dev mode). When set, every endpoint except
             ``/health``, ``/version``, ``/docs``, ``/redoc`` and
             ``/openapi.json`` requires ``Authorization: Bearer <key>``.
+        serve_dashboard: If ``True``, mount the prebuilt React dashboard
+            at ``/`` (from ``src/bijotel/dashboard_dist/``) AND shift all
+            API routes to the ``/api/*`` prefix so they don't collide
+            with the SPA's client-side routes. Default ``False`` keeps
+            v1.1.0 behavior — routes at root, no dashboard.
 
     Returns:
         Configured :class:`FastAPI` instance.
@@ -148,25 +158,25 @@ def create_app(
         allow_headers=["*"],
     )
 
-    # ----- Meta routes inline (small, no payload structure) -----
-    @app.get("/health", tags=["meta"])
-    def health() -> dict[str, str | bool]:
-        """Liveness probe — 200 if the process is up.
+    # ----- Meta routes (helpers so we can mount them under / AND /api) -----
+    def _register_meta(target) -> None:
+        @target.get("/health", tags=["meta"])
+        def health() -> dict[str, str | bool]:
+            """Liveness probe — 200 if the process is up."""
+            return {
+                "status": "ok",
+                "version": __version__,
+                "db": db_path_str,
+                "db_exists": Path(db_path_str).is_file(),
+            }
 
-        Reports ``db_exists`` honestly: the server boots before the chain
-        is created, so ``db_exists=false`` is a legitimate transient state.
-        """
-        return {
-            "status": "ok",
-            "version": __version__,
-            "db": db_path_str,
-            "db_exists": Path(db_path_str).is_file(),
-        }
+        @target.get("/version", tags=["meta"])
+        def version() -> dict[str, str]:
+            """Return package version + name (forensic build trace)."""
+            return {"version": __version__, "package": "bijotel"}
 
-    @app.get("/version", tags=["meta"])
-    def version() -> dict[str, str]:
-        """Return package version + name (forensic build trace)."""
-        return {"version": __version__, "package": "bijotel"}
+    # Always register at root for kubernetes / load balancer liveness probes.
+    _register_meta(app)
 
     # ----- Route modules (defer import so missing extras don't break /health) -----
     from bijotel.api.routes import chain as chain_routes
@@ -175,11 +185,73 @@ def create_app(
     from bijotel.api.routes import policy as policy_routes
     from bijotel.api.routes import regression as regression_routes
 
-    app.include_router(chain_routes.router)
-    app.include_router(policy_routes.router)
-    app.include_router(layers_routes.router)
-    app.include_router(regression_routes.router)
-    app.include_router(export_routes.router)
+    route_modules = [
+        chain_routes,
+        policy_routes,
+        layers_routes,
+        regression_routes,
+        export_routes,
+    ]
+
+    if serve_dashboard:
+        # In --dashboard mode, group all API routes under /api/* so the
+        # static SPA can own /. The dashboard's client.js already uses
+        # `const API_BASE = '/api'` so this is the URL it expects.
+        # Meta routes are duplicated under /api so the dashboard fetch
+        # for liveness uses the same prefix as everything else.
+        api_router = APIRouter(prefix="/api")
+        _register_meta(api_router)
+        for mod in route_modules:
+            api_router.include_router(mod.router)
+        app.include_router(api_router)
+    else:
+        # v1.1.0 behavior: routes at root (no prefix). Backward compatible.
+        for mod in route_modules:
+            app.include_router(mod.router)
+
+    # ----- Optional static dashboard mount -----
+    if serve_dashboard:
+        # Resolve dashboard_dist next to this module: src/bijotel/dashboard_dist
+        dashboard_dir = Path(__file__).resolve().parent.parent / "dashboard_dist"
+        if dashboard_dir.is_dir() and (dashboard_dir / "index.html").is_file():
+            # Serve the asset bundles directly. We DON'T mount StaticFiles
+            # at "/" alone because StaticFiles + html=True returns 404 for
+            # arbitrary deep paths (e.g. /system) — it does not fall back
+            # to index.html the way single-page apps require. Instead:
+            #   * mount /assets/*  →  hashed JS/CSS chunks
+            #   * register a catch-all GET that returns index.html for any
+            #     path not handled by an API route or the assets mount.
+            from fastapi.responses import FileResponse
+
+            app.mount(
+                "/assets",
+                StaticFiles(directory=str(dashboard_dir / "assets")),
+                name="dashboard-assets",
+            )
+
+            index_html_path = dashboard_dir / "index.html"
+
+            @app.get("/", include_in_schema=False)
+            def _spa_root() -> FileResponse:  # noqa: D401
+                return FileResponse(str(index_html_path))
+
+            # Catch-all for client-side router. include_in_schema=False so
+            # this doesn't appear in /openapi.json. Excludes anything under
+            # /api, /docs, /redoc, /openapi.json — those are real routes.
+            @app.get("/{spa_path:path}", include_in_schema=False)
+            def _spa_catchall(spa_path: str) -> FileResponse:  # noqa: D401
+                # Defence in depth: if the path looks like an API miss,
+                # let FastAPI's 404 handler take over instead of pretending
+                # everything is the SPA. (Routes win before this catch-all
+                # via FastAPI's matcher, so /api/chain at the wrong path
+                # still 404s.)
+                return FileResponse(str(index_html_path))
+        else:
+            _LOG.warning(
+                "serve_dashboard=True but no dashboard bundle at %s. "
+                "Build it with: cd src/bijotel/dashboard && npm run build",
+                dashboard_dir,
+            )
 
     return app
 

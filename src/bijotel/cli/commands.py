@@ -517,11 +517,15 @@ def serve_cmd(args: argparse.Namespace) -> int:
         return 2
 
     db_path = args.db or os.environ.get("BIJOTEL_DB_PATH", "chain.db")
-    app = create_app(db_path=db_path)
+    serve_dashboard = getattr(args, "dashboard", False)
+    app = create_app(db_path=db_path, serve_dashboard=serve_dashboard)
 
+    api_base = "/api" if serve_dashboard else ""
     print(f"BIJOTEL serve: http://{args.host}:{args.port}  (db={db_path})")
-    print(f"  Docs:    http://{args.host}:{args.port}/docs")
-    print(f"  Health:  http://{args.host}:{args.port}/health")
+    if serve_dashboard:
+        print(f"  Dashboard: http://{args.host}:{args.port}/")
+    print(f"  Docs:    http://{args.host}:{args.port}{api_base}/docs")
+    print(f"  Health:  http://{args.host}:{args.port}{api_base}/health")
 
     try:
         uvicorn.run(app, host=args.host, port=args.port, log_level=args.log_level)

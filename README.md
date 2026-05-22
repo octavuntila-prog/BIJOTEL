@@ -1,5 +1,11 @@
 # BIJOTEL
 
+[![PyPI](https://img.shields.io/pypi/v/bijotel.svg)](https://pypi.org/project/bijotel/)
+[![Python](https://img.shields.io/pypi/pyversions/bijotel.svg)](https://pypi.org/project/bijotel/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-485%20passing-brightgreen.svg)](#)
+[![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen.svg)](#)
+
 > **Forensic-grade tamper-evident audit chain for LLM applications.**
 
 BIJOTEL turns the spans your OpenTelemetry GenAI instrumentation already
@@ -72,14 +78,15 @@ bijotel verify --db chain.db
 After install, the `bijotel` command exposes 8 subcommands:
 
 ```bash
-bijotel verify --db chain.db                   # full HMAC re-verification
-bijotel inspect --db chain.db 4952              # one entry's canonical body
-bijotel stats --db chain.db                    # chain + CAS + policy stats
-bijotel list --db chain.db --since 2026-05-20  # filterable browsing
-bijotel export --db chain.db --output out.json # signed portable JSON
-bijotel verify-export out.json                  # auditor-side verification
-bijotel regression --db chain.db --window 100  # z-score + IQR drift
-bijotel serve --port 8080 --db chain.db        # REST API + Swagger UI
+bijotel verify --db chain.db                          # full HMAC re-verification
+bijotel inspect --db chain.db 4952                     # one entry's canonical body
+bijotel stats --db chain.db                           # chain + CAS + policy stats
+bijotel list --db chain.db --since 2026-05-20         # filterable browsing
+bijotel export --db chain.db --output out.json        # signed portable JSON
+bijotel verify-export out.json                         # auditor-side verification
+bijotel regression --db chain.db --window 100         # z-score + IQR drift
+bijotel serve --port 8080 --db chain.db               # REST API only (Swagger at /docs)
+bijotel serve --port 8080 --db chain.db --dashboard   # API at /api/* + React dashboard at /
 ```
 
 `--since` uses UTC calendar dates (`YYYY-MM-DD`, lower bound inclusive
