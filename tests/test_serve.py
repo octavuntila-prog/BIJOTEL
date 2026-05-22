@@ -86,26 +86,22 @@ def test_version_endpoint() -> None:
     assert r.json() == {"version": __version__, "package": "bijotel"}
 
 
-def test_chain_placeholder_returns_501() -> None:
-    app = create_app()
+def test_chain_route_returns_503_when_db_missing() -> None:
+    """v1.1.0: /chain now real but errors gracefully without a chain.db."""
+    app = create_app(db_path="/tmp/does-not-exist-chain.db")
     client = TestClient(app)
     r = client.get("/chain")
-    assert r.status_code == 501
-    assert "v1.1.0" in r.json()["detail"]
+    # No DB → 503 from the chain router's _ensure_db gate
+    assert r.status_code == 503
+    assert "Chain DB not found" in r.json()["detail"]
 
 
-def test_policy_placeholder_returns_501() -> None:
-    app = create_app()
-    client = TestClient(app)
-    r = client.get("/policy")
-    assert r.status_code == 501
-
-
-def test_regression_placeholder_returns_501() -> None:
+def test_regression_route_not_in_v1_1_0() -> None:
+    """Regression endpoints are scheduled for Day 7 (v1.1.0 second half)."""
     app = create_app()
     client = TestClient(app)
     r = client.get("/regression")
-    assert r.status_code == 501
+    assert r.status_code == 404  # not yet mounted
 
 
 def test_openapi_docs_served() -> None:
@@ -115,9 +111,19 @@ def test_openapi_docs_served() -> None:
     r = client.get("/openapi.json")
     assert r.status_code == 200
     spec = r.json()
-    # All v1.0.0 routes present
     paths = set(spec.get("paths", {}).keys())
-    assert {"/health", "/version", "/chain", "/policy", "/regression"} <= paths
+    # v1.1.0 set — chain + policy + layers real, regression still pending
+    assert {
+        "/health",
+        "/version",
+        "/chain",
+        "/chain/stats",
+        "/chain/{seq}",
+        "/chain/verify",
+        "/policy/rules",
+        "/policy/evaluate",
+        "/layers",
+    } <= paths
 
 
 # === CLI integration ===

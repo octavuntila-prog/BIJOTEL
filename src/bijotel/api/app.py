@@ -1,15 +1,28 @@
-"""Minimal FastAPI app for ``bijotel serve``.
+"""FastAPI app factory for ``bijotel serve``.
 
-v1.0.0 ships **only** the wiring needed to validate the API runtime:
+v1.1.0 ships real chain / policy / layers endpoints (Day 6 of the harvest
+plan). The previous 501-placeholder routes from v1.0.0 are replaced by
+the implementations in :mod:`bijotel.api.routes`.
 
-* ``GET  /health`` — process-level liveness probe.
-* ``GET  /version`` — package version + db path (forensic-trace).
-* ``GET  /chain`` — placeholder (returns 501 with "Coming in v1.1.0").
+Topology
+========
 
-The full chain explorer, policy inspector, and regression dashboard endpoints
-are scheduled for v1.1.0 / v1.2.0 per the 12-day harvest plan. Shipping the
-placeholders now lets users provision Docker + reverse-proxy + TLS once,
-then upgrade transparently when the real endpoints land.
+* ``GET  /health``    — liveness, version, db_exists
+* ``GET  /version``   — version + package
+* ``GET  /chain``     — paginated list (filterable by since/until)
+* ``GET  /chain/stats``     — aggregate stats
+* ``GET  /chain/{seq}``     — one full entry (canonical body)
+* ``POST /chain/verify``    — full or smoke verification
+* ``GET  /policy/rules``    — list active rules + introspection
+* ``POST /policy/evaluate`` — run a request through the engine
+* ``GET  /layers``    — status of every BIJOTEL bijuterie
+
+Mounting is done by :func:`create_app`. The host can pass a custom
+:class:`bijotel.policy.engine.PolicyEngine` so dashboards reflect the
+exact ruleset enforced in production. If omitted, a small default engine
+is wired (see :func:`_default_policy_engine`) — having *some* rules is
+much better than `/policy/rules → []`, which would look like a
+misconfiguration.
 
 This module is import-safe **only** when ``fastapi`` is installed. The
 package's ``bijotel.api.__init__`` uses lazy ``__getattr__`` so the
@@ -22,8 +35,9 @@ import os
 from pathlib import Path
 
 try:
-    from fastapi import FastAPI, HTTPException
-except ImportError as e:  # pragma: no cover - tested via test_serve_without_fastapi_graceful
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+except ImportError as e:  # pragma: no cover
     raise ImportError(
         "bijotel.api requires the [api] extra. Install with:\n"
         "    pip install bijotel[api]\n"
@@ -31,20 +45,52 @@ except ImportError as e:  # pragma: no cover - tested via test_serve_without_fas
     ) from e
 
 from bijotel import __version__
+from bijotel.policy.engine import PolicyEngine
+from bijotel.policy.rules import (
+    output_length_limit,
+    pii_detection,
+    prompt_pattern_deny,
+)
 
 
-def create_app(db_path: str | Path = "chain.db") -> FastAPI:
-    """Build a fresh ``FastAPI`` instance bound to ``db_path``.
+def _default_policy_engine() -> PolicyEngine:
+    """Return a small default engine — three warn-mode rules.
+
+    Used when the host doesn't pass ``policy_engine=`` to ``create_app``.
+    All rules are in WARN mode so the engine never denies — visiting
+    ``/policy/evaluate`` won't surprise anyone with a 403-style decision.
+    """
+    return PolicyEngine(
+        rules=[
+            prompt_pattern_deny(mode="warn"),
+            pii_detection(mode="warn"),
+            output_length_limit(max_tokens=4096, mode="warn"),
+        ]
+    )
+
+
+def create_app(
+    db_path: str | Path = "chain.db",
+    *,
+    policy_engine: PolicyEngine | None = None,
+    cors_origins: list[str] | None = None,
+) -> FastAPI:
+    """Build a fresh FastAPI app bound to ``db_path`` and ``policy_engine``.
 
     Args:
-        db_path: Path to the BIJOTEL chain.db SQLite file. Stored on the
-            app instance for downstream endpoints (v1.1.0+). Not opened
-            at construction time — endpoints open on demand so the
-            FastAPI process can start before the DB exists.
+        db_path: Path to the BIJOTEL chain.db. Stored on the app and
+            read by chain / layers endpoints. Not opened at construction
+            time — endpoints open on demand so the server can boot
+            before the chain is initialized.
+        policy_engine: Optional :class:`PolicyEngine`. If ``None``, a
+            small default warn-mode engine is wired (see
+            :func:`_default_policy_engine`).
+        cors_origins: List of allowed CORS origins for the dashboard.
+            Defaults to ``["*"]`` for dev simplicity; set explicit origins
+            in production (e.g. ``["https://dashboard.example.com"]``).
 
     Returns:
-        Configured :class:`FastAPI` instance with health + version routes
-        and v1.1.0 placeholder routes.
+        Configured :class:`FastAPI` instance.
     """
     db_path_str = str(db_path)
 
@@ -52,24 +98,40 @@ def create_app(db_path: str | Path = "chain.db") -> FastAPI:
         title="BIJOTEL",
         description=(
             "Forensic-grade tamper-evident audit chain for LLM applications. "
-            "HMAC-SHA256 chain + content-addressable storage + pre-call policy gate."
+            "HMAC-SHA256 chain + content-addressable storage + pre-call "
+            "policy gate + regression detection."
         ),
         version=__version__,
         docs_url="/docs",
         redoc_url="/redoc",
+        openapi_tags=[
+            {"name": "meta", "description": "Health, version, liveness probes."},
+            {"name": "chain", "description": "BIJOTEL HMAC chain (read-only)."},
+            {"name": "policy", "description": "PolicyEngine introspection + dry-run."},
+            {"name": "layers", "description": "Bijuterii catalog status."},
+        ],
     )
 
-    # Attach db_path for downstream endpoints (v1.1.0+ will read this)
+    # ----- App state (per-instance, passed via `request.app.state`) -----
     app.state.db_path = db_path_str
+    app.state.policy_engine = policy_engine or _default_policy_engine()
 
+    # ----- CORS middleware -----
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins or ["*"],
+        allow_credentials=False,  # token-based, no cookies
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["*"],
+    )
+
+    # ----- Meta routes inline (small, no payload structure) -----
     @app.get("/health", tags=["meta"])
     def health() -> dict[str, str | bool]:
-        """Liveness probe. Returns 200 if the process is up.
+        """Liveness probe — 200 if the process is up.
 
-        Does NOT verify chain integrity — that's :func:`/verify` (v1.1.0).
-        Does NOT confirm the DB file exists — that's intentional: the
-        server should boot even if the chain is being initialized
-        asynchronously by another process.
+        Reports ``db_exists`` honestly: the server boots before the chain
+        is created, so ``db_exists=false`` is a legitimate transient state.
         """
         return {
             "status": "ok",
@@ -80,35 +142,17 @@ def create_app(db_path: str | Path = "chain.db") -> FastAPI:
 
     @app.get("/version", tags=["meta"])
     def version() -> dict[str, str]:
-        """Return package version + build-time metadata (forensic trace)."""
-        return {
-            "version": __version__,
-            "package": "bijotel",
-        }
+        """Return package version + name (forensic build trace)."""
+        return {"version": __version__, "package": "bijotel"}
 
-    @app.get("/chain", tags=["chain"], status_code=501)
-    def chain_list() -> dict[str, str]:
-        """Placeholder for chain listing. Implemented in v1.1.0."""
-        raise HTTPException(
-            status_code=501,
-            detail="Chain listing endpoint coming in v1.1.0 (Day 6-7 of harvest plan).",
-        )
+    # ----- Route modules (defer import so missing extras don't break /health) -----
+    from bijotel.api.routes import chain as chain_routes
+    from bijotel.api.routes import layers as layers_routes
+    from bijotel.api.routes import policy as policy_routes
 
-    @app.get("/policy", tags=["policy"], status_code=501)
-    def policy_state() -> dict[str, str]:
-        """Placeholder for policy state. Implemented in v1.1.0."""
-        raise HTTPException(
-            status_code=501,
-            detail="Policy state endpoint coming in v1.1.0.",
-        )
-
-    @app.get("/regression", tags=["regression"], status_code=501)
-    def regression_scan() -> dict[str, str]:
-        """Placeholder for regression scan. Implemented in v1.1.0."""
-        raise HTTPException(
-            status_code=501,
-            detail="Regression scan endpoint coming in v1.1.0.",
-        )
+    app.include_router(chain_routes.router)
+    app.include_router(policy_routes.router)
+    app.include_router(layers_routes.router)
 
     return app
 
