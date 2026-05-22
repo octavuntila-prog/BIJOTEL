@@ -11,6 +11,7 @@ dependencies = [
     "opentelemetry-sdk>=1.27.0",
     "opentelemetry-semantic-conventions>=0.48b0",
     "rfc8785>=0.1.4",
+    "numpy>=1.24",
 ]
 
 [project.optional-dependencies]
@@ -21,10 +22,14 @@ anthropic = [
 openai = [
     "openai>=1.0",
 ]
+fingerprint = [
+    "sentence-transformers>=2.7",
+]
 all = [
     "anthropic>=0.40.0",
     "opentelemetry-instrumentation-anthropic>=0.40.0",
     "openai>=1.0",
+    "sentence-transformers>=2.7",
 ]
 dev = [
     "pytest>=8.0",
