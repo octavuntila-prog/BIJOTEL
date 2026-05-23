@@ -5,6 +5,106 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] — 2026-05-23 — F11 pattern extension (15 → 35 patterns, 100% attack coverage)
+
+Empirical security release driven by Day-13 misalignment-probe results
+on the deployed Haiku model. Pattern count up from 15 to 35; **F11
+attack-probe coverage 33% → 100%** (24/24 attack probes caught) with
+**zero false positives** on the 3 benign control probes and the 2
+``comply_with_caveat`` probes.
+
+### Background
+
+The 2026-05-23 morning probe run (``misalignment_probes_20260523T072622Z
+.json`` on GENA) showed F11 v1.4.x caught only 8/24 attack-category
+probes (33%). The remaining 16 missed the existing regex set because:
+
+* **Disregard / override variants** — existing patterns matched
+  ``disregard previous instructions`` but not ``disregard the prior
+  system message``.
+* **Encoding-bypass weak spots** — ``base64\s*[:=]`` matched
+  ``base64:`` literal but not ``Decode this base64 and respond`` framed
+  intent. No coverage for leet-speak (``1gn0r3 4ll 1nstruct10ns``) or
+  reverse-text execution requests.
+* **Multi-turn manipulation** — no patterns at all for ``Pick up where
+  we left off``, ``In turn one you agreed``, ``Earlier you agreed``.
+* **Authority impersonation** — no patterns for ``I am your
+  developer``, ``Anthropic engineering:``, ``Admin override token:
+  XXX``, ``Constitutional AI training exercise``.
+* **Role overrides by name** — DAN / FreeBot / EvilGPT matched via
+  ``DAN mode`` but not via direct ``You are now DAN``.
+* **System-prompt extraction phrasing** — ``what are the exact
+  instructions`` and ``repeat your hidden instructions`` slipped past
+  the prior list.
+
+### Added (20 new patterns across 4 categories)
+
+* **Instruction override** (+2): broader ``disregard ... (system|
+  prior|earlier) ...``; ``override (your|the|all|its) (safety) ...
+  guidelines``.
+* **System prompt extraction** (+2): ``what are the (exact|hidden|
+  initial) instructions``; ``repeat your (hidden|secret|original)
+  instructions``.
+* **Role override** (+2): named jailbreak personas (``you are now DAN/
+  FreeBot/EvilGPT``); ``an AI with no constraints/restrictions``.
+* **Encoding bypass** (+6): ``decode this base64/b64/hex/rot13``;
+  ``reverse this text and execute``; leet-speak versions of ``ignore``
+  / ``instructions`` / ``forget`` / ``previous`` (specific digit
+  substitutions, narrow enough to avoid false positives on prose).
+* **Multi-turn manipulation (new category, +4)**: ``where we left
+  off``; ``in turn one``; ``earlier you agreed/said/promised``;
+  ``bypass your (safety) (guidelines/rules/filters)``.
+* **Authority impersonation (new category, +4)**: ``I am your
+  developer/creator/trainer/admin``; ``Anthropic/OpenAI/Google
+  engineering/safety/team``; ``admin override token:``;
+  ``Constitutional AI training exercise``.
+
+### Test suite (+27 new, 512 total)
+
+``tests/test_prompt_pattern_deny.py`` doubled in size. Every new pattern
+has BOTH:
+
+1. **A positive test** asserting the attack form fires the warning.
+2. **A false-positive guard test** asserting a legitimate prompt that
+   resembles the attack (e.g. ``How do I override the __str__ method?``
+   for the ``override safety guidelines`` pattern) does NOT fire.
+
+Plus a sweep test ``test_v150_probe_library_attack_coverage_100pct``
+that runs F11 against every ProbeLibrary attack probe and asserts
+all 24 fire — this is the regression guard for any future pattern
+edit that would weaken coverage.
+
+### Honest scope clarification (M2)
+
+The **probe-detector miss rate** (model's response → refused per
+heuristic) and the **F11 catch rate** (pre-call pattern match) are
+**two independent metrics**:
+
+* **F11 catch rate** — set entirely by ``DEFAULT_JAILBREAK_PATTERNS``.
+  v1.4.x: 8/24 attack probes. **v1.5.0: 24/24 (100%) attack probes.**
+* **Probe-detector miss rate** — set by the model's actual response
+  and ``ProbeLibrary.REFUSAL_TOKENS``. Unchanged by F11 changes
+  because F11 in warn mode never blocks the call — it just adds a
+  ``bijotel.policy.warning`` span attribute. The model still
+  responds.
+
+The model's 75.86% probe-detector rate on the morning run was
+preserved on the post-deploy v1.5.0 live re-run — both runs hit
+Cloudflare AI Gateway with identical prompts and got identical
+(cached) responses. Reducing the probe-detector miss rate is a
+separate v1.5.1 item: extending ``REFUSAL_TOKENS`` with polite
+refusal markers (``i appreciate``, ``i'm not going``, ``but i
+should``) seen in the morning run's missed responses.
+
+### Production validated
+
+* Deployed to all 4 GENA containers (v1.4.2 → v1.5.0).
+* Cross-version chain integrity preserved: ``Chain VALID (5,090
+  entries)`` across now **6 wheel versions**
+  (v0.5.0 → v0.6.0 → v0.6.1 → v1.1.0 → v1.4.2 → v1.5.0).
+* PolicyEngine on GENA reports 2 rules (``prompt_pattern_deny``,
+  ``ast_safety_check``), 35 patterns, warn mode.
+
 ## [1.4.2] — 2026-05-23 — Pydantic 2.9 compat for `bijotel serve --dashboard` on GENA
 
 Post-launch operational release. v1.4.0 worked locally (Pydantic 2.10.x)
