@@ -150,16 +150,24 @@ npm run dev   # http://localhost:5173 with /api proxied to :8080
 Production build → `dashboard_dist/` at project root. Day 12 polish
 wires `bijotel serve --dashboard` to mount it as static.
 
-## 13 AI safety bijuterii covered
+## 14 AI safety bijuterii covered
 
-Each layer maps to a catalog pattern. ``active`` = wired in this
-process (with runtime evidence); ``available`` = code ships, host can
-opt in; ``planned`` = v1.3+.
+Each layer maps to a catalog pattern. ``status`` reflects the live
+``GET /layers`` response on a healthy production install (chain
+populated, policy engine configured). ``active`` = runtime evidence
+present (e.g. chain rows > 0); ``available`` = code ships, host can
+opt in; ``planned`` = v1.5+.
+
+On a fresh ``pip install`` against an empty chain.db, only
+``otel_genai`` and ``provider_protocol`` start as ``active`` — the
+rest report ``available`` until they have data to point at. This is
+intentional (M2 — reality > docs).
 
 | # | Bijuterie | Layer | Status |
 |---|-----------|---------------------|--------|
 | 11 | Forensic-First | HMAC-SHA256 chain (`HmacChainSpanProcessor`) | active |
-| 2  | Content-Addressable | CAS + Merkle DAG | active |
+| 2  | Content-Addressable Storage | CAS unique-body table | active |
+| 2  | Merkle DAG | `dag_nodes` + `dag_refs` reference graph | available |
 | 10 | Compliance-as-Code | PolicyEngine + 8 rule factories | active |
 | 16 | Regression Detection | z-score + IQR over input_tokens/output_tokens/cost | active |
 | 19 | OTel GenAI Semconv | Compatible with OpenLLMetry, Anthropic/OpenAI instrumentors | active |

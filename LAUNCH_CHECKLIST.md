@@ -79,11 +79,18 @@ bijotel regression    — z-score + IQR drift
 bijotel serve         — REST API (+ optional --dashboard)
 ```
 
-## 13 / 20 bijuterii covered
+## 14 / 20 bijuterii covered
 
-* **#2** Content-Addressable + Merkle DAG — active (4,952 entries / 4,810 CAS bodies on GENA)
+(Split from the day-of-launch "13" tally: `#2 Content-Addressable` and
+`#2 Merkle DAG` are tracked as separate rows by the runtime
+``/layers`` endpoint — CAS can be `active` while the DAG remains
+`available`. README + ARCHITECTURE updated 2026-05-23 to match.)
+
+* **#2** Content-Addressable Storage — active (CAS unique-body table populated)
+* **#2** Merkle DAG — available (`dag_nodes` + `dag_refs` reference graph)
 * **#5** AST-First Code Safety — available ([ast] extra)
-* **#7** Provider Protocol + Fingerprinting — active (Anthropic + OpenAI adapters)
+* **#7** Provider Protocol — active (Anthropic + OpenAI adapters)
+* **#7** Deterministic + Semantic Fingerprinting — available ([fingerprint] extra)
 * **#10** Compliance-as-Code — active (8 rule factories + default 3-rule warn engine)
 * **#11** Forensic-First HMAC chain — active (production-validated)
 * **#15** Inference Routing — available
@@ -146,7 +153,7 @@ the seven not-yet-touched catalog patterns (#4 / #6 / #8 / #12 / #14 / #17 / #20
 Day 12 / harvest plan **complete**. The 12-day work block delivered:
 
 * **A working forensic-grade LLM audit chain library** (PyPI), with
-  13 catalog bijuterii implemented and runtime evidence on a real
+  14 catalog bijuterii implemented and runtime evidence on a real
   production chain.
 * **A 18-endpoint REST API** (`bijotel serve`) with optional Bearer
   auth.

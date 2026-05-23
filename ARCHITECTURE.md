@@ -1,7 +1,7 @@
 # BIJOTEL Architecture
 
 This document covers the runtime call path, on-disk schema, and the
-13-layer bijuterii positioning. Aimed at new contributors and at
+14-layer bijuterii positioning. Aimed at new contributors and at
 auditors trying to convince themselves the chain integrity story is
 real.
 
@@ -171,7 +171,7 @@ The same logic ships server-side in `POST /chain/verify` with
 `full=true`. The CLI and the API give the same answer on the same
 chain.db + secret.
 
-## 13-layer bijuterii positioning
+## 14-layer bijuterii positioning
 
 ```mermaid
 graph TB

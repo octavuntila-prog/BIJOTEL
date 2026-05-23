@@ -5,6 +5,69 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] — 2026-05-23 — Pydantic 2.9 compat for `bijotel serve --dashboard` on GENA
+
+Post-launch operational release. v1.4.0 worked locally (Pydantic 2.10.x)
+but crashed at startup on GENA's pinned Pydantic 2.9.0 with
+``PydanticUndefinedAnnotation: name 'FileResponse' is not defined``.
+
+The combination of ``from __future__ import annotations`` + Pydantic
+2.9's stricter forward-reference resolution failed to look up
+``FileResponse`` through the function's ``__globals__`` even when the
+import was at module level and the route was declared with
+``include_in_schema=False``.
+
+### Fixed
+
+* ``src/bijotel/api/routes/export.py`` — dropped the ``-> FileResponse``
+  return annotation on ``export_post``. Kept ``response_class=FileResponse``
+  (which is what FastAPI actually consumes for response handling). The
+  annotation was decorative.
+* ``src/bijotel/api/app.py`` — same fix on the two SPA routes
+  (``_spa_root``, ``_spa_catchall``) that mount when ``serve_dashboard=True``.
+
+### Production validated
+
+* Deployed to all 4 GENA containers (``v3-atelier``, ``v4-piata``,
+  ``v9-oracle``, ``v8-ambasador``).
+* ``POST /chain/verify`` with ``full=true`` returns ``valid:true``
+  across **5,082 entries** spanning **five wheel versions** —
+  v0.5.0 → v0.6.0 → v0.6.1 → v1.1.0 → v1.4.2.
+* ``bijotel serve --dashboard`` boots cleanly on GENA;
+  ``/api/health``, ``/`` (SPA), ``/api/chain/stats``,
+  ``/api/layers`` all respond with live data.
+* ``GET /api/layers`` returns ``total=14 active=6 available=6 planned=2``
+  matching the doc-fix below.
+
+### Docs
+
+* ``README.md`` — bijuterii table 13 → **14 rows**. Splits
+  Content-Addressable Storage from Merkle DAG (they have independent
+  ``status`` in the runtime ``/layers`` response). Adds a parenthetical
+  explaining that "active" requires runtime evidence (DB rows > 0); on
+  a fresh ``pip install`` against an empty chain, only ``otel_genai``
+  and ``provider_protocol`` report active until data accrues.
+* ``ARCHITECTURE.md`` — same 13 → 14 update on the layer-positioning
+  diagram + intro.
+* ``LAUNCH_CHECKLIST.md`` — 13/20 → 14/20 + per-layer status table
+  refresh.
+* ``AUDIT_2026_05_23.md`` — full complex audit (this commit's other
+  artefact): 9 audit dimensions covered, 3 critical findings, top-7
+  prioritized roadmap.
+
+### Honest reframes (M2)
+
+* The Pydantic 2.9 vs 2.10 forward-ref resolution difference is a
+  **known upstream behavior change**. We didn't catch it in v1.4.0
+  because local tests run on 2.10+; GENA's pin is 2.9.0. Pinning a
+  newer Pydantic in ``requirements.txt`` on GENA would also fix it,
+  but that's a coordinated upgrade. The annotation drop is the
+  minimal, safe change.
+* CHANGELOG skips v1.4.1 publicly. v1.4.1 was a transient wheel
+  produced during the same fix cycle — it addressed `export.py` but
+  missed the matching `app.py` regression. Building under one version
+  number kept the public release count tidy.
+
 ## [1.4.0] — 2026-05-23 — Launch-ready: dashboard served by `bijotel serve --dashboard`
 
 Last day of the 12-day harvest plan. After this release,

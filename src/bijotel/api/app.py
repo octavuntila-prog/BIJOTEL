@@ -231,20 +231,22 @@ def create_app(
 
             index_html_path = dashboard_dir / "index.html"
 
+            # Return-type annotations intentionally omitted on these SPA
+            # routes. With `from __future__ import annotations`, Pydantic
+            # 2.9 (the pin on GENA) cannot forward-resolve `FileResponse`
+            # at schema-gen time even when include_in_schema=False. Works
+            # on local Pydantic 2.10+, fails on 2.9. Until we bump the
+            # GENA pin to >=2.10, the safe form is no annotation.
             @app.get("/", include_in_schema=False)
-            def _spa_root() -> FileResponse:  # noqa: D401
+            def _spa_root():  # noqa: ANN201
                 return FileResponse(str(index_html_path))
 
             # Catch-all for client-side router. include_in_schema=False so
-            # this doesn't appear in /openapi.json. Excludes anything under
-            # /api, /docs, /redoc, /openapi.json — those are real routes.
+            # this doesn't appear in /openapi.json. Routes win before this
+            # catch-all via FastAPI's matcher, so /api/chain still routes
+            # to the API instead of falling through to the SPA.
             @app.get("/{spa_path:path}", include_in_schema=False)
-            def _spa_catchall(spa_path: str) -> FileResponse:  # noqa: D401
-                # Defence in depth: if the path looks like an API miss,
-                # let FastAPI's 404 handler take over instead of pretending
-                # everything is the SPA. (Routes win before this catch-all
-                # via FastAPI's matcher, so /api/chain at the wrong path
-                # still 404s.)
+            def _spa_catchall(spa_path: str):  # noqa: ANN201
                 return FileResponse(str(index_html_path))
         else:
             _LOG.warning(

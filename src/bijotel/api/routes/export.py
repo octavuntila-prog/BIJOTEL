@@ -73,7 +73,14 @@ def _resolve_secret() -> bytes:
     summary="Export the chain as a signed JSON file (download)",
     response_class=FileResponse,
 )
-def export_post(request: Request) -> FileResponse:
+def export_post(request: Request):  # noqa: ANN201 — return annotation
+    # Annotation intentionally omitted: with `from __future__ import
+    # annotations` Pydantic 2.9 fails to forward-resolve `FileResponse`
+    # at schema-gen time (observed on GENA's pinned pydantic 2.9.0;
+    # works on local 2.10.x). The `response_class=FileResponse` decorator
+    # arg is what FastAPI actually uses for response handling; the
+    # return-type annotation was decorative. Keep this until we bump
+    # the GENA pin to pydantic >=2.10.
     """Generate a fresh signed JSON snapshot of the chain and stream it back.
 
     Returns a ``FileResponse`` with ``Content-Disposition: attachment`` and
