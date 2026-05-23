@@ -5,6 +5,85 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] — 2026-05-23 — MerkleDAG auto-wired in CasSpanProcessor (Bijuteria #2 → fully active)
+
+Closes the last remaining "available but not active" layer in the
+manifest. Day-13 audit flagged `merkle_dag` as Tier 3 — code shipped
+since v0.8.0 (Day 4) but nothing in the chain pipeline was calling
+`MerkleDAG.add_node()`. v1.5.3 wires it in.
+
+### Added
+
+* **`CasSpanProcessor.__init__(..., enable_dag: bool = True)`** — new
+  keyword. Default `True`: every CAS write is followed by a
+  `MerkleDAG.add_node(content_hash=body_hash, refs=[])` call. The DAG
+  uses the same SQLite file as CAS — single backup, shared WAL.
+* **`dag_nodes` table populates automatically** as spans flow through
+  the chain. The `dag_refs` table stays empty for now (cross-span
+  reference logic deferred to v1.6+, see "Honest scope" below).
+
+### Layer manifest impact
+
+`GET /api/layers` now reports `merkle_dag` as **`active`** instead of
+`available` once at least one span has flowed through CasSpanProcessor
+post-deploy. The on-by-default flag means the transition is automatic
+— no host config change needed.
+
+### Backwards compatibility
+
+* Existing callers that do `CasSpanProcessor(db_path=...)` get the
+  new behavior (DAG auto-wired). The `dag_nodes` + `dag_refs` tables
+  are CREATEd via `IF NOT EXISTS` so no schema-migration step is
+  required.
+* Hosts that want the strict v1.5.2 behavior (CAS only, no DAG
+  side-effect) pass `enable_dag=False`. Documented in the docstring.
+
+### Crash isolation
+
+Same pattern as the rest of the chain pipeline: a `MerkleDAG.add_node`
+failure is **logged at ERROR level and SUPPRESSED**. CAS already
+committed; a DAG insert miss is observability degradation, not data
+loss. The next add for the same body_hash succeeds idempotently via
+`ON CONFLICT DO NOTHING`.
+
+### Tests (+5 new, 532 total)
+
+`tests/test_cas.py`:
+
+* `test_v153_cas_creates_dag_node_by_default` — 1 span → 1 CAS row +
+  1 DAG node.
+* `test_v153_cas_dag_dedup_no_duplicate_nodes` — same body twice →
+  ref_count=2 in CAS, 1 DAG node (idempotent add).
+* `test_v153_cas_enable_dag_false_keeps_v15x_behavior` — opt-out
+  works: no dag_nodes rows when flag is False.
+* `test_v153_cas_multiple_distinct_bodies_each_get_dag_node` — 3
+  distinct inputs → 3 DAG nodes.
+* `test_v153_dag_refs_table_empty_v153_no_cross_span_refs` —
+  asserts dag_refs intentionally stays empty (v1.5.3 doesn't compute
+  cross-span references yet; planned v1.6+).
+
+### Honest scope (M2)
+
+* **`dag_refs` stays empty in v1.5.3.** Populating cross-span refs
+  requires "is this span building on a prior span's output?"
+  semantics — needs parent-span lookup logic that we haven't shipped
+  yet. v1.5.3 makes `dag_nodes` populate (so the layer manifest
+  honestly reports active) without overengineering. Two paths to
+  add real refs later:
+  - Use `span.parent.span_id` → look up that span's body_hash → ref.
+  - Let hosts pass explicit refs in a custom processor subclass.
+* **No backfill.** Existing chain.db files won't have DAG nodes for
+  pre-v1.5.3 spans. The `dag_nodes` table starts populating from the
+  first post-deploy span forward. A `bijotel dag backfill --db
+  chain.db` CLI command is the natural follow-up (v1.6 candidate).
+
+### Production state
+
+GENA already redeployed to v1.5.2 in this session. To get v1.5.3 +
+DAG activation on GENA, the standard SCP+rebuild pattern applies.
+Until then, GENA's `dag_nodes` row count stays at 0 (the layer
+reports `available`, not `active`).
+
 ## [1.5.2] — 2026-05-23 — CAVEAT_TOKENS for comply_with_caveat probes (93.1% → 100%)
 
 Detector-only release. Closes the last 2 probe-detector misses

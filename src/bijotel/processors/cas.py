@@ -14,6 +14,7 @@ from opentelemetry.context import Context
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 
 from bijotel.processors.canonical import canonicalize, span_to_semantic_dict
+from bijotel.processors.dag import MerkleDAG
 
 BUSY_TIMEOUT_MS = 5000  # SQLite per-connection retry budget under contention
 DB_FILE_MODE = 0o600    # Owner read/write only; cas.body holds prompt BLOBs
@@ -55,6 +56,7 @@ class CasSpanProcessor(SpanProcessor):
         *,
         db_path: str | Path,
         filter_fn: Callable[[ReadableSpan], bool] | None = None,
+        enable_dag: bool = True,
     ) -> None:
         """Initialize CasSpanProcessor.
 
@@ -62,11 +64,28 @@ class CasSpanProcessor(SpanProcessor):
             db_path: Path către SQLite file (creat dacă nu există).
                 Same path ca HmacChainSpanProcessor -> same DB (recomandat).
             filter_fn: Span filter. Default: keep spans cu gen_ai.* attrs.
+            enable_dag: If True (default), wire :class:`MerkleDAG` so each
+                CAS entry also becomes a ``dag_nodes`` row. Activates the
+                Merkle DAG bijuterie (#2) at runtime — the ``/layers``
+                endpoint will report ``merkle_dag`` as ``active`` once at
+                least one span flows through. Pass ``False`` to keep the
+                v1.5.x-and-earlier behavior (CAS only, no DAG side-effect).
+
+                The DAG uses the same SQLite file as ``db_path`` — single
+                file backup, shared WAL. Tables ``dag_nodes`` + ``dag_refs``
+                are created lazily on first add.
+
+                Refs are LEFT EMPTY in v1.5.3 — populating cross-span
+                references requires parent-span lookup logic that's
+                planned for v1.6+. Until then, every span becomes a
+                standalone DAG node (``dag_refs`` table stays empty;
+                ``dag_nodes`` table fills).
         """
         self._filter = filter_fn or _default_filter
         self._db_path = Path(db_path)
         self._lock = threading.Lock()
         self._init_db()
+        self._dag = MerkleDAG(db_path) if enable_dag else None
 
     def _init_db(self) -> None:
         """Create cas table if not exists, enable WAL, apply restrictive perms.
@@ -155,6 +174,28 @@ class CasSpanProcessor(SpanProcessor):
                     raise
                 finally:
                     conn.close()
+
+            # v1.5.3 — DAG side-effect (best-effort, crash-isolated).
+            # After CAS commit, project this body into the Merkle DAG so the
+            # `merkle_dag` layer reports `active` instead of `available`.
+            # Errors here are logged but do NOT propagate — CAS already
+            # succeeded; a DAG insert failure is observability degradation,
+            # not data loss. The DAG row is idempotent (ON CONFLICT DO
+            # NOTHING) so retry semantics are simple.
+            if self._dag is not None:
+                try:
+                    self._dag.add_node(
+                        content_hash=body_hash,
+                        refs=[],
+                        created_ns=span.end_time,
+                    )
+                except Exception as e:
+                    _LOG.error(
+                        "bijotel cas: dag.add_node failed (CAS row kept, DAG "
+                        "missed this body_hash): %s: %s",
+                        type(e).__name__,
+                        e,
+                    )
         except Exception as e:
             _LOG.error(
                 "bijotel cas write failed (body not stored, host unaffected): "
