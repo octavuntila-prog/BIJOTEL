@@ -22,6 +22,10 @@ htmlcov/
 f1_spans.jsonl
 *.jsonl
 
+# Audit scratch (per-session working notes; superseded each audit pass).
+# Current canonical audit lives at root as AUDIT_<YYYY-MM-DD>.md.
+.audit_tmp/
+
 # Dashboard (Day 8+): node deps + build output
 # dashboard_dist/ lives at src/bijotel/dashboard_dist/ (inside the package,
 # included in the wheel by hatchling). Build it via:
