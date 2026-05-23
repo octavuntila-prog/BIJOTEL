@@ -23,6 +23,7 @@ Usage:
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from bijotel.adapters.base import Provider, ProviderResponse
@@ -66,7 +67,15 @@ class AnthropicAdapter(Provider):
         if self._client is None:
             import anthropic
 
-            self._client = anthropic.AsyncAnthropic()
+            _aig_h = (
+                {"cf-aig-authorization": f"Bearer {os.environ['CLOUDFLARE_AIG_TOKEN']}"}
+                if os.environ.get("CLOUDFLARE_AIG_TOKEN")
+                else None
+            )
+            self._client = anthropic.AsyncAnthropic(
+                base_url=os.environ.get("ANTHROPIC_BASE_URL") or None,
+                default_headers=_aig_h,
+            )
         return self._client
 
     async def complete(

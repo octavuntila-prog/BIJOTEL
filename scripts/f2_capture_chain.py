@@ -49,7 +49,11 @@ def main() -> int:
     trace.set_tracer_provider(provider)
     AnthropicInstrumentor().instrument()
 
-    client = anthropic.Anthropic()
+    _aig_h = ({"cf-aig-authorization": f"Bearer {os.environ['CLOUDFLARE_AIG_TOKEN']}"} if os.environ.get("CLOUDFLARE_AIG_TOKEN") else None)
+    client = anthropic.Anthropic(
+        base_url=os.environ.get("ANTHROPIC_BASE_URL") or None,
+        default_headers=_aig_h,
+    )
 
     print("=== Call 1: Basic Messages ===", file=sys.stderr)
     client.messages.create(
