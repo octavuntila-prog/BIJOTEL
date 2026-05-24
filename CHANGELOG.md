@@ -5,6 +5,89 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] — 2026-05-24 — **SECURITY:** verify_export now detects canonical_body tampering
+
+### CRITICAL — forensic integrity gap closed
+
+Test 1 of the 18-test production validation (Tamper-detect roundtrip,
+2026-05-24) discovered that `bijotel verify-export` accepted as VALID
+an export whose `canonical_body_b64` had been rewritten by an attacker
+without recomputing `canonical_hash`.
+
+**Why pre-v2.0.3 missed it:** the HMAC chain HMAC is computed from
+`HMAC(prev_hash || canonical_hash, secret)`. As long as
+`canonical_hash` is untouched, every link in the chain still verifies.
+Pre-v2.0.3 the verifier checked HMAC linkage and `chain_signature` but
+**did not** SHA-256 the actual body bytes to confirm they match
+`canonical_hash`. So an attacker who got hold of an export file
+could:
+1. Decode `canonical_body_b64` (base64 → JSON bytes)
+2. Edit the JSON (change a token count, swap a model, inject a field)
+3. Re-encode as base64, write back
+4. Submit the modified export — verify said VALID
+
+That defeats the entire "tamper-evident audit chain" claim.
+
+### Fixed
+
+* `verify_export` now SHA-256's the decoded `canonical_body_b64`
+  bytes and rejects any entry whose computed hash doesn't match the
+  stored `canonical_hash`. Error message names the seq and shows
+  both hashes for forensic clarity:
+
+```
+canonical_body tampered at seq=2753: body hashes to 1b31f4a4c087c10c...
+but canonical_hash claims 0b31f4a4c087c10c...
+```
+
+* `binascii` added to imports so base64 decode errors get a clean
+  reason string instead of an uncaught exception.
+
+### Tests (+1, 650 total)
+
+* `tests/test_processors_export.py::test_verify_export_detects_canonical_body_tamper`
+  — exact regression test for the pre-v2.0.3 bug. Builds a chain,
+  exports, modifies `canonical_body_b64` content **without touching
+  canonical_hash**, calls verify, asserts `valid=False` with the
+  specific "canonical_body tampered" reason.
+* Existing `test_verify_export_detects_tampered_entry` updated: it
+  flips a char in `canonical_hash`. v2.0.3+ catches this as
+  "canonical_body tampered" (body bytes hash to original, but the
+  stored canonical_hash is the flipped value). Test now accepts
+  either reason string — same detection, different message.
+
+### Impact assessment
+
+* **Exposure window:** v0.5.0 → v2.0.2 (all releases until this
+  patch). Production chains on GENA were never actually tampered
+  (the bug is in `verify-export`, not in chain seal — entries
+  written to chain.db remain HMAC-sealed correctly), but any
+  archived export from this window could in principle have had its
+  body contents swapped and still validated.
+* **Mitigation:** install v2.0.3+ and re-verify any archived
+  exports. Chain rebuild not required.
+* **Severity:** **HIGH** for users relying on `verify-export` for
+  legal/audit attestation. **LOW** for users only using the live
+  chain DB (HmacChainSpanProcessor itself was never affected — it
+  hashes body bytes correctly into canonical_hash at seal time).
+
+### Backwards compatibility
+
+API-compatible. Exports from v2.0.2 and earlier verify cleanly under
+v2.0.3 *if not tampered*. Tampered older exports that previously
+passed will now correctly fail.
+
+### Discovery credit
+
+Found during Test 1 of the 18-test production validation suite
+(2026-05-24), 4 minutes into the run. The test was designed to
+prove the tamper-evident claim; it instead surfaced the gap that
+the claim wasn't fully enforced. This is M2 (reality > docs) in
+action: a test that's good enough to find the bug it was meant to
+confirm is doing its job.
+
+---
+
 ## [2.0.2] — 2026-05-24 — Honesty patch: badges + stats match reality (M2)
 
 Audit cross-check found four drifts between docs and reality. v2.0.2

@@ -80,7 +80,12 @@ def test_verify_export_detects_tampered_entry(
 
     valid, reason = verify_export(out, SECRET)
     assert valid is False
-    assert "hmac_hash mismatch" in (reason or "")
+    # v2.0.3+: canonical_body check fires before HMAC check, so a flipped
+    # canonical_hash is caught as "canonical_body tampered" (the body bytes
+    # hash to the original, not the flipped value). Either error message
+    # indicates the same underlying detection: this entry has been altered.
+    assert ("hmac_hash mismatch" in (reason or "")
+            or "canonical_body tampered" in (reason or ""))
 
 
 def test_verify_export_detects_tampered_chain_signature(
@@ -173,6 +178,58 @@ def test_verify_export_secret_key_min_length(tmp_path: Path) -> None:
     valid, reason = verify_export(tmp_path / "any.json", b"short")
     assert valid is False
     assert "at least 16 bytes" in (reason or "")
+
+
+def test_verify_export_detects_canonical_body_tamper(tmp_path: Path) -> None:
+    """v2.0.3 forensic fix: tampering canonical_body_b64 without recomputing
+    canonical_hash MUST be detected.
+
+    Pre-v2.0.3 the verifier only checked HMAC chain linkage (which uses
+    canonical_hash, not the body bytes), so an attacker could swap body
+    contents and the chain still validated. This test guards against
+    that regression — discovered during the 18-test production validation
+    on 2026-05-24 (Test 1 — Tamper-detect roundtrip).
+    """
+    import base64
+
+    db = tmp_path / "chain.db"
+    provider = TracerProvider()
+    provider.add_span_processor(HmacChainSpanProcessor(db_path=db, secret_key=SECRET))
+    trace.set_tracer_provider(provider)
+    tracer = trace.get_tracer("test_tamper_canonical_body")
+    for i in range(3):
+        with tracer.start_as_current_span(f"s-{i}") as s:
+            s.set_attribute("gen_ai.request.model", "claude-haiku-4-5")
+            s.set_attribute("gen_ai.usage.input_tokens", 10 + i)
+            s.set_attribute("gen_ai.usage.output_tokens", 5)
+    provider.shutdown()
+
+    out = tmp_path / "exp.json"
+    export_chain(db, out, SECRET)
+
+    # Sanity: clean export verifies
+    valid, _ = verify_export(out, SECRET)
+    assert valid is True
+
+    # Tamper: rewrite canonical_body_b64 of one entry WITHOUT touching
+    # canonical_hash. The HMAC chain still validates (it's computed from
+    # canonical_hash, not the body bytes), so pre-v2.0.3 verifier missed
+    # this. v2.0.3 adds the SHA-256(body_bytes) == canonical_hash check.
+    data = json.loads(out.read_text(encoding="utf-8"))
+    target = data["entries"][1]
+    body_bytes = base64.b64decode(target["canonical_body_b64"])
+    body_dict = json.loads(body_bytes)
+    body_dict.setdefault("attributes", {})["malicious_field"] = "injected"
+    new_body = json.dumps(body_dict, sort_keys=True, separators=(",", ":")).encode()
+    target["canonical_body_b64"] = base64.b64encode(new_body).decode()
+    out.write_text(json.dumps(data), encoding="utf-8")
+
+    # Must reject with explicit reason
+    valid, reason = verify_export(out, SECRET)
+    assert valid is False
+    assert reason is not None
+    assert "canonical_body tampered" in reason
+    assert "seq=" in reason
 
 
 def test_export_chain_handles_empty_db(tmp_path: Path) -> None:

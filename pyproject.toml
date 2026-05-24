@@ -1,6 +1,6 @@
 [project]
 name = "bijotel"
-version = "2.0.2"
+version = "2.0.3"
 description = "Forensic-grade tamper-evident audit chain for LLM applications. HMAC-SHA256 chain, content-addressable storage, pre-call policy gate, regression detection."
 readme = "README.md"
 requires-python = ">=3.11"

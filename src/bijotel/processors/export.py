@@ -52,6 +52,7 @@ Verification path:
 from __future__ import annotations
 
 import base64
+import binascii
 import hashlib
 import hmac
 import json
@@ -213,6 +214,30 @@ def verify_export(
 
     prev_hash = GENESIS_HASH
     for i, entry in enumerate(entries):
+        # NEW in v2.0.3 — canonical_body integrity check.
+        # The pre-v2.0.3 verifier only checked HMAC chain links, which
+        # left a tamper-evident gap: an attacker could swap the bytes of
+        # ``canonical_body_b64`` without touching ``canonical_hash``, and
+        # the chain HMAC (computed from ``prev_hash || canonical_hash``)
+        # would still validate. We now reject any entry whose decoded
+        # body bytes don't hash to the stored canonical_hash.
+        body_b64 = entry.get("canonical_body_b64")
+        if body_b64 is None:
+            return False, f"missing canonical_body_b64 at seq={entry.get('seq', i)}"
+        try:
+            body_bytes = base64.b64decode(body_b64, validate=True)
+        except (binascii.Error, ValueError) as e:
+            return False, (
+                f"canonical_body_b64 not decodable at seq={entry.get('seq', i)}: {e}"
+            )
+        recomputed_canonical = hashlib.sha256(body_bytes).hexdigest()
+        if recomputed_canonical != entry["canonical_hash"]:
+            return False, (
+                f"canonical_body tampered at seq={entry.get('seq', i)}: "
+                f"body hashes to {recomputed_canonical[:16]}... but "
+                f"canonical_hash claims {entry['canonical_hash'][:16]}..."
+            )
+
         # Per-entry HMAC verify
         recomputed = _recompute_hmac(
             entry["prev_hash"], entry["canonical_hash"], secret_key
