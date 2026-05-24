@@ -93,10 +93,42 @@ def _default_policy_engine() -> PolicyEngine:
         pass
 
     # Routing recommendation — pure Python, always available.
+    # v2.0.4+: respect BIJOTEL_MODELS env var so hosts can scope
+    # the recommender to their actual fleet. Without it, the default
+    # registry (Haiku + Sonnet + Opus + GPT-4o family) recommends
+    # gpt-4o-mini for every prompt because it's the cheapest entry
+    # — actionable only on fleets that include OpenAI, noise on
+    # Anthropic-only deployments like GENA.
+    #
+    # Format: comma-separated model names, e.g.
+    #   BIJOTEL_MODELS="claude-haiku-4-5-20251001,claude-sonnet-4-20250514"
+    # Unknown model names are silently dropped (no crash on typos).
     try:
-        from bijotel.layers.routing import routing_recommendation
+        from bijotel.layers.routing import (
+            DEFAULT_MODELS,
+            ModelRegistry,
+            ParetoRouter,
+            routing_recommendation,
+        )
 
-        rules.append(routing_recommendation(mode="warn"))
+        models_env = os.environ.get("BIJOTEL_MODELS", "").strip()
+        if models_env:
+            wanted = [m.strip() for m in models_env.split(",") if m.strip()]
+            scoped = {m: DEFAULT_MODELS[m] for m in wanted if m in DEFAULT_MODELS}
+            if scoped:
+                registry = ModelRegistry(scoped)
+                rules.append(
+                    routing_recommendation(
+                        registry=registry,
+                        router=ParetoRouter(registry=registry),
+                        mode="warn",
+                    )
+                )
+            else:
+                # All names invalid — fall back to default rather than skip
+                rules.append(routing_recommendation(mode="warn"))
+        else:
+            rules.append(routing_recommendation(mode="warn"))
     except Exception:
         # Defensive: if a future routing rule constructor changes,
         # don't crash the whole engine.

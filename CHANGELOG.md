@@ -5,6 +5,46 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4] — 2026-05-24 — `BIJOTEL_MODELS` env var scopes routing registry
+
+Round 2 production test (Test 12 / R2-A2) confirmed the default
+`bijotel serve` engine recommends `gpt-4o-mini` for every prompt
+because the full `DEFAULT_MODELS` registry includes it and it's the
+cheapest entry with quality ≥ 0.6. That's actionable only on fleets
+that actually include OpenAI; on Anthropic-only deployments like
+GENA, it's pure noise (every call gets a "over-provisioned, use
+gpt-4o-mini" warning).
+
+### Fixed
+
+* **`BIJOTEL_MODELS` env var** — comma-separated list of model
+  names to scope the default routing registry. Hosts that run an
+  Anthropic-only fleet set:
+
+```bash
+BIJOTEL_MODELS="claude-haiku-4-5-20251001,claude-sonnet-4-20250514"
+```
+
+  and the recommendation engine then evaluates the Pareto frontier
+  only across those two models. Unknown names are silently dropped.
+  Empty / unset → falls back to full `DEFAULT_MODELS` (v2.0.3 behavior).
+
+### Behaviour change
+
+* `_default_policy_engine()` now consults the env var at construction
+  time. The recommendation rule is rebuilt with a scoped registry
+  when the env var is set.
+* When all names in `BIJOTEL_MODELS` are invalid (typos), the code
+  falls back to the default registry rather than skipping routing —
+  the rule should always exist for `/api/layers` consistency.
+
+### Backwards compatibility
+
+100% compatible. Without `BIJOTEL_MODELS`, behaviour is identical to
+v2.0.3. Existing tests pass unchanged.
+
+---
+
 ## [2.0.3] — 2026-05-24 — **SECURITY:** verify_export now detects canonical_body tampering
 
 ### CRITICAL — forensic integrity gap closed
