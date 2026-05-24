@@ -5,6 +5,29 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] — 2026-05-24 — README table reflects v2.0.0 reality (doc patch)
+
+Tightens the bijuterii table in README.md so the PyPI rendering
+matches the v2.0.0 milestone. The previous README carried over from
+the v1.4-era listing and still showed Energy + Consensus as
+``planned`` — confusing for anyone reading the project page after
+v2.0.0 hit PyPI.
+
+### Changed
+
+* **README.md "14 AI safety bijuterii" table** — fully rewritten:
+  * 0 ``planned`` rows (was 2: Energy, Consensus)
+  * All 14 rows flipped to ``active`` with the exact runtime
+    evidence trigger spelled out in a new "active when…" column
+  * Added a short "Why no more ``planned``" paragraph linking
+    Energy/Consensus to v1.8.0/v1.9.0 production proof
+
+### Backwards compatibility
+
+100% compatible. No code change. Pure docs / metadata patch.
+
+---
+
 ## [2.0.0] — 2026-05-24 — All 14 layers active + cross-provider HMAC chain (MILESTONE)
 
 The catalog is whole. Every bijuterie has shipped code, tests, an

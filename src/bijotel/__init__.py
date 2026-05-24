@@ -63,7 +63,7 @@ from bijotel.regression import (
     compute_baseline,
 )
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 __all__ = [
     "ASTSafetyChecker",

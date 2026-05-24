@@ -179,35 +179,58 @@ npm run dev   # http://localhost:5173 with /api proxied to :8080
 Production build → `dashboard_dist/` at project root. Day 12 polish
 wires `bijotel serve --dashboard` to mount it as static.
 
-## 14 AI safety bijuterii covered
+## 14 AI safety bijuterii — all active in v2.0.0
 
 Each layer maps to a catalog pattern. ``status`` reflects the live
-``GET /layers`` response on a healthy production install (chain
-populated, policy engine configured). ``active`` = runtime evidence
-present (e.g. chain rows > 0); ``available`` = code ships, host can
-opt in; ``planned`` = v1.5+.
+``GET /layers`` response on a healthy production install. There are
+three states the endpoint can report:
 
-On a fresh ``pip install`` against an empty chain.db, only
-``otel_genai`` and ``provider_protocol`` start as ``active`` — the
-rest report ``available`` until they have data to point at. This is
-intentional (M2 — reality > docs).
+* **active** — layer is wired in this process *right now* and has
+  runtime evidence (chain rows, rule in PolicyEngine, tracker on
+  app state, sibling JSON on disk, etc.).
+* **available** — code ships and is importable, but nothing on this
+  server currently uses it; the host can opt in via config.
+* **planned** — *no code yet*. In **v2.0.0 there are zero ``planned``
+  layers** — the catalog is whole.
 
-| # | Bijuterie | Layer | Status |
-|---|-----------|---------------------|--------|
-| 11 | Forensic-First | HMAC-SHA256 chain (`HmacChainSpanProcessor`) | active |
-| 2  | Content-Addressable Storage | CAS unique-body table | active |
-| 2  | Merkle DAG | `dag_nodes` + `dag_refs` reference graph | available |
-| 10 | Compliance-as-Code | PolicyEngine + 8 rule factories | active |
-| 16 | Regression Detection | z-score + IQR over input_tokens/output_tokens/cost | active |
-| 19 | OTel GenAI Semconv | Compatible with OpenLLMetry, Anthropic/OpenAI instrumentors | active |
-| 7  | Provider Protocol | `AnthropicAdapter`, `OpenAIAdapter` | active |
-| 7  | Deterministic + Semantic Fingerprinting | SHA-256 + sentence-transformers | available |
-| 5  | AST-First Code Safety | tree-sitter bash + stdlib Python ast | available |
-| 15 | Inference Routing | Pareto cost/quality/latency + per-agent budget | available |
-| 18 | Misalignment Probes | 29 probes across 8 attack categories | available |
-| D  | Containment (Combo D) | Permitted + Safe + Sealed orchestrator | available |
-| 3  | Energy Accounting | per-call kWh + carbon estimate | planned |
-| 9  | Consensus Voting | Multi-model agreement | planned |
+On a fresh ``pip install`` with the v2.0.0 default engine
+(``prompt_pattern_deny + pii_detection + output_length_limit +
+ast_safety_check + routing_recommendation``), the layers below
+report ``active`` immediately once their evidence trigger is met
+(see column "active when…"). The empty-chain edge case is the only
+one where ``forensic_chain``/``regression`` start as
+``available`` — they flip to ``active`` after the first sealed span.
+
+| # | Bijuterie | Layer | Active when… | v2.0.0 |
+|---|---|---|---|---|
+| 11 | Forensic-First | HMAC-SHA256 chain (`HmacChainSpanProcessor`) | chain table has ≥1 row | ✅ active |
+| 2  | Content-Addressable Storage | CAS unique-body table | cas table has ≥1 row | ✅ active |
+| 2  | Merkle DAG | `dag_nodes` + `dag_refs` reference graph | dag_nodes has ≥1 row | ✅ active (since v1.5.3) |
+| 10 | Compliance-as-Code | PolicyEngine + 11 rule factories | engine on app state | ✅ active |
+| 5  | AST-First Code Safety | tree-sitter bash + stdlib Python ast | `ast_safety_check` rule in engine | ✅ active (since v1.9.1) |
+| 15 | Inference Routing | Pareto cost/quality/latency + per-agent budget | `routing_recommendation` rule in engine | ✅ active (since v1.6.0) |
+| D  | Containment (Combo D) | Permitted + Safe + Sealed orchestrator | `ContainmentGuard` on app state | ✅ active (since v1.7.0) |
+| 9  | Consensus Voting | Multi-model agreement, N-version pattern | `consensus_provider` on app state | ✅ active (since v1.8.0) |
+| 3  | Energy Accounting | per-call Wh + grams CO2 + region grid intensity | `EnergyTracker` attached **or** `energy_log` rows | ✅ active (since v1.9.0) |
+| 16 | Regression Detection | z-score + IQR over input_tokens/output_tokens/cost | chain has ≥5 rows | ✅ active |
+| 7  | Deterministic + Semantic Fingerprinting | SHA-256 + sentence-transformers | `bijotel_fingerprints.db` has ≥1 row | ✅ active (since v1.6.0) |
+| 18 | Misalignment Probes | 29 probes across 8 attack categories | `misalignment_probes_*.json` sibling exists | ✅ active (since v1.9.1) |
+| 19 | OTel GenAI Semconv | Compatible with OpenLLMetry, Anthropic/OpenAI instrumentors | always (semantic conventions used throughout) | ✅ active |
+| 7  | Provider Protocol | `AnthropicAdapter`, `OpenAIAdapter` (xAI via OpenAI-compatible) | always | ✅ active |
+
+### Why no more ``planned``
+
+Up through v1.8.0 the table carried ``planned`` for **Energy
+Accounting** and ``planned`` for **Consensus Voting** — both
+shipped in v1.8.0 / v1.9.0 with full tests and production proof:
+
+* v1.8.0 — Consensus: real Haiku vs Sonnet votes recorded
+  (factual agreement 1.00, creative agreement 0.15).
+* v1.9.0 — Energy: 14-day GENA backfill produced
+  19.95 Wh / 7.58 g CO2; Haiku-migration savings ≈ 8× captured
+  ex post facto.
+
+v2.0.0 is the tag for the moment the column emptied.
 
 ## What makes BIJOTEL different
 
