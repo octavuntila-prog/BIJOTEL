@@ -334,6 +334,89 @@ class RegressionRunRequest(BaseModel):
     )
 
 
+# ───────────────────────── /containment ─────────────────────────
+
+
+class ContainmentEvaluateRequest(BaseModel):
+    """Body of ``POST /containment/evaluate`` — same shape as policy/evaluate."""
+
+    messages: list[dict[str, Any]] = Field(
+        ...,
+        description="OTel GenAI-style messages list. Each entry: "
+        "{'role': str, 'content': str | list}. Code blocks inside "
+        "content will be picked up by the AST checker if one is wired.",
+    )
+    model: str | None = Field(
+        None, description="Optional gen_ai.request.model used by some rules."
+    )
+    max_tokens: int | None = Field(
+        None, description="Optional max_tokens used by output_length_limit."
+    )
+    extra: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Free-form extra fields preserved into the seal record "
+        "for forensic value (agent_id, request_id, tool_name, ...).",
+    )
+
+
+class ASTViolationItem(BaseModel):
+    """One AST safety violation surfaced by the containment scan."""
+
+    pattern: str = Field(..., description="Pattern name (e.g. 'dangerous_rm').")
+    language: str = Field(..., description="'bash' / 'python'.")
+    line: int | None = Field(None, description="Line number within the code block.")
+    severity: str = Field(..., description="'critical' / 'high' / 'medium' / 'low'.")
+
+
+class ContainmentEvaluateResponse(BaseModel):
+    """Body of ``POST /containment/evaluate`` — three-question result.
+
+    Mirrors :class:`bijotel.layers.containment.ContainmentDecision`
+    flattened for JSON transport. The dashboard reads ``permitted`` +
+    ``safe`` + ``sealed`` as three status pills (green/red).
+    """
+
+    permitted: bool = Field(
+        ..., description="PolicyEngine: allow OR warn (not deny). The 'is it permitted?' answer."
+    )
+    safe: bool = Field(
+        ...,
+        description="AST: no critical violations (or no AST checker wired). "
+        "The 'is it safe?' answer.",
+    )
+    sealed: bool | None = Field(
+        None,
+        description="Chain: containment record written. ``null`` if no "
+        "chain_writer is wired (decision produced, not persisted). "
+        "The 'was it noted?' answer.",
+    )
+    all_clear: bool = Field(
+        ...,
+        description="``permitted AND safe`` — the host's go/no-go signal "
+        "(sealing is informational, not blocking).",
+    )
+    policy_decision: str = Field(
+        ..., description="'allow' / 'warn' / 'deny' — the aggregate engine state."
+    )
+    policy_warnings: list[PolicyWarning] = Field(
+        default_factory=list,
+        description="All warn-mode rules that matched, even on permit.",
+    )
+    ast_violations: list[ASTViolationItem] = Field(
+        default_factory=list,
+        description="AST scan findings. Empty when no code blocks or no checker.",
+    )
+    seal_record: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Canonical JSON suitable for writing into an audit chain "
+        "(host writes it via their own processor — this endpoint only "
+        "produces it). Includes the action's keys for forensic context.",
+    )
+    evaluation_ms: float = Field(
+        ..., description="Wall-clock duration of guard.evaluate_action() in ms."
+    )
+
+
 # ───────────────────────── /export ─────────────────────────
 
 

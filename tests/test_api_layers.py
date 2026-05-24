@@ -160,6 +160,53 @@ def test_ast_safety_active_when_rule_wired() -> None:
     assert ast["metrics"]["wired_in_engine"] is True
 
 
+def test_containment_active_when_guard_attached() -> None:
+    """`containment` flips to active when ContainmentGuard is on app state (v1.7.0)."""
+    from bijotel.layers.containment import ContainmentGuard
+    from bijotel.policy import PolicyEngine, prompt_pattern_deny
+
+    engine = PolicyEngine(rules=[prompt_pattern_deny(mode="warn")])
+    guard = ContainmentGuard(policy_engine=engine)
+    app = create_app(db_path="/tmp/no-such-chain.db", containment_guard=guard)
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    containment = next(layer for layer in body["layers"] if layer["id"] == "containment")
+    assert containment["status"] == "active"
+    assert containment["metrics"]["guard_attached"] is True
+
+
+def test_containment_available_when_no_guard() -> None:
+    """`containment` stays available until a guard is attached (default + no calls)."""
+    app = create_app(db_path="/tmp/no-such-chain.db")
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    containment = next(layer for layer in body["layers"] if layer["id"] == "containment")
+    assert containment["status"] == "available"
+    assert containment["metrics"]["guard_attached"] is False
+
+
+def test_containment_active_after_first_evaluate_call() -> None:
+    """The /containment/evaluate handler caches a guard on state — layers detects it."""
+    app = create_app(db_path="/tmp/no-such-chain.db")
+    client = TestClient(app)
+    # Before any call: containment available
+    pre = client.get("/layers").json()
+    pre_status = next(layer for layer in pre["layers"] if layer["id"] == "containment")["status"]
+    assert pre_status == "available"
+
+    # Trigger lazy-build via the endpoint
+    r = client.post(
+        "/containment/evaluate",
+        json={"messages": [{"role": "user", "content": "hi"}]},
+    )
+    assert r.status_code == 200
+
+    # After: containment active
+    post = client.get("/layers").json()
+    post_status = next(layer for layer in post["layers"] if layer["id"] == "containment")["status"]
+    assert post_status == "active"
+
+
 def test_fingerprint_active_when_db_populated(tmp_path: Path) -> None:
     """`fingerprint` flips to active when sibling fingerprints.db has rows."""
     import sqlite3

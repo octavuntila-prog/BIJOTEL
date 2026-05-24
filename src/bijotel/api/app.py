@@ -34,6 +34,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 try:
     from fastapi import APIRouter, FastAPI
@@ -78,6 +79,7 @@ def create_app(
     db_path: str | Path = "chain.db",
     *,
     policy_engine: PolicyEngine | None = None,
+    containment_guard: Any | None = None,
     cors_origins: list[str] | None = None,
     api_key: str | None = None,
     serve_dashboard: bool = False,
@@ -92,6 +94,13 @@ def create_app(
         policy_engine: Optional :class:`PolicyEngine`. If ``None``, a
             small default warn-mode engine is wired (see
             :func:`_default_policy_engine`).
+        containment_guard: Optional pre-built :class:`ContainmentGuard`
+            (Combo D). When set, ``/containment/evaluate`` uses it
+            verbatim. When ``None``, the endpoint builds a guard
+            lazily on first call from ``policy_engine`` + an
+            ``ASTSafetyChecker`` (if the ``[ast]`` extra is installed).
+            Hosts that need a custom AST config or a ``chain_writer``
+            should pass their own guard here.
         cors_origins: List of allowed CORS origins for the dashboard.
             Defaults to ``["*"]`` for dev simplicity; set explicit origins
             in production (e.g. ``["https://dashboard.example.com"]``).
@@ -134,12 +143,20 @@ def create_app(
                 "name": "export",
                 "description": "Portable signed JSON export + verification.",
             },
+            {
+                "name": "containment",
+                "description": "Combo D three-question gate "
+                "(permitted? safe? sealed?).",
+            },
         ],
     )
 
     # ----- App state (per-instance, passed via `request.app.state`) -----
     app.state.db_path = db_path_str
     app.state.policy_engine = policy_engine or _default_policy_engine()
+    # containment_guard is lazy by default: the /containment/evaluate
+    # handler builds one on first call when None (cached afterwards).
+    app.state.containment_guard = containment_guard
 
     # ----- Middleware -----
     # IMPORTANT: middleware order matters and FastAPI executes them in REVERSE
@@ -180,6 +197,7 @@ def create_app(
 
     # ----- Route modules (defer import so missing extras don't break /health) -----
     from bijotel.api.routes import chain as chain_routes
+    from bijotel.api.routes import containment as containment_routes
     from bijotel.api.routes import export as export_routes
     from bijotel.api.routes import layers as layers_routes
     from bijotel.api.routes import policy as policy_routes
@@ -191,6 +209,7 @@ def create_app(
         layers_routes,
         regression_routes,
         export_routes,
+        containment_routes,
     ]
 
     if serve_dashboard:

@@ -94,6 +94,19 @@ def _fingerprint_db_active(db_path: Path) -> bool:
     return bool(n and n > 0)
 
 
+def _containment_active(request: Request) -> bool:
+    """True iff a ContainmentGuard is bound on app state.
+
+    Either:
+      * host passed ``containment_guard=`` to ``create_app``, OR
+      * a previous ``POST /containment/evaluate`` call lazy-built one
+        (cached on state per :mod:`bijotel.api.routes.containment`).
+
+    Both cases prove the endpoint is operable on this process.
+    """
+    return getattr(request.app.state, "containment_guard", None) is not None
+
+
 def _build_layers(request: Request) -> list[LayerStatus]:
     """Compute the 13-layer manifest for this server's current state."""
     db_path = Path(request.app.state.db_path)
@@ -105,6 +118,7 @@ def _build_layers(request: Request) -> list[LayerStatus]:
     fingerprint_active = _fingerprint_db_active(db_path)
     ast_in_engine = _engine_has_rule(engine, "ast_safety_check")
     routing_in_engine = _engine_has_rule(engine, "routing_recommendation")
+    containment_active = _containment_active(request)
 
     layers: list[LayerStatus] = []
 
@@ -211,8 +225,12 @@ def _build_layers(request: Request) -> list[LayerStatus]:
         LayerStatus(
             id="containment",
             bijuterie="Combo D",
-            status="available",
+            # Active iff a ContainmentGuard is on app state (either
+            # host-supplied or lazy-built by the /containment/evaluate
+            # handler on first call). Both prove the layer is operable.
+            status="active" if containment_active else "available",
             note="Permitted + Safe + Sealed orchestrator.",
+            metrics={"guard_attached": containment_active},
         )
     )
 

@@ -5,6 +5,85 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] — 2026-05-24 — Combo D ContainmentGuard reachable as `/containment/evaluate` (Bijuteria Combo D → active)
+
+Day-14 audit (2026-05-24) flagged Combo D as Tier 3 — the
+`ContainmentGuard` orchestrator (Permitted + Safe + Sealed) shipped
+in v0.8.0 but had no public-facing trigger. Nothing on GENA invoked
+it. v1.7.0 adds the missing entry point.
+
+### Added
+
+* **`POST /containment/evaluate`** — the three-question gate as a
+  one-shot endpoint. Request mirrors the PolicyEngine shape
+  (`messages` + optional `model` / `max_tokens` / `extra`); response
+  carries `permitted`, `safe`, `sealed`, `all_clear`, all warnings,
+  all AST violations, plus a forensic `seal_record` ready for chain
+  embedding.
+
+* **`create_app(..., containment_guard=...)`** — new kwarg accepts a
+  pre-built :class:`ContainmentGuard`. When `None` (default), the
+  endpoint lazy-builds one from `app.state.policy_engine` plus an
+  optional :class:`ASTSafetyChecker`. The lazy guard is cached on
+  state so the second call doesn't re-init tree-sitter grammars.
+
+* **`_containment_active(request)`** in `layers.py` — completes the
+  v1.6.0 dynamic-detection set. `containment` flips to `status="active"`
+  the moment `app.state.containment_guard` is non-None (either
+  host-supplied or lazy-built by the first `/containment/evaluate`
+  call).
+
+* **`ContainmentEvaluateRequest`, `ContainmentEvaluateResponse`,
+  `ASTViolationItem`** — Pydantic models for transport. Match the
+  in-process `ContainmentDecision` flat-out so the dashboard maps 1:1.
+
+* **GENA reference: `get_guard()`** in
+  `/opt/substrate-v2/policy_engine.py` — lazy singleton alongside the
+  existing `get_engine()`. Backward-compatible: ecosystem code that
+  still calls `get_engine().evaluate(...)` keeps working unchanged.
+  Future ecosystem code can call
+  `get_guard().evaluate_action(action)` for the three-question
+  result in one shot.
+
+### Behaviour
+
+* Benign prompt → `permitted=True safe=True all_clear=True`,
+  empty warnings + violations
+* Jailbreak (warn-mode F11) → `permitted=True` (allow + warn),
+  warnings carry F11 reason
+* Jailbreak (deny-mode F11) → `permitted=False`, AST skipped
+  (decision.safe defaults to True), `all_clear=False`
+* Dangerous bash (`rm -rf /`) → `permitted=True` (warn engine),
+  `safe=False` (critical AST violation),
+  `ast_violations[0].pattern == "dangerous_rm"`
+* Combined jailbreak + dangerous code → both surface,
+  `safe=False`
+
+### Tests (+16, 552 total)
+
+* `tests/test_api_containment.py` — 13 new tests covering benign,
+  jailbreak, deny-short-circuit, dangerous bash, safe code, combined
+  threats, extras preservation, 503 when no engine, host-supplied
+  guard wins, lazy-build caching, evaluation_ms sanity.
+* `tests/test_api_layers.py` — +3 tests: containment active when
+  guard attached, available when no guard, flips after first
+  /containment/evaluate call.
+
+### Tier impact
+
+* **Before v1.7.0:** Combo D Tier 3 (code ships, never invoked).
+* **After v1.7.0 + deploy:** Combo D Tier 1 — endpoint live, lazy
+  guard auto-builds on first call, `/api/layers` reports `active`
+  immediately.
+
+### Backwards compatibility
+
+100% compatible. `create_app(db_path=...)` still works without
+the new kwarg. Hosts that don't call `/containment/evaluate` and
+don't pass `containment_guard=` see no behavioral change.
+
+---
+
 ## [1.6.0] — 2026-05-24 — `/api/layers` reflects PolicyEngine reality (routing #15 + ast_safety #5 → reportable as active)
 
 Day-13 audit (2026-05-23) flagged a gap: layers like `routing`, `ast_safety`,
