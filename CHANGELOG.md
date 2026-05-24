@@ -5,6 +5,60 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] — 2026-05-24 — F11 patterns 35 → 50; R1 probe detection 34.8% → 100%
+
+Round 2 production test R2-A1 closes the F11 PARTIAL status documented
+honestly since v1.5.x. The R1 production suite (test04_f11) flagged
+8/23 = 34.8% detection against a hand-curated attack-probe corpus
+covering 7 categories. R2-E4 surfaced two additional framing gaps
+(hypothetical-pretend, soft roleplay). v2.0.5 closes both axes:
+
+- **Patterns**: 35 → 50 (+16 new, −1 removed).
+- **R1 detection**: 8/23 → **23/23 = 100%** offline against the same
+  probe corpus, with **0/13 false positives** on a benign control set
+  (including tricky lookalikes: "Roleplay as a doctor", "Pretend you're
+  a pirate", "As we discussed before, please send the report",
+  "I am a Python developer", etc.).
+- **Per-category lift** (was → is): instruction_override 3/4 → 4/4,
+  system_extraction 1/3 → 3/3, role_override 1/4 → 4/4, framing 1/4
+  → 4/4, encoding 2/2 → 2/2, multi-turn 0/3 → 3/3, authority
+  impersonation 0/3 → 3/3.
+
+What changed in `bijotel/policy/prompt_patterns.py`:
+
+- **+16 patterns** spread across the existing 7 categories. Each new
+  pattern requires either (a) a specific noun anchor
+  (safety/restrictions/instructions/AI persona) or (b) co-located
+  attack vocabulary within a bounded window (`[\s\S]{0,80}` etc.).
+  This "narrow lexicon, broad surface" approach is the same v1.5.0
+  used and is what keeps the FP rate at zero on the benign corpus.
+- **−1 pattern removed**: the v1.5.0 broad `act as if you (were|are) `
+  pattern false-positived on "Act as if you were teaching Python".
+  Its attack-form coverage is replaced by the narrower v2.0.5 pattern
+  `(?:pretend ... |act as if you (were|are)) [unfiltered|uncensored|
+  jailbroken|...] (AI|assistant|model|...)`.
+- **+34 tests** in `tests/test_prompt_pattern_deny.py` (43 → 79):
+  positive + negative pair for each new pattern, plus a hard
+  `test_v205_r1_probe_detection_rate_at_least_50pct` gate that locks
+  the 50% R1 floor in CI — no silent regression possible.
+
+Bookkeeping:
+
+- Test count: 650 → **686** passing (+36, all v2.0.5 additions); 8
+  skipped (Windows-skipped multiproc + GENA-only paths).
+- Ruff: clean.
+- Public API: unchanged. `DEFAULT_JAILBREAK_PATTERNS` is still the
+  module-level list of compiled-on-demand regex strings; callers
+  passing `extra_patterns=` still extend cleanly.
+
+What this does NOT change:
+
+- Pattern engine internals (`CompiledPatternMatcher`).
+- Rule wiring (`prompt_pattern_deny` factory signature).
+- Default mode (`warn`) — operators flipping to `mode="deny"` get the
+  R2-E4-confirmed deny mechanics + 100% R1 coverage.
+- Storage format / chain semantics (no migration needed).
+
 ## [2.0.4] — 2026-05-24 — `BIJOTEL_MODELS` env var scopes routing registry
 
 Round 2 production test (Test 12 / R2-A2) confirmed the default
