@@ -4,9 +4,9 @@
 [![Python](https://img.shields.io/pypi/pyversions/bijotel.svg)](https://pypi.org/project/bijotel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-649%20passing-brightgreen.svg)](#)
-[![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen.svg)](#)
+[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](#)
 [![Layers](https://img.shields.io/badge/layers-14%2F14%20active-brightgreen.svg)](#)
-[![Providers](https://img.shields.io/badge/providers-Anthropic%20%2B%20xAI%20%2B%20OpenAI-blue.svg)](#)
+[![Providers](https://img.shields.io/badge/chain%20providers-Anthropic%20%2B%20xAI-blue.svg)](#)
 
 > **Forensic-grade tamper-evident audit chain for LLM applications.**
 
@@ -17,11 +17,14 @@ It's a plug-in to whatever tracer you have (OpenLLMetry,
 `AnthropicInstrumentor`, custom wrappers) — it does not replace your
 tracer; it extends it.
 
-**Status:** v2.0.0 on PyPI. Production-validated through 14 consecutive
-days on the GENA agent ecosystem: 5,490+ chain entries, 8 wheel upgrades,
-0 chain breaks, **2 LLM providers in the same chain** (Anthropic + xAI
-live; OpenAI adapter shipped). **All 14 bijuterii layers active** at the
-default `bijotel serve` engine.
+**Status:** v2.0.1 on PyPI; **GENA production runs v1.9.1** (v2.0.x is a
+docs-only PyPI release on top of the same v1.9.1 code, no behavior
+change). Production-validated through 14 consecutive days on the GENA
+agent ecosystem: **5,497 chain entries, 11 wheel deploys
+(v0.5.0 → v1.9.1), 0 chain breaks, 2 LLM providers in the same chain**
+(Anthropic + xAI; the OpenAI SDK adapter is shipped, no
+`api.openai.com` calls in production). **All 14 bijuterii layers
+active** at the default `bijotel serve` engine.
 
 ## Multi-provider chain (v2.0.0)
 
@@ -261,25 +264,42 @@ v2.0.0 is the tag for the moment the column emptied.
   ``opentelemetry-instrumentation-openai`` chain. It never wraps the
   SDK call itself, so there's no provider-specific glue to maintain.
 
-## Production validated
+## Production validated (v1.9.1 deploy, 2026-05-24)
 
-The v1.1.0 release passed a Day-10 integration test against GENA's
-production agent ecosystem (Aisophical):
+GENA's production agent ecosystem (Aisophical) has been the rolling
+integration test since v0.5.0:
 
-* **13 days continuous operation**, 4 wheel upgrades
-  (v0.5.0 → v0.6.0 → v0.6.1 → v1.1.0).
-* **4,952 chain entries**, `POST /chain/verify` with `full=true`
-  returns `valid:true` — cross-version HMAC continuity.
-* **0 chain breaks** across the upgrade window; the chain processor's
-  ``BEGIN IMMEDIATE`` critical section + WAL mode survived all
-  concurrent-writer scenarios that came up.
-* First **production regression baseline** persisted: cost
-  $0.0033 ± $0.0008 per call (24% relative stdev); ~396 spans/day.
-* **18/18 endpoints** responded correctly against the live chain.
-* `POST /export` produced a 48.1 MB signed snapshot;
-  `POST /export/verify` confirmed validity.
+* **14 days continuous operation** (2026-05-10 → 2026-05-24), **11
+  wheel deploys** on GENA: v0.5.0 → v0.6.0 → v0.6.1 → v1.1.0 → v1.4.0
+  → v1.5.2 → v1.5.3 → v1.7.0 → v1.8.0 → v1.9.0 → v1.9.1. *(v2.0.0
+  and v2.0.1 are docs-only releases on PyPI; the production code is
+  v1.9.1.)*
+* **5,497 chain entries**, `bijotel verify --db chain.db` returns
+  `Chain VALID` end-to-end — cross-version *and* cross-provider
+  HMAC continuity.
+* **0 chain breaks** across the 11-deploy window; the chain
+  processor's ``BEGIN IMMEDIATE`` critical section + WAL mode survived
+  every concurrent-writer scenario including the gen4 add-on (today)
+  writing into the same DB from a separate process.
+* **2 LLM providers in the chain** as of 2026-05-24:
+  Anthropic (claude-haiku-4-5 + claude-sonnet-4) emitted via
+  `AnthropicInstrumentor`, and xAI (grok-3-mini) emitted via
+  `bijotel.wrap()` on an OpenAI-SDK client pointing at
+  `https://api.x.ai/v1`. Both providers verify under the same HMAC.
+* **All 14 layers `active`** in `/api/layers` on the default
+  `bijotel serve` engine.
+* **14-day energy footprint** (chain backfill, 2026-05-24):
+  19.95 Wh / 7.58 g CO2 across 5,459 LLM calls.
+  Haiku migration on 2026-05-21 cut daily CO2 ≈ 8× — captured
+  retroactively, not designed in.
+* **Cross-provider consensus** sample (2026-05-24): Haiku vs Sonnet
+  on a factual prompt scored 1.00 agreement (same answer);
+  on a creative prompt scored 0.15 (genuine disagreement → flag).
 
-Full report in
+Full reports in
+[`AUDIT_2026_05_23.md`](AUDIT_2026_05_23.md) and
+[`TIER_MIGRATION_2026_05_23.md`](TIER_MIGRATION_2026_05_23.md);
+the v1.1.0-era integration test in
 [`INTEGRATION_TEST_20260523.md`](INTEGRATION_TEST_20260523.md).
 
 ## Known issues

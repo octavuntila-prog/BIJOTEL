@@ -5,6 +5,46 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] — 2026-05-24 — Honesty patch: badges + stats match reality (M2)
+
+Audit cross-check found four drifts between docs and reality. v2.0.2
+fixes them. No code change.
+
+### Fixed
+
+* **Coverage badge** 92% → **90%** (measured: 3892 stmts, 397 missed).
+* **Providers badge** "Anthropic + xAI + OpenAI" → **"Anthropic + xAI"**.
+  The OpenAI SDK adapter is shipped and tested, but no
+  `api.openai.com` calls are made in production — xAI uses the OpenAI
+  SDK with `base_url=https://api.x.ai/v1`, which counts as `xai` in
+  the chain, not `openai`. The previous badge implied three live
+  providers; we have two.
+* **README "Production validated" section** — rewritten with the
+  actual 11-deploy GENA history (v0.5.0 → v1.9.1), not the
+  v1.1.0-era "13 days / 4 wheel upgrades / 4,952 entries". Adds
+  cross-provider proof, energy-backfill numbers, consensus sample.
+* **README status sentence** — clarifies that v2.0.0 and v2.0.1 are
+  docs-only PyPI releases. **The production code on GENA is v1.9.1**
+  (byte-equivalent to v2.0.x; the package version is just a
+  documentation marker).
+* **CHANGELOG v2.0.0 entry** — "7 wheel upgrades v0.5.0 → v2.0.0"
+  corrected to **"11 wheel deploys v0.5.0 → v1.9.1"** with the full
+  list spelled out. Notes that v2.0.0 is docs-only.
+
+### Why this matters
+
+The M2 principle (reality > docs) calls for cross-checking claims
+against the actual production state. The numbers that landed in
+v2.0.0 / v2.0.1 came from a mix of period-correct sources
+(measured at the time of an earlier release) and aspirational
+copy. v2.0.2 is the rectification.
+
+### Backwards compatibility
+
+100%. Code unchanged. Pure docs + badge fix.
+
+---
+
 ## [2.0.1] — 2026-05-24 — README table reflects v2.0.0 reality (doc patch)
 
 Tightens the bijuterii table in README.md so the PyPI rendering
@@ -82,10 +122,17 @@ unproven until today.
 ### Production validation
 
 - **14 consecutive days** continuous chain growth on GENA
-- **7 wheel upgrades** in-flight (v0.5.0 → v2.0.0) without chain
-  breakage; cross-version integrity preserved
+  (2026-05-10 → 2026-05-24).
+- **11 wheel deploys** on GENA in-flight (v0.5.0 → v0.6.0 → v0.6.1
+  → v1.1.0 → v1.4.0 → v1.5.2 → v1.5.3 → v1.7.0 → v1.8.0 → v1.9.0
+  → v1.9.1) without chain breakage. Note: v2.0.0 itself is a
+  docs-only PyPI release; GENA production runs v1.9.1, which is
+  byte-equivalent code.
+- **5,497 chain entries** as of 2026-05-24T10:34Z, `bijotel verify`
+  → VALID end-to-end including the cross-provider rows.
 - **2 providers** in the chain after the gen4 instrumentation
-  (today): Anthropic claude-haiku-4-5 + xAI grok-3-mini
+  (today): Anthropic (claude-haiku-4-5 + claude-sonnet-4) and xAI
+  (grok-3-mini, via OpenAI SDK at `https://api.x.ai/v1`).
 - **Dual observer**: BIJOTEL chain vs GENA's traces.db ledger
   agree to within 1 entry across 14 days (lockstep)
 - **Energy footprint** for the entire 14-day window: 19.95 Wh,
