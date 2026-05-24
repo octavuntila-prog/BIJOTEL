@@ -5,6 +5,108 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] — 2026-05-24 — AI energy + carbon accounting (Bijuteria #3: last Tier 4 → Tier 1)
+
+"Fiecare token are un cost în wați. Măsoară-l."
+
+Each LLM call burns watts. Each watt has an associated grams-CO2
+depending on where the inference ran. BIJOTEL-instrumented stacks
+already record ``gen_ai.usage.input_tokens`` and
+``gen_ai.usage.output_tokens`` per span — v1.9.0 turns those two
+integers into Wh and gCO2, persists them, and surfaces aggregates
+("how much CO2 did v3-atelier produce this week?").
+
+Closes the last "code not coded" gap in the bijuterii catalog.
+After v1.9.0: **every catalog entry has shipped code.** Tier 4
+deprecated; `/api/layers` no longer reports any `planned` rows.
+
+### Added
+
+* **`bijotel.layers.energy`** (~500 LOC):
+  * :class:`EnergyEstimator` — tokens-to-Wh function with
+    per-model rate table (Anthropic Haiku/Sonnet/Opus + OpenAI
+    gpt-4o family). Conservative public-data estimates;
+    override via constructor for hosts with measured numbers.
+  * :class:`CarbonCalculator` — Wh to grams CO2 via regional
+    grid intensity. Defaults cover ``us-east``, ``us-west``,
+    ``eu-west``, ``eu-north`` (Sweden 30 g/kWh!), ``eu-central``,
+    ``asia-pacific``, plus ``world`` average (450 g/kWh).
+  * :class:`EnergyTracker` — SQLite-backed accumulator with WAL
+    + busy_timeout + atomic INSERT (same hardening pattern as
+    :class:`Budget`). UNIQUE index on ``span_seq`` makes
+    backfill idempotent. ``summary()`` returns
+    :class:`EnergySummary` filterable by time/agent with
+    human-friendly equivalents (km driven, phone charges,
+    kettle boils).
+  * :class:`EnergySpanProcessor` — OTel SpanProcessor. Reads
+    tokens + model from span attrs, records via tracker.
+    Crash-isolated.
+  * :func:`energy_budget` — :class:`PolicyEngine` rule. Warns
+    when *today's* accumulated Wh (per agent) crosses the
+    configured ceiling. UTC day boundary.
+
+* **`POST /energy/estimate`** — stateless tokens-to-CO2 math
+  (no DB writes). Accepts optional ``region`` override.
+
+* **`GET /energy/summary`** — aggregate over the host's
+  :class:`EnergyTracker`. Filterable by ``since`` / ``until``
+  (ISO-8601) and ``agent_id``. Lazy-builds a tracker against
+  the chain DB on first call if the host didn't wire one.
+
+* **`bijotel energy backfill --db CHAIN.db [--region us-east]`**
+  — read every chain row, extract model + token counts from
+  the canonical body, INSERT into ``energy_log``. Idempotent
+  on ``chain.seq``. Prints summary at the end.
+
+* **`bijotel energy summary --db CHAIN.db [--since] [--until] [--agent-id]`**
+  — pretty-print aggregate stats from ``energy_log``.
+
+* **`/api/layers` updated** — `energy` (Bijuteria #3) flips to
+  `status="active"` when ``app.state.energy_tracker`` is
+  attached OR when ``energy_log`` has rows. Manifest count
+  unchanged (14); `planned` set is now empty.
+
+* **Public API** — `bijotel.EnergyEstimator`,
+  `bijotel.CarbonCalculator`, `bijotel.EnergyTracker`,
+  `bijotel.EnergySpanProcessor`, `bijotel.EnergySummary`,
+  `bijotel.energy_budget`.
+
+### Honest scope
+
+Numbers are **estimates, not measurements**. The per-1K-tokens
+rates are public approximations; carbon intensity varies by
+hour-of-day on real grids; Anthropic doesn't publish per-call Wh.
+Treat these as **directional, not exact** — useful for "are we
+trending up?" and "agent A uses N× more than agent B," not for
+ISO-14064 reporting. Doc-strings spell this out.
+
+### Tests (+38, 645 total)
+
+* `tests/test_energy.py` — 38 tests across Estimator (9),
+  Calculator (6), Tracker (11), SpanProcessor (5), policy rule
+  (7), GENA-workload integration (1).
+* `tests/test_api_layers.py` — +2 tests for active/available
+  detection of the energy layer. Updated the manifest-count
+  test: `planned` count is now 0.
+
+### Tier impact (final)
+
+| Bijuteria | Pre-v1.9.0 | Post-v1.9.0 |
+|---|---|---|
+| #3 Energy | Tier 4 (no code) | **Tier 1** (code + tests + endpoint + CLI + GENA backfill) |
+
+Catalog state: **0 Tier 4 layers remaining.** Every layer has
+shipped code on PyPI. Production-active counts depend on per-host
+wiring; see DEPLOY_v1.9.0_2026-05-24.md for GENA's full
+14-day backfill numbers (real Wh + gCO2 for 5,438 chain entries).
+
+### Backwards compatibility
+
+100% compatible. Hosts that ignore energy see no behavioral
+change. The new endpoints and CLI commands are additive.
+
+---
+
 ## [1.8.0] — 2026-05-24 — Multi-LLM consensus voting (Bijuteria #9: Tier 4 → Tier 1)
 
 Don't ask one model. Ask N and compare.

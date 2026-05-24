@@ -52,13 +52,13 @@ def test_layers_endpoint_returns_envelope() -> None:
 
 
 def test_layers_count_matches_manifest() -> None:
-    """The manifest has 14 entries (12 wired + 1 default-active + 1 planned)."""
+    """The manifest has 14 entries (v1.9.0: 0 planned — all layers have code)."""
     app = create_app(db_path="/tmp/no-such-chain.db")
     client = TestClient(app)
     body = client.get("/layers").json()
     assert body["total"] == 14  # bumped if/when new bijuterii are added
-    # v1.8.0: consensus moved planned→available, only energy remains planned
-    assert body["planned"] == 1
+    # v1.9.0: energy moved planned→available; manifest fully fleshed out
+    assert body["planned"] == 0
 
 
 def test_layers_planned_set() -> None:
@@ -66,8 +66,33 @@ def test_layers_planned_set() -> None:
     client = TestClient(app)
     body = client.get("/layers").json()
     planned_ids = {layer["id"] for layer in body["layers"] if layer["status"] == "planned"}
-    # v1.8.0: only energy still planned (consensus has code now)
-    assert planned_ids == {"energy"}
+    # v1.9.0: no planned-only layers — every catalog entry has code
+    assert planned_ids == set()
+
+
+def test_energy_active_when_tracker_attached(tmp_path: Path) -> None:
+    """`energy` layer flips to active when EnergyTracker is on app state (v1.9.0)."""
+    from bijotel.layers.energy import EnergyTracker
+
+    db = tmp_path / "chain.db"
+    db.write_bytes(b"")  # touch
+    app = create_app(db_path=str(db))
+    app.state.energy_tracker = EnergyTracker(db)
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    energy = next(layer for layer in body["layers"] if layer["id"] == "energy")
+    assert energy["status"] == "active"
+
+
+def test_energy_available_without_tracker(tmp_path: Path) -> None:
+    """`energy` stays available when no tracker + no energy_log table."""
+    db = tmp_path / "chain.db"
+    db.write_bytes(b"")  # touch
+    app = create_app(db_path=str(db))
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    energy = next(layer for layer in body["layers"] if layer["id"] == "energy")
+    assert energy["status"] == "available"
 
 
 def test_consensus_active_when_provider_attached() -> None:

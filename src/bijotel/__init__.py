@@ -12,11 +12,16 @@ from bijotel.layers import (
     ASTSafetyChecker,
     ASTViolation,
     Budget,
+    CarbonCalculator,
     ConsensusResult,
     ConsensusVoter,
     ContainmentDecision,
     ContainmentGuard,
     DeterministicFingerprinter,
+    EnergyEstimator,
+    EnergySpanProcessor,
+    EnergySummary,
+    EnergyTracker,
     FingerprintSpanProcessor,
     MisalignmentReport,
     ModelRegistry,
@@ -30,6 +35,7 @@ from bijotel.layers import (
     ast_safety_check,
     compute_agreement,
     consensus_requirement,
+    energy_budget,
     misalignment_check,
     routing_recommendation,
     similarity_search,
@@ -57,7 +63,7 @@ from bijotel.regression import (
     compute_baseline,
 )
 
-__version__ = "1.8.0"
+__version__ = "1.9.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -66,6 +72,7 @@ __all__ = [
     "AnomalyMethod",
     "AnthropicAdapter",
     "Budget",
+    "CarbonCalculator",
     "ConsensusResult",
     "ConsensusVoter",
     "ContainmentDecision",
@@ -74,6 +81,10 @@ __all__ = [
     "Decision",
     "DeterministicFingerprinter",
     "DimensionStats",
+    "EnergyEstimator",
+    "EnergySpanProcessor",
+    "EnergySummary",
+    "EnergyTracker",
     "FingerprintSpanProcessor",
     "MerkleDAG",
     "MisalignmentReport",
@@ -98,6 +109,7 @@ __all__ = [
     "consensus_requirement",
     "cost_per_call_max",
     "daily_token_budget",
+    "energy_budget",
     "export_chain",
     "guard",
     "init",

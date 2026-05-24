@@ -334,6 +334,72 @@ class RegressionRunRequest(BaseModel):
     )
 
 
+# ───────────────────────── /energy ─────────────────────────
+
+
+class EnergyEstimateRequest(BaseModel):
+    """Body of ``POST /energy/estimate``."""
+
+    model: str = Field(..., description="LLM model name.")
+    tokens_in: int = Field(..., ge=0)
+    tokens_out: int = Field(..., ge=0)
+    region: str | None = Field(
+        None,
+        description="Optional override of the host's default grid region.",
+    )
+
+
+class EnergyEstimateResponse(BaseModel):
+    """Body of ``POST /energy/estimate``."""
+
+    model: str
+    tokens: int = Field(..., description="tokens_in + tokens_out.")
+    wh: float
+    co2_grams: float
+    region: str
+    intensity_g_per_kwh: float
+
+
+class EnergyModelEntry(BaseModel):
+    model: str
+    calls: int
+    tokens: int
+    wh: float
+    co2_grams: float
+
+
+class EnergyAgentEntry(BaseModel):
+    agent_id: str
+    calls: int
+    tokens: int
+    wh: float
+    co2_grams: float
+
+
+class EnergySummaryResponse(BaseModel):
+    """Body of ``GET /energy/summary``."""
+
+    total_calls: int
+    total_tokens: int
+    total_wh: float
+    total_co2_grams: float
+    co2_kg: float
+    equivalent_km_driven: float = Field(
+        ..., description="grams CO2 / 120 (typical gasoline car)."
+    )
+    equivalent_phone_charges: float = Field(
+        ..., description="total_wh / 10 (1 phone charge ≈ 10 Wh)."
+    )
+    equivalent_kettle_boils: float = Field(
+        ..., description="total_wh / 100 (1.5L kettle boil ≈ 100 Wh)."
+    )
+    per_model: list[EnergyModelEntry]
+    per_agent: list[EnergyAgentEntry]
+    since: str | None = None
+    until: str | None = None
+    has_data: bool
+
+
 # ───────────────────────── /consensus ─────────────────────────
 
 

@@ -286,14 +286,23 @@ def _build_layers(request: Request) -> list[LayerStatus]:
         )
     )
 
-    # --- PLANNED ---
+    # --- AVAILABLE: energy is shipped code (v1.9.0). Flips to active
+    #     when the host has an EnergyTracker on app state, OR when the
+    #     chain DB has an energy_log table with rows (proxy: backfill
+    #     was run, or the host wired EnergySpanProcessor). ---
 
+    energy_active = (
+        getattr(request.app.state, "energy_tracker", None) is not None
+        or (_table_row_count(db_path, "energy_log") or 0) > 0
+    )
+    energy_rows = _table_row_count(db_path, "energy_log") or 0
     layers.append(
         LayerStatus(
             id="energy",
             bijuterie="#3",
-            status="planned",
-            note="Energy accounting per call. Future release.",
+            status="active" if energy_active else "available",
+            note="Wh + gCO2 per LLM call (v1.9.0).",
+            metrics={"energy_log_rows": energy_rows},
         )
     )
 

@@ -6,6 +6,7 @@ import argparse
 import sys
 
 from bijotel.cli.commands import (
+    energy_cmd,
     export_cmd,
     inspect_cmd,
     list_cmd,
@@ -132,6 +133,44 @@ def _build_parser() -> argparse.ArgumentParser:
         help="z-score absolute threshold for anomaly (default 3.0).",
     )
 
+    # bijotel energy
+    p_energy = subparsers.add_parser(
+        "energy",
+        help="AI energy + carbon accounting (Bijuteria #3). Subcommands: backfill, summary.",
+    )
+    energy_sub = p_energy.add_subparsers(dest="energy_command", required=True)
+
+    # bijotel energy backfill --db ...
+    p_backfill = energy_sub.add_parser(
+        "backfill",
+        help="Backfill energy_log from chain.db entries (idempotent on chain.seq).",
+    )
+    p_backfill.add_argument("--db", required=True, help="SQLite chain DB path.")
+    p_backfill.add_argument(
+        "--region",
+        default="us-east",
+        help="Grid region for carbon intensity (default us-east).",
+    )
+
+    # bijotel energy summary --db ...
+    p_esum = energy_sub.add_parser(
+        "summary",
+        help="Print aggregate energy + CO2 stats from energy_log.",
+    )
+    p_esum.add_argument("--db", required=True, help="SQLite chain DB path.")
+    p_esum.add_argument(
+        "--since",
+        help="ISO-8601 lower bound (e.g. 2026-05-24T00:00:00Z).",
+    )
+    p_esum.add_argument(
+        "--until",
+        help="ISO-8601 upper bound.",
+    )
+    p_esum.add_argument(
+        "--agent-id",
+        help="Filter to one agent.",
+    )
+
     # bijotel serve
     p_serve = subparsers.add_parser(
         "serve",
@@ -185,6 +224,7 @@ def main(argv: list[str] | None = None) -> int:
         "export": export_cmd,
         "verify-export": verify_export_cmd,
         "regression": regression_cmd,
+        "energy": energy_cmd,
         "serve": serve_cmd,
     }
     handler = handlers[args.command]

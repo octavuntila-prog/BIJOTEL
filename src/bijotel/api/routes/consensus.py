@@ -80,6 +80,13 @@ def consensus_evaluate(
                     "callable."
                 ),
             ) from e
+        # Anthropic SDK is importable — cache the default provider on
+        # app state so /api/layers reports `consensus` as "active" and
+        # the next call hits the same callable (no re-import cost).
+        from bijotel.layers.consensus import anthropic_provider
+
+        request.app.state.consensus_provider = anthropic_provider
+        provider = anthropic_provider
 
     voter = ConsensusVoter(
         models=payload.models,

@@ -153,6 +153,10 @@ def create_app(
                 "description": "Multi-LLM voting (Bijuteria #9) — "
                 "N-version programming for hallucination resistance.",
             },
+            {
+                "name": "energy",
+                "description": "AI energy + carbon accounting (Bijuteria #3).",
+            },
         ],
     )
 
@@ -204,6 +208,7 @@ def create_app(
     from bijotel.api.routes import chain as chain_routes
     from bijotel.api.routes import consensus as consensus_routes
     from bijotel.api.routes import containment as containment_routes
+    from bijotel.api.routes import energy as energy_routes
     from bijotel.api.routes import export as export_routes
     from bijotel.api.routes import layers as layers_routes
     from bijotel.api.routes import policy as policy_routes
@@ -217,6 +222,7 @@ def create_app(
         export_routes,
         containment_routes,
         consensus_routes,
+        energy_routes,
     ]
 
     if serve_dashboard:
