@@ -148,6 +148,11 @@ def create_app(
                 "description": "Combo D three-question gate "
                 "(permitted? safe? sealed?).",
             },
+            {
+                "name": "consensus",
+                "description": "Multi-LLM voting (Bijuteria #9) — "
+                "N-version programming for hallucination resistance.",
+            },
         ],
     )
 
@@ -197,6 +202,7 @@ def create_app(
 
     # ----- Route modules (defer import so missing extras don't break /health) -----
     from bijotel.api.routes import chain as chain_routes
+    from bijotel.api.routes import consensus as consensus_routes
     from bijotel.api.routes import containment as containment_routes
     from bijotel.api.routes import export as export_routes
     from bijotel.api.routes import layers as layers_routes
@@ -210,6 +216,7 @@ def create_app(
         regression_routes,
         export_routes,
         containment_routes,
+        consensus_routes,
     ]
 
     if serve_dashboard:

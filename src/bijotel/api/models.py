@@ -334,6 +334,92 @@ class RegressionRunRequest(BaseModel):
     )
 
 
+# ───────────────────────── /consensus ─────────────────────────
+
+
+class ConsensusEvaluateRequest(BaseModel):
+    """Body of ``POST /consensus/evaluate``."""
+
+    messages: list[dict[str, Any]] = Field(
+        ..., description="OTel GenAI-style messages list."
+    )
+    models: list[str] = Field(
+        ...,
+        min_length=1,
+        description="Models to query in parallel. Cost = N × single call.",
+    )
+    max_tokens: int = Field(
+        500, ge=1, le=8192, description="Max tokens per model response."
+    )
+    threshold: float = Field(
+        0.7,
+        ge=0.0,
+        le=1.0,
+        description="Agreement threshold for consensus_reached.",
+    )
+
+
+class ConsensusModelResponse(BaseModel):
+    """One model's reply within a consensus round."""
+
+    model: str
+    response: str
+    tokens_in: int
+    tokens_out: int
+    cost_usd: float
+    latency_ms: float
+    error: str | None = Field(
+        None, description="Error string if the call failed; None on success."
+    )
+
+
+class ConsensusEvaluateResponse(BaseModel):
+    """Body of ``POST /consensus/evaluate``."""
+
+    models_queried: list[str]
+    responses: list[ConsensusModelResponse]
+    agreement_score: float = Field(
+        ..., description="Pairwise-mean Jaccard token overlap in [0,1]."
+    )
+    consensus_reached: bool
+    threshold: float
+    disagreement_details: list[str] = Field(
+        default_factory=list,
+        description="Top-3 model-pairs by lowest pairwise agreement, "
+        "populated when consensus_reached=False.",
+    )
+    recommended_response: str = Field(
+        ..., description="Response from the highest-cost successful model."
+    )
+    recommended_model: str
+    cost_total_usd: float
+    latency_ms: float = Field(
+        ..., description="Wall-clock duration of the parallel vote()."
+    )
+    errors: list[str] = Field(
+        default_factory=list,
+        description="Per-model errors. Empty when all calls succeeded.",
+    )
+
+
+class ConsensusStakesRequest(BaseModel):
+    """Body of ``POST /consensus/stakes``."""
+
+    messages: list[dict[str, Any]] = Field(
+        ..., description="Messages to classify."
+    )
+
+
+class ConsensusStakesResponse(BaseModel):
+    """Body of ``POST /consensus/stakes``."""
+
+    stakes: str = Field(..., description="'high' / 'low'.")
+    keywords_found: list[str] = Field(
+        default_factory=list,
+        description="High-stakes keywords matched in the prompt text.",
+    )
+
+
 # ───────────────────────── /containment ─────────────────────────
 
 

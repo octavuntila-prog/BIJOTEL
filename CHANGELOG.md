@@ -5,6 +5,119 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] — 2026-05-24 — Multi-LLM consensus voting (Bijuteria #9: Tier 4 → Tier 1)
+
+Don't ask one model. Ask N and compare.
+
+**N-version programming** (Avizienis 1977 — Space Shuttle flight
+software) applied to LLMs: one model may hallucinate, but two
+hallucinating the same thing for the same prompt is unlikely, and
+three is rare. So:
+
+* High-stakes query → fan out to Haiku + Sonnet (+ optionally Opus)
+* Compute agreement score over their responses
+* Above threshold → consensus; return the highest-cost successful
+  reply (quality proxy)
+* Below threshold → flag for human review; the disagreement itself
+  is the signal
+
+Day-14 audit (2026-05-24) flagged #9 Consensus as Tier 4 — "tracked
+in catalog, no code." v1.8.0 ships the code, the policy gate, the
+endpoints, and the public API.
+
+### Added
+
+* **`bijotel.layers.consensus`** (~450 LOC) — new module:
+  * `ConsensusVoter(models, *, provider, threshold)` — async
+    orchestrator. `vote(messages, max_tokens=N)` fires N parallel
+    calls and returns a :class:`ConsensusResult`. Exceptions from
+    individual models are captured per-response, not bubbled — one
+    flaky model can't kill the vote.
+  * `ConsensusResult` + `ModelResponse` — flat dataclasses carrying
+    agreement_score, consensus_reached, disagreement_details,
+    recommended_response/model, cost_total_usd, latency_ms,
+    per-model errors.
+  * `StakesClassifier` — 31-keyword default (medical, legal,
+    financial, safety, security). `classify(messages)` returns
+    `"high"` / `"low"`. Whole-word boundary, case-insensitive.
+  * `compute_agreement(responses)` — pairwise-mean Jaccard token
+    overlap in `[0.0, 1.0]`. Honest about being a crude semantic
+    proxy.
+  * `anthropic_provider` — default async :class:`ProviderCallable`
+    using the Anthropic SDK. Lazy-import, so hosts that pass a
+    custom provider don't need the `[anthropic]` extra.
+  * `consensus_requirement(*, mode, stakes_threshold)` —
+    :class:`PolicyEngine` rule. Warns when a high-stakes prompt
+    goes to a single model. Host signals "this call is already
+    multi-model" by passing `{"_consensus": True}` or
+    `"models_used": N >= 2` in the request dict.
+
+* **`POST /consensus/evaluate`** — fire N-way vote, return result.
+  Hosts attach `app.state.consensus_provider` for custom dispatch
+  (mixing providers, mocking, OpenAI). 503 when neither a custom
+  provider is set nor the Anthropic SDK is importable.
+
+* **`POST /consensus/stakes`** — classify a prompt with
+  `StakesClassifier` (no LLM calls). Useful for upstream gating:
+  only route high-stakes prompts through the expensive evaluate
+  endpoint.
+
+* **`/api/layers` updated** — `consensus` (Bijuteria #9) flips to
+  `status="active"` when a provider is attached. Manifest count
+  unchanged (still 14 layers); `planned` set shrinks from
+  `{energy, consensus}` to `{energy}` — energy is now the last
+  Tier 4 entry.
+
+* **Public API** — `bijotel.ConsensusVoter`,
+  `bijotel.ConsensusResult`, `bijotel.ModelResponse`,
+  `bijotel.StakesClassifier`, `bijotel.compute_agreement`,
+  `bijotel.consensus_requirement`.
+
+### Cost note
+
+Consensus = N × cost per call. Use `StakesClassifier` upstream as
+a gate — only high-stakes prompts pay the multiplier. Low-stakes
+go through a single model unchanged. The endpoint reports
+`cost_total_usd` so the host can decide post-hoc whether to keep
+voting.
+
+### Tests (+51, 605 total)
+
+* `tests/test_consensus.py` — 41 tests covering stakes
+  classification (8 paths), agreement scoring (8 paths),
+  ConsensusVoter with mock provider (parallel latency,
+  per-model exception capture, recommended-response strategy,
+  cost summing, models-property immutability), ConsensusResult
+  shape, and the policy rule (warn/deny modes, multi-model
+  passthrough markers, bad-config validation,
+  PolicyEngine composition).
+* `tests/test_api_consensus.py` — 10 endpoint tests (stakes
+  high/low, evaluate agree/disagree, recommended-model,
+  per-model errors, payload validation). 1 skipped when the
+  Anthropic SDK is installed (the 503 path requires a clean
+  install to verify).
+* `tests/test_api_layers.py` — 2 new tests: consensus active
+  when provider attached, available otherwise. Updated existing
+  `planned` test to reflect the manifest shrinkage.
+
+### Tier impact
+
+* **Before v1.8.0:** Tier 4 (no code).
+* **After v1.8.0 (package):** code shipped, importable; layers
+  endpoint reports `available` until host wires a provider.
+* **After v1.8.0 deploy + provider wiring on GENA:** Tier 1.
+  `/api/layers` reports `consensus` as `active`. First real
+  Haiku-vs-Sonnet agreement score on GENA's actual workload
+  recorded in DEPLOY_v1.8.0_2026-05-24.md.
+
+### Backwards compatibility
+
+100% compatible. Hosts that ignore consensus see no behavioural
+change. The `[anthropic]` extra is unchanged. The new endpoints
+are additive. Public-API additions don't shadow existing names.
+
+---
+
 ## [1.7.0] — 2026-05-24 — Combo D ContainmentGuard reachable as `/containment/evaluate` (Bijuteria Combo D → active)
 
 Day-14 audit (2026-05-24) flagged Combo D as Tier 3 — the

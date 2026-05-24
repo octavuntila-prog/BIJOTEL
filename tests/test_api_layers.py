@@ -52,12 +52,13 @@ def test_layers_endpoint_returns_envelope() -> None:
 
 
 def test_layers_count_matches_manifest() -> None:
-    """The manifest currently has 14 entries (10 wired + 2 active default + 2 planned)."""
+    """The manifest has 14 entries (12 wired + 1 default-active + 1 planned)."""
     app = create_app(db_path="/tmp/no-such-chain.db")
     client = TestClient(app)
     body = client.get("/layers").json()
     assert body["total"] == 14  # bumped if/when new bijuterii are added
-    assert body["planned"] == 2  # energy + consensus
+    # v1.8.0: consensus moved planned→available, only energy remains planned
+    assert body["planned"] == 1
 
 
 def test_layers_planned_set() -> None:
@@ -65,7 +66,38 @@ def test_layers_planned_set() -> None:
     client = TestClient(app)
     body = client.get("/layers").json()
     planned_ids = {layer["id"] for layer in body["layers"] if layer["status"] == "planned"}
-    assert planned_ids == {"energy", "consensus"}
+    # v1.8.0: only energy still planned (consensus has code now)
+    assert planned_ids == {"energy"}
+
+
+def test_consensus_active_when_provider_attached() -> None:
+    """`consensus` layer flips to active when host wires consensus_provider (v1.8.0)."""
+
+    async def fake_provider(model, messages, max_tokens):
+        from bijotel.layers.consensus import ModelResponse
+        return ModelResponse(
+            model=model, response="ok", tokens_in=1, tokens_out=1,
+            cost_usd=0.0, latency_ms=1.0, error=None,
+        )
+
+    app = create_app(db_path="/tmp/no-such-chain.db")
+    app.state.consensus_provider = fake_provider
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    consensus = next(layer for layer in body["layers"] if layer["id"] == "consensus")
+    assert consensus["status"] == "active"
+    assert consensus["metrics"]["provider_attached"] is True
+
+
+def test_consensus_available_without_provider() -> None:
+    """`consensus` stays available when no provider is attached."""
+    app = create_app(db_path="/tmp/no-such-chain.db")
+    # don't set consensus_provider
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    consensus = next(layer for layer in body["layers"] if layer["id"] == "consensus")
+    assert consensus["status"] == "available"
+    assert consensus["metrics"]["provider_attached"] is False
 
 
 def test_layers_chain_active_when_db_populated(populated_db: Path) -> None:

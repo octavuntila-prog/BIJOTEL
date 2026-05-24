@@ -267,6 +267,25 @@ def _build_layers(request: Request) -> list[LayerStatus]:
         )
     )
 
+    # --- AVAILABLE: consensus is shipped code (v1.8.0) — flips to active
+    #     when host attaches a provider on app.state ---
+
+    consensus_active = (
+        getattr(request.app.state, "consensus_provider", None) is not None
+    )
+    layers.append(
+        LayerStatus(
+            id="consensus",
+            bijuterie="#9",
+            # Active iff the host wired a provider OR the endpoint has
+            # been called (the route doesn't lazy-build a provider —
+            # default uses anthropic SDK which is the host's choice).
+            status="active" if consensus_active else "available",
+            note="N-model voting + StakesClassifier gate (v1.8.0).",
+            metrics={"provider_attached": consensus_active},
+        )
+    )
+
     # --- PLANNED ---
 
     layers.append(
@@ -274,16 +293,7 @@ def _build_layers(request: Request) -> list[LayerStatus]:
             id="energy",
             bijuterie="#3",
             status="planned",
-            note="Energy accounting per call. v1.3.0 target.",
-        )
-    )
-
-    layers.append(
-        LayerStatus(
-            id="consensus",
-            bijuterie="#9",
-            status="planned",
-            note="Multi-model consensus voting. v1.3.0 target.",
+            note="Energy accounting per call. Future release.",
         )
     )
 
