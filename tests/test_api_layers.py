@@ -107,3 +107,74 @@ def test_layers_bijuterii_references_present() -> None:
     for layer in body["layers"]:
         assert layer["bijuterie"]  # non-empty
         assert isinstance(layer["bijuterie"], str)
+
+
+# ============================================================================
+# v1.6.0: dynamic active-detection for routing / ast_safety / fingerprint
+# ============================================================================
+
+
+def test_routing_active_when_rule_wired() -> None:
+    """`routing` flips to active when a routing_recommendation rule is in the
+    bound PolicyEngine (v1.6.0)."""
+    from bijotel.layers.routing import routing_recommendation
+    from bijotel.policy import PolicyEngine, prompt_pattern_deny
+
+    engine = PolicyEngine(
+        rules=[
+            prompt_pattern_deny(mode="warn"),
+            routing_recommendation(mode="warn"),
+        ]
+    )
+    app = create_app(db_path="/tmp/no-such-chain.db", policy_engine=engine)
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    routing = next(layer for layer in body["layers"] if layer["id"] == "routing")
+    assert routing["status"] == "active"
+    assert routing["metrics"]["wired_in_engine"] is True
+
+
+def test_routing_available_when_not_wired() -> None:
+    """`routing` stays available with the default engine (no routing rule)."""
+    app = create_app(db_path="/tmp/no-such-chain.db")
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    routing = next(layer for layer in body["layers"] if layer["id"] == "routing")
+    assert routing["status"] == "available"
+    assert routing["metrics"]["wired_in_engine"] is False
+
+
+def test_ast_safety_active_when_rule_wired() -> None:
+    """`ast_safety` flips to active when ast_safety_check is in the engine."""
+    pytest.importorskip("tree_sitter")
+    pytest.importorskip("tree_sitter_bash")
+    from bijotel.layers.ast_safety import ast_safety_check
+    from bijotel.policy import PolicyEngine
+
+    engine = PolicyEngine(rules=[ast_safety_check(languages=("bash",), mode="warn")])
+    app = create_app(db_path="/tmp/no-such-chain.db", policy_engine=engine)
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    ast = next(layer for layer in body["layers"] if layer["id"] == "ast_safety")
+    assert ast["status"] == "active"
+    assert ast["metrics"]["wired_in_engine"] is True
+
+
+def test_fingerprint_active_when_db_populated(tmp_path: Path) -> None:
+    """`fingerprint` flips to active when sibling fingerprints.db has rows."""
+    import sqlite3
+
+    chain_db = tmp_path / "chain.db"
+    chain_db.write_bytes(b"")  # touch
+    fp_db = tmp_path / "bijotel_fingerprints.db"
+    with sqlite3.connect(fp_db) as conn:
+        conn.execute("CREATE TABLE fingerprints (id INTEGER PRIMARY KEY, h TEXT)")
+        conn.execute("INSERT INTO fingerprints (h) VALUES (?)", ("abc",))
+        conn.commit()
+
+    app = create_app(db_path=str(chain_db))
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    fp = next(layer for layer in body["layers"] if layer["id"] == "fingerprint")
+    assert fp["status"] == "active"
+    assert fp["metrics"]["deterministic_fingerprints"] is True

@@ -57,6 +57,43 @@ def _table_row_count(db_path: Path, table: str) -> int | None:
         return None
 
 
+def _engine_has_rule(engine: Any, factory_name: str) -> bool:
+    """True iff ``engine`` has a rule produced by ``factory_name``.
+
+    Each rule factory in :mod:`bijotel.policy` and :mod:`bijotel.layers`
+    returns a closure named ``rule`` defined inside the factory. The
+    closure's ``__qualname__`` therefore contains the factory name,
+    e.g. ``routing_recommendation.<locals>.rule``. We use that as a
+    detection sentinel — no factory needs to set an explicit flag.
+
+    Returns False for ``engine is None``, missing ``_rules``, or any
+    inspection error (defensive: this endpoint must never raise).
+    """
+    if engine is None:
+        return False
+    try:
+        rules = getattr(engine, "_rules", []) or []
+        for rule in rules:
+            qn = getattr(rule, "__qualname__", "") or ""
+            if factory_name in qn:
+                return True
+    except Exception:
+        pass
+    return False
+
+
+def _fingerprint_db_active(db_path: Path) -> bool:
+    """True iff the sibling ``bijotel_fingerprints.db`` exists & has entries.
+
+    ``FingerprintSpanProcessor`` writes to a dedicated DB alongside the
+    chain. Presence of the file alone isn't enough (it may be created
+    empty); requires at least one entry to count as active.
+    """
+    fp_path = db_path.parent / "bijotel_fingerprints.db"
+    n = _table_row_count(fp_path, "fingerprints")
+    return bool(n and n > 0)
+
+
 def _build_layers(request: Request) -> list[LayerStatus]:
     """Compute the 13-layer manifest for this server's current state."""
     db_path = Path(request.app.state.db_path)
@@ -65,6 +102,9 @@ def _build_layers(request: Request) -> list[LayerStatus]:
     chain_count = _table_row_count(db_path, "chain")
     cas_count = _table_row_count(db_path, "cas")
     dag_count = _table_row_count(db_path, "dag_nodes")
+    fingerprint_active = _fingerprint_db_active(db_path)
+    ast_in_engine = _engine_has_rule(engine, "ast_safety_check")
+    routing_in_engine = _engine_has_rule(engine, "routing_recommendation")
 
     layers: list[LayerStatus] = []
 
@@ -116,9 +156,15 @@ def _build_layers(request: Request) -> list[LayerStatus]:
         LayerStatus(
             id="fingerprint",
             bijuterie="#7",
-            status="available",
+            # Active iff the sibling fingerprints.db has at least one
+            # row — the FingerprintSpanProcessor is wired and emitting.
+            # Available otherwise (code ships, just nothing written yet).
+            status="active" if fingerprint_active else "available",
             note=None if fp_have else "Install 'bijotel[fingerprint]' for semantic mode.",
-            metrics={"sentence_transformers": fp_have},
+            metrics={
+                "sentence_transformers": fp_have,
+                "deterministic_fingerprints": fingerprint_active,
+            },
         )
     )
 
@@ -127,9 +173,15 @@ def _build_layers(request: Request) -> list[LayerStatus]:
         LayerStatus(
             id="ast_safety",
             bijuterie="#5",
-            status="available",
+            # Active iff this server's PolicyEngine actually has an
+            # ast_safety_check rule wired (not just the import being
+            # available). Mirrors the routing detection below.
+            status="active" if ast_in_engine else "available",
             note=None if ast_have else "Install 'bijotel[ast]' for bash AST scan.",
-            metrics={"tree_sitter": ast_have},
+            metrics={
+                "tree_sitter": ast_have,
+                "wired_in_engine": ast_in_engine,
+            },
         )
     )
 
@@ -137,8 +189,12 @@ def _build_layers(request: Request) -> list[LayerStatus]:
         LayerStatus(
             id="routing",
             bijuterie="#15",
-            status="available",
+            # Active iff this server's PolicyEngine actually has a
+            # routing_recommendation rule wired. Detection via the
+            # rule closure's __qualname__ — see _engine_has_rule.
+            status="active" if routing_in_engine else "available",
             note="Pareto cost/quality/latency + Budget (SQLite per-agent).",
+            metrics={"wired_in_engine": routing_in_engine},
         )
     )
 

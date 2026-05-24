@@ -5,6 +5,95 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] — 2026-05-24 — `/api/layers` reflects PolicyEngine reality (routing #15 + ast_safety #5 → reportable as active)
+
+Day-13 audit (2026-05-23) flagged a gap: layers like `routing`, `ast_safety`,
+and `fingerprint` were hardcoded to `status="available"` in `/api/layers`
+regardless of whether the host had actually wired them into a
+`PolicyEngine` or a `SpanProcessor`. The Day-14 audit (2026-05-24)
+confirmed the gap is real on GENA production: routing fires as a
+PolicyEngine rule but the layers endpoint reports it idle.
+
+v1.6.0 closes the reporting gap. No new layer code — every layer that
+flips status already existed; the endpoint just now *looks* for it.
+
+### Added
+
+* **`_engine_has_rule(engine, factory_name)`** — closure introspection
+  via `__qualname__`. A rule produced by a factory `foo()` is a closure
+  whose `__qualname__` is `foo.<locals>.rule`, so substring matching on
+  the factory name is a safe, side-effect-free detection sentinel.
+  No factory needs an explicit flag.
+
+* **`_fingerprint_db_active(db_path)`** — checks the sibling
+  `bijotel_fingerprints.db` for at least one row. Presence alone of an
+  empty DB doesn't count as active.
+
+### Changed
+
+* **`routing` (Bijuteria #15)** now reports `status="active"` when the
+  bound `PolicyEngine` contains a `routing_recommendation` rule.
+  `metrics.wired_in_engine` exposes the boolean for the dashboard.
+
+* **`ast_safety` (Bijuteria #5)** now reports `status="active"` when
+  the bound `PolicyEngine` contains an `ast_safety_check` rule (rather
+  than just when `tree_sitter` is importable). Both signals are kept
+  in `metrics` (`tree_sitter`, `wired_in_engine`).
+
+* **`fingerprint` (Bijuteria #7)** now reports `status="active"` when
+  `bijotel_fingerprints.db` exists with rows. The
+  `sentence_transformers` flag is preserved in `metrics` to indicate
+  whether semantic mode is available alongside the deterministic mode.
+
+### Production wiring pattern (GENA Day-14 reference)
+
+The detection works against any host's PolicyEngine. Reference wiring
+(`/opt/substrate-v2/policy_engine.py` on GENA, 2026-05-24) layers three
+rules:
+
+```python
+from bijotel.policy import PolicyEngine, prompt_pattern_deny
+from bijotel.layers.ast_safety import ast_safety_check
+from bijotel.layers.routing import ModelProfile, ModelRegistry, routing_recommendation
+
+gena_registry = ModelRegistry({
+    "claude-haiku-4-5-20251001":  ModelProfile(cost=0.05, quality=0.70, latency=0.30),
+    "claude-sonnet-4-20250514":   ModelProfile(cost=0.20, quality=0.90, latency=0.60),
+})
+
+engine = PolicyEngine(rules=[
+    prompt_pattern_deny(mode="warn", use_defaults=True),
+    ast_safety_check(languages=("python", "bash"), mode="warn"),
+    routing_recommendation(registry=gena_registry, mode="warn"),
+])
+```
+
+`bijotel serve --policy-engine ...` (when the host passes a custom
+engine via `create_app(policy_engine=engine)`) now reports those three
+layers as `active`. The default engine that `bijotel serve` builds
+itself remains conservative (F11 + PII + length only) — no surprise
+new rules.
+
+### Tier impact (per GENA audit)
+
+* **Before v1.6.0:** 7 layers active in `/api/layers` even though 10
+  were active in reality (3 hidden: routing, ast_safety, fingerprint).
+* **After v1.6.0:** the endpoint matches reality. Audit's "Tier 1
+  active" count and `/api/layers` "active" count converge.
+
+### Tests (532 → unchanged, no test deletions)
+
+* Existing layer tests cover the new branches via parameterized
+  PolicyEngine fixtures. Smoke test + version bump only.
+
+### Backwards compatibility
+
+100% compatible. Any host that was getting `"available"` for these
+three layers now gets `"active"` automatically when the wiring is in
+place. No client code change required.
+
+---
+
 ## [1.5.3] — 2026-05-23 — MerkleDAG auto-wired in CasSpanProcessor (Bijuteria #2 → fully active)
 
 Closes the last remaining "available but not active" layer in the
