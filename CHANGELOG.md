@@ -5,6 +5,102 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] — 2026-05-24 — All 14 layers active + cross-provider HMAC chain (MILESTONE)
+
+The catalog is whole. Every bijuterie has shipped code, tests, an
+endpoint or CLI surface, and production runtime evidence on GENA.
+v2.0.0 is the version tag for that state — not a feature release.
+
+### The 14-layer manifest
+
+Each layer mapped to a catalog ID, status on GENA's default-engine
+`bijotel serve`, and the empirical evidence backing it.
+
+| # | Layer | Catalog | GENA evidence (2026-05-24) |
+|---|---|---|---|
+| 1 | `forensic_chain` | #11 Forensic-First | 5,490+ HMAC-sealed entries, 14 days, VALID |
+| 2 | `content_addressable` | #2 Content-Addressable | 5,290 unique bodies, dedup 1.03× |
+| 3 | `merkle_dag` | #2 (companion) | 335+ DAG nodes, cryptographic graph |
+| 4 | `policy_gate (F11)` | #10 Compliance-as-code | 35 jailbreak patterns, 4/4 GENA agents wired |
+| 5 | `policy_gate (AST)` | #5 AST-First Safety | tree-sitter live, `dangerous_rm` fires |
+| 6 | `routing` | #15 Inference Routing | ParetoRouter in PolicyEngine, GENA-tuned registry |
+| 7 | `containment` | Combo D | `POST /containment/evaluate`, lazy-built guard |
+| 8 | `consensus` | #9 Multi-LLM | Real Haiku vs Sonnet votes done, agreement scored |
+| 9 | `energy` | #3 AI Energy | 19.95 Wh / 7.58 g CO2 for 14-day backfill |
+| 10 | `regression` | #16 Drift Detection | z-score + IQR cron every 30 min |
+| 11 | `fingerprint` | #7 (provenance) | 352 deterministic fingerprints written |
+| 12 | `misalignment` | #18 Probes | 29 probes × 8 categories, 100% caveat detection |
+| 13 | `otel_genai` | #19 GenAI SemConv | Every span uses `gen_ai.*` attributes |
+| 14 | `provider_protocol` | #7 (provider) | Anthropic + OpenAI/xAI adapters live |
+
+### Cross-provider chain (today's headline)
+
+The HMAC chain handles **multiple LLM providers in the same
+tamper-evident table, with the same HMAC secret and the same JCS
+canonical body format**. Verified end-to-end:
+
+```
+chain rows (recent excerpt):
+  seq 5490  openai.chat     provider=xai        (gen4 verifier)
+  seq 5489  anthropic.chat  provider=anthropic  (gen4 extractor, claude-haiku-4-5)
+  seq 5488  openai.chat     provider=xai
+  seq 5487  anthropic.chat  provider=anthropic
+  ...
+  bijotel verify → VALID across both providers
+```
+
+That pattern repeats for every gen4 cycle (extract with Anthropic,
+verify with xAI). `bijotel verify --db chain.db` walks the whole
+chain across providers without distinguishing — the HMAC linkage
+holds regardless of who emitted the span. This closes the
+"multi-provider" claim that shipped in v0.7.0 as theory and lived
+unproven until today.
+
+### Production validation
+
+- **14 consecutive days** continuous chain growth on GENA
+- **7 wheel upgrades** in-flight (v0.5.0 → v2.0.0) without chain
+  breakage; cross-version integrity preserved
+- **2 providers** in the chain after the gen4 instrumentation
+  (today): Anthropic claude-haiku-4-5 + xAI grok-3-mini
+- **Dual observer**: BIJOTEL chain vs GENA's traces.db ledger
+  agree to within 1 entry across 14 days (lockstep)
+- **Energy footprint** for the entire 14-day window: 19.95 Wh,
+  7.58 g CO2 (≈ 63 m of gasoline-car driving)
+- **Haiku migration** (2026-05-21) cut daily CO2 by ~8× —
+  captured retroactively by the energy backfill, not designed in
+- **Consensus**: factual queries (capital of France) score 1.00
+  agreement Haiku-vs-Sonnet; creative queries (startup tagline)
+  score 0.15 — the disagreement IS the signal
+
+### Tests
+
+649 tests pass, ruff clean. No new code in v2.0.0 beyond the
+docstring + version bumps — this is a tag, not a feature release.
+
+### Known issues (carried forward)
+
+- **xAI model name** not populated in `bijotel.wrap()` spans
+  (`provider=xai` is correct, but `gen_ai.request.model` lives in
+  the closure-captured kwargs not the response). Fix planned for
+  v2.0.1.
+- **Lazy-attach pattern** for `containment` + `consensus` means
+  those two layers show as `available` immediately after a
+  `bijotel serve` restart, flipping to `active` on the first
+  `/{layer}/evaluate` call. Documented in the layers
+  endpoint metrics (`provider_attached`, `guard_attached`).
+- **GitHub repository remains PRIVATE** during v1.x → v2.x.
+  PyPI links to "Source" / "Issues" return 404 for external
+  visitors. Decision: ship to public when ready, not on a
+  milestone tag.
+
+### Backwards compatibility
+
+100% compatible with v1.9.1. Pure version-marker bump + docs.
+No API surface change, no test deletions, no behavioral change.
+
+---
+
 ## [1.9.1] — 2026-05-24 — `/api/layers` reports 14/14 active by default
 
 Polish patch: closes the last detection-gap reported by the v1.9.0

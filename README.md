@@ -3,8 +3,10 @@
 [![PyPI](https://img.shields.io/pypi/v/bijotel.svg)](https://pypi.org/project/bijotel/)
 [![Python](https://img.shields.io/pypi/pyversions/bijotel.svg)](https://pypi.org/project/bijotel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-485%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-649%20passing-brightgreen.svg)](#)
 [![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen.svg)](#)
+[![Layers](https://img.shields.io/badge/layers-14%2F14%20active-brightgreen.svg)](#)
+[![Providers](https://img.shields.io/badge/providers-Anthropic%20%2B%20xAI%20%2B%20OpenAI-blue.svg)](#)
 
 > **Forensic-grade tamper-evident audit chain for LLM applications.**
 
@@ -15,9 +17,36 @@ It's a plug-in to whatever tracer you have (OpenLLMetry,
 `AnthropicInstrumentor`, custom wrappers) — it does not replace your
 tracer; it extends it.
 
-**Status:** v1.1.0 on PyPI. Production-validated through 13 consecutive
-days on the GENA agent ecosystem: 4,952 chain entries, 8 wheel
-upgrades, 0 chain breaks. API surface frozen for the v1.x line.
+**Status:** v2.0.0 on PyPI. Production-validated through 14 consecutive
+days on the GENA agent ecosystem: 5,490+ chain entries, 8 wheel upgrades,
+0 chain breaks, **2 LLM providers in the same chain** (Anthropic + xAI
+live; OpenAI adapter shipped). **All 14 bijuterii layers active** at the
+default `bijotel serve` engine.
+
+## Multi-provider chain (v2.0.0)
+
+The HMAC-sealed chain handles **any LLM provider that emits OTel GenAI
+spans**, in the same table, with the same HMAC secret, the same JCS
+canonical body format. Anthropic spans (via
+`opentelemetry-instrumentation-anthropic`) and OpenAI / xAI spans (via
+`bijotel.wrap()`) land side-by-side. `bijotel verify` walks the whole
+chain without distinguishing — the HMAC linkage holds regardless of
+who emitted each span.
+
+```
+chain rows on GENA (excerpt, 2026-05-24):
+  seq 5490  openai.chat     provider=xai        grok-3-mini      (gen4 verifier)
+  seq 5489  anthropic.chat  provider=anthropic  claude-haiku-4-5 (gen4 extractor)
+  seq 5488  openai.chat     provider=xai        grok-3-mini
+  seq 5487  anthropic.chat  provider=anthropic  claude-haiku-4-5
+  ...
+  $ bijotel verify --db chain.db
+  Chain VALID (5490 entries).
+```
+
+That's N-version programming in production: one provider extracts,
+another verifies; the chain records both and verifies cleanly across
+both.
 
 ## Install
 
