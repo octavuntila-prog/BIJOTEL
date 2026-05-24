@@ -17,7 +17,7 @@ from bijotel.policy.rules import (  # noqa: E402
 
 
 def _client_with_default() -> TestClient:
-    """Default app — uses _default_policy_engine (3 warn-mode rules)."""
+    """Default app — uses _default_policy_engine (5 warn-mode rules from v1.9.1)."""
     app = create_app()
     return TestClient(app)
 
@@ -31,14 +31,33 @@ def _client_with_custom(engine: PolicyEngine) -> TestClient:
 
 
 def test_policy_rules_default_engine() -> None:
-    """Default engine has 3 warn-mode rules — endpoint surfaces all of them."""
+    """v1.9.1: default engine adds ast_safety + routing → 5 warn-mode rules.
+
+    Always present (pure Python): prompt_pattern_deny, pii_detection,
+    output_length_limit, routing_recommendation.
+    Conditionally present (requires [ast] extra): ast_safety_check.
+    """
     c = _client_with_default()
     r = c.get("/policy/rules")
     assert r.status_code == 200
     body = r.json()
-    assert body["total"] == 3
     names = {x["name"] for x in body["rules"]}
-    assert names == {"prompt_pattern_deny", "pii_detection", "output_length_limit"}
+    # Core trio + routing always there
+    must_have = {
+        "prompt_pattern_deny",
+        "pii_detection",
+        "output_length_limit",
+        "routing_recommendation",
+    }
+    assert must_have.issubset(names)
+    # ast_safety_check only when the extra is installed
+    try:
+        import tree_sitter  # noqa: F401
+        import tree_sitter_bash  # noqa: F401
+        assert "ast_safety_check" in names
+        assert body["total"] == 5
+    except ImportError:
+        assert body["total"] == 4
     # all warn-mode
     assert all(x["mode"] == "warn" for x in body["rules"])
 

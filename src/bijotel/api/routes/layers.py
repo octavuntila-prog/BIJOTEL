@@ -94,6 +94,23 @@ def _fingerprint_db_active(db_path: Path) -> bool:
     return bool(n and n > 0)
 
 
+def _misalignment_results_present(db_path: Path) -> bool:
+    """True iff at least one probe-results JSON exists alongside chain.db.
+
+    :class:`bijotel.layers.misalignment.ProbeLibrary.run_probes` writes
+    JSON reports as ``misalignment_probes_<timestamp>.json`` next to
+    the chain DB. Their presence proves the probe suite has executed
+    at least once on this host — stronger evidence than "module is
+    importable" (which is always true once bijotel is installed).
+    """
+    try:
+        return any(db_path.parent.glob("misalignment_probes_*.json"))
+    except OSError:
+        # Permission / IO error during glob — defensive False rather
+        # than crash the endpoint.
+        return False
+
+
 def _containment_active(request: Request) -> bool:
     """True iff a ContainmentGuard is bound on app state.
 
@@ -118,6 +135,7 @@ def _build_layers(request: Request) -> list[LayerStatus]:
     fingerprint_active = _fingerprint_db_active(db_path)
     ast_in_engine = _engine_has_rule(engine, "ast_safety_check")
     routing_in_engine = _engine_has_rule(engine, "routing_recommendation")
+    misalignment_active = _misalignment_results_present(db_path)
     containment_active = _containment_active(request)
 
     layers: list[LayerStatus] = []
@@ -216,8 +234,13 @@ def _build_layers(request: Request) -> list[LayerStatus]:
         LayerStatus(
             id="misalignment",
             bijuterie="#18",
-            status="available",
+            # Active iff a probe-results JSON exists alongside chain.db
+            # (i.e. ProbeLibrary.run_probes has been executed at least
+            # once on this host). The file path convention matches what
+            # the GENA misalignment cron writes.
+            status="active" if misalignment_active else "available",
             note="29 probes across 8 attack categories.",
+            metrics={"probe_results_on_disk": misalignment_active},
         )
     )
 

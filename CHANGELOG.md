@@ -5,6 +5,73 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] — 2026-05-24 — `/api/layers` reports 14/14 active by default
+
+Polish patch: closes the last detection-gap reported by the v1.9.0
+GENA deploy. After v1.9.0, three layers (`ast_safety`, `routing`,
+`misalignment`) showed as `"available"` in `/api/layers` on hosts
+that ran the default `bijotel serve` engine — even though the code
+was shipped and tested. The reason was structural: the default
+engine wired only F11 + PII + length, and there was no fallback
+detector for misalignment.
+
+v1.9.1 fixes this in two places.
+
+### Changed
+
+* **`_default_policy_engine()` now ships five rules** (was three):
+  * `prompt_pattern_deny(use_defaults=True)` — F11
+  * `pii_detection()`
+  * `output_length_limit(max_tokens=4096)`
+  * `ast_safety_check(languages=("python", "bash"))` — graceful
+    skip if the `[ast]` extra isn't installed (no tree-sitter)
+  * `routing_recommendation()` — pure Python, always available
+
+  All rules WARN-only. Hosts that want a smaller engine still pass
+  `policy_engine=` explicitly.
+
+* **`/api/layers` misalignment detection** — added
+  `_misalignment_results_present(db_path)` which globs
+  `misalignment_probes_*.json` alongside the chain DB. Presence of
+  at least one JSON proves the probe suite has executed on this
+  host (matches the GENA cron convention). When found, the layer
+  flips to `status="active"`. Falls back to `"available"` when no
+  results exist yet — install + probes-never-run isn't the same as
+  active.
+
+### Impact on `/api/layers`
+
+A default `bijotel serve` (no host config) on a host with the
+`[ast]` extra now reports:
+
+* `ast_safety` → **active** (rule in default engine)
+* `routing` → **active** (rule in default engine)
+* `misalignment` → **active** when probe JSON exists; **available**
+  otherwise
+
+GENA: 14/14 layers active after the v1.9.1 deploy + misalignment
+JSON files from the 2026-05-23 probe run.
+
+### Tests (+5, 654 total)
+
+* `tests/test_api_layers.py` — +5: routing default-active,
+  misalignment probe-JSON detection (active + available paths),
+  ast_safety default-active, routing minimal-engine fallback.
+* `tests/test_api_policy.py` — updated
+  `test_policy_rules_default_engine` to expect 5 rules (or 4 when
+  `[ast]` extra missing) instead of the legacy 3.
+
+### Backwards compatibility
+
+100% compatible at API level. Hosts that already passed
+`policy_engine=` see no change. Hosts that relied on the default
+engine now get two extra rules in WARN mode — they can fire
+warnings (never deny) on patterns / code blocks / routing
+mismatches. If a host doesn't want them, they pass an explicit
+engine.
+
+---
+
 ## [1.9.0] — 2026-05-24 — AI energy + carbon accounting (Bijuteria #3: last Tier 4 → Tier 1)
 
 "Fiecare token are un cost în wați. Măsoară-l."

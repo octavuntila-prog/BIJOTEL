@@ -60,19 +60,49 @@ _LOG = logging.getLogger("bijotel.api")
 
 
 def _default_policy_engine() -> PolicyEngine:
-    """Return a small default engine — three warn-mode rules.
+    """Return a full default engine in WARN mode (v1.9.1+).
 
     Used when the host doesn't pass ``policy_engine=`` to ``create_app``.
-    All rules are in WARN mode so the engine never denies — visiting
-    ``/policy/evaluate`` won't surprise anyone with a 403-style decision.
+    Every rule that ships with the package is wired here — F11 prompt
+    patterns, PII detection, output length, AST safety (if the
+    ``[ast]`` extra is installed), and routing recommendation.
+
+    All rules WARN-only so the engine never denies a default
+    ``/policy/evaluate`` call. Hosts that want a custom subset pass
+    ``policy_engine=`` to ``create_app`` explicitly.
+
+    The graceful-import pattern lets a minimal install (no
+    ``[ast]`` extra) still build the engine — tree-sitter-dependent
+    rules are silently skipped. Routing is pure Python, always
+    available.
     """
-    return PolicyEngine(
-        rules=[
-            prompt_pattern_deny(mode="warn"),
-            pii_detection(mode="warn"),
-            output_length_limit(max_tokens=4096, mode="warn"),
-        ]
-    )
+    rules = [
+        prompt_pattern_deny(mode="warn", use_defaults=True),
+        pii_detection(mode="warn"),
+        output_length_limit(max_tokens=4096, mode="warn"),
+    ]
+
+    # AST safety — requires [ast] extra (tree-sitter + tree-sitter-bash).
+    try:
+        from bijotel.layers.ast_safety import ast_safety_check
+
+        rules.append(
+            ast_safety_check(languages=("python", "bash"), mode="warn")
+        )
+    except ImportError:
+        pass
+
+    # Routing recommendation — pure Python, always available.
+    try:
+        from bijotel.layers.routing import routing_recommendation
+
+        rules.append(routing_recommendation(mode="warn"))
+    except Exception:
+        # Defensive: if a future routing rule constructor changes,
+        # don't crash the whole engine.
+        pass
+
+    return PolicyEngine(rules=rules)
 
 
 def create_app(

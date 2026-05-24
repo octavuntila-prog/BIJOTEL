@@ -191,14 +191,62 @@ def test_routing_active_when_rule_wired() -> None:
     assert routing["metrics"]["wired_in_engine"] is True
 
 
-def test_routing_available_when_not_wired() -> None:
-    """`routing` stays available with the default engine (no routing rule)."""
-    app = create_app(db_path="/tmp/no-such-chain.db")
+def test_routing_available_when_host_passes_minimal_engine() -> None:
+    """`routing` stays available when host explicitly wires a minimal engine."""
+    from bijotel.policy import PolicyEngine, prompt_pattern_deny
+
+    engine = PolicyEngine(rules=[prompt_pattern_deny(mode="warn")])
+    app = create_app(db_path="/tmp/no-such-chain.db", policy_engine=engine)
     client = TestClient(app)
     body = client.get("/layers").json()
     routing = next(layer for layer in body["layers"] if layer["id"] == "routing")
     assert routing["status"] == "available"
     assert routing["metrics"]["wired_in_engine"] is False
+
+
+def test_routing_active_in_default_engine() -> None:
+    """v1.9.1: default engine includes routing_recommendation by default."""
+    app = create_app(db_path="/tmp/no-such-chain.db")
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    routing = next(layer for layer in body["layers"] if layer["id"] == "routing")
+    assert routing["status"] == "active"
+
+
+def test_misalignment_active_when_probe_json_present(tmp_path: Path) -> None:
+    """v1.9.1: misalignment flips to active when probe JSON exists next to chain.db."""
+    db = tmp_path / "chain.db"
+    db.write_bytes(b"")  # touch
+    probe_json = tmp_path / "misalignment_probes_20260524T080000Z.json"
+    probe_json.write_text("{}")  # touch
+    app = create_app(db_path=str(db))
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    mis = next(layer for layer in body["layers"] if layer["id"] == "misalignment")
+    assert mis["status"] == "active"
+    assert mis["metrics"]["probe_results_on_disk"] is True
+
+
+def test_misalignment_available_without_probe_json(tmp_path: Path) -> None:
+    db = tmp_path / "chain.db"
+    db.write_bytes(b"")
+    app = create_app(db_path=str(db))
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    mis = next(layer for layer in body["layers"] if layer["id"] == "misalignment")
+    assert mis["status"] == "available"
+    assert mis["metrics"]["probe_results_on_disk"] is False
+
+
+def test_ast_safety_active_in_default_engine() -> None:
+    """v1.9.1: default engine includes ast_safety_check when [ast] extra installed."""
+    pytest.importorskip("tree_sitter")
+    pytest.importorskip("tree_sitter_bash")
+    app = create_app(db_path="/tmp/no-such-chain.db")
+    client = TestClient(app)
+    body = client.get("/layers").json()
+    ast = next(layer for layer in body["layers"] if layer["id"] == "ast_safety")
+    assert ast["status"] == "active"
 
 
 def test_ast_safety_active_when_rule_wired() -> None:
