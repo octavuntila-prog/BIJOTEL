@@ -5,11 +5,10 @@
 [![Python](https://img.shields.io/pypi/pyversions/bijotel.svg)](https://pypi.org/project/bijotel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-686%20passing-brightgreen.svg)](#)
-[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](#)
 [![Layers](https://img.shields.io/badge/layers-14%2F14%20active-brightgreen.svg)](#)
-[![Providers](https://img.shields.io/badge/chain%20providers-Anthropic%20%2B%20xAI-blue.svg)](#)
+[![Providers](https://img.shields.io/badge/chain%20providers-Anthropic%20%C2%B7%20xAI%20%28OpenAI%20adapter%29-blue.svg)](#)
 
-> **Forensic-grade tamper-evident audit chain for LLM applications.**
+> **Tamper-evident HMAC audit chain for LLM applications.**
 
 BIJOTEL turns the spans your OpenTelemetry GenAI instrumentation already
 emits into a HMAC-sealed chain on disk, content-addressable storage with
@@ -18,14 +17,14 @@ It's a plug-in to whatever tracer you have (OpenLLMetry,
 `AnthropicInstrumentor`, custom wrappers) — it does not replace your
 tracer; it extends it.
 
-**Status:** v2.0.1 on PyPI; **GENA production runs v1.9.1** (v2.0.x is a
-docs-only PyPI release on top of the same v1.9.1 code, no behavior
-change). Production-validated through 14 consecutive days on the GENA
-agent ecosystem: **5,497 chain entries, 11 wheel deploys
-(v0.5.0 → v1.9.1), 0 chain breaks, 2 LLM providers in the same chain**
-(Anthropic + xAI; the OpenAI SDK adapter is shipped, no
-`api.openai.com` calls in production). **All 14 bijuterii layers
-active** at the default `bijotel serve` engine.
+**Status:** v2.0.5 on PyPI; **GENA production runs v2.0.5** (deployed
+2026-05-25 via the F11 pattern-expansion release). Now also running on
+a second independent system (ARA, ai-research-agency on aarch64) since
+2026-05-25. Production-validated through 15 consecutive days on GENA:
+**5,889 chain entries, 14 wheel deploys (v0.5.0 → v2.0.5), 0 chain
+breaks, 2 LLM providers in the same chain** (Anthropic + xAI; the
+OpenAI SDK adapter is shipped, no `api.openai.com` calls in production).
+**All 14 bijuterii layers active** at the default `bijotel serve` engine.
 
 ## Multi-provider chain (v2.0.0)
 
@@ -265,20 +264,19 @@ v2.0.0 is the tag for the moment the column emptied.
   ``opentelemetry-instrumentation-openai`` chain. It never wraps the
   SDK call itself, so there's no provider-specific glue to maintain.
 
-## Production validated (v1.9.1 deploy, 2026-05-24)
+## Production validated (v2.0.5 deploy, 2026-05-25)
 
 GENA's production agent ecosystem (Aisophical) has been the rolling
 integration test since v0.5.0:
 
-* **14 days continuous operation** (2026-05-10 → 2026-05-24), **11
+* **15 days continuous operation** (2026-05-10 → 2026-05-25), **14
   wheel deploys** on GENA: v0.5.0 → v0.6.0 → v0.6.1 → v1.1.0 → v1.4.0
-  → v1.5.2 → v1.5.3 → v1.7.0 → v1.8.0 → v1.9.0 → v1.9.1. *(v2.0.0
-  and v2.0.1 are docs-only releases on PyPI; the production code is
-  v1.9.1.)*
-* **5,497 chain entries**, `bijotel verify --db chain.db` returns
+  → v1.5.2 → v1.5.3 → v1.7.0 → v1.8.0 → v1.9.0 → v1.9.1 → v2.0.3
+  → v2.0.4 → v2.0.5.
+* **5,889 chain entries**, `bijotel verify --db chain.db` returns
   `Chain VALID` end-to-end — cross-version *and* cross-provider
   HMAC continuity.
-* **0 chain breaks** across the 11-deploy window; the chain
+* **0 chain breaks** across the 14-deploy window; the chain
   processor's ``BEGIN IMMEDIATE`` critical section + WAL mode survived
   every concurrent-writer scenario including the gen4 add-on (today)
   writing into the same DB from a separate process.
@@ -297,29 +295,26 @@ integration test since v0.5.0:
   on a factual prompt scored 1.00 agreement (same answer);
   on a creative prompt scored 0.15 (genuine disagreement → flag).
 
-Full reports in
-[`AUDIT_2026_05_23.md`](AUDIT_2026_05_23.md) and
-[`TIER_MIGRATION_2026_05_23.md`](TIER_MIGRATION_2026_05_23.md);
-the v1.1.0-era integration test in
-[`INTEGRATION_TEST_20260523.md`](INTEGRATION_TEST_20260523.md).
+For deep production validation across Rounds 1–3 (46 tests, 0
+partial/fail), see release notes in
+[`CHANGELOG.md`](CHANGELOG.md) and the live demo with a
+verify-yourself chain at <https://bijotel.whiteandpoint.com>.
 
 ## Known issues
 
-* **Dashboard `bijotel serve --dashboard` not wired yet** (planned
-  v1.3+). Today's pattern: run `bijotel serve` on the backend, run
-  Vite dev server (or any static host) on the dashboard side, point
-  the proxy at `:8080`.
 * **Vite dev server binds IPv6-only on some Windows installs.**
   `curl 127.0.0.1:5173` returns nothing; use `curl localhost:5173`
   (DNS resolves to ::1) or `curl '[::1]:5173'`. Browsers are fine.
-* **GENA-style deploys** that install the wheel without extras must
-  add `python-multipart` to their `requirements.txt` if they want
-  `POST /export/verify` to register (FastAPI's `UploadFile` requires
-  it). The `[api]` extra carries it transitively.
-* **GitHub source repository remains private** during the v1.x.x
-  development window — the URLs in PyPI metadata (Documentation,
-  Issues, Changelog, Source) currently 404 for external visitors.
-  This is intentional and will flip when the repo goes public.
+  Only affects the dashboard dev workflow; the built bundle shipped
+  in the wheel is unaffected.
+* **F11 pattern coverage** improved to 100% on the R1 production
+  probe corpus in v2.0.5 (23/23 attack vectors caught with 0 false
+  positives on the benign control set). Coverage on broader, unseen
+  attack corpora is necessarily lower; pattern expansion is iterative,
+  not "done". See the v2.0.5 entry in `CHANGELOG.md` for the methodology.
+* **`bijotel verify` signals failure via stderr + exit code 3, not
+  stdout.** A surfaced R3 finding; if you script the CLI, branch on
+  exit code, not stdout substring match.
 
 ## License
 
