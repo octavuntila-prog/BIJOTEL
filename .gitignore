@@ -34,3 +34,6 @@ node_modules/
 dashboard_dist/
 src/bijotel/dashboard_dist/
 .vite/
+
+# MkDocs build output (deployed via mkdocs gh-deploy to gh-pages branch)
+site/
