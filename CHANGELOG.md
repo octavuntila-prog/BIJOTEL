@@ -5,6 +5,43 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.6] — 2026-05-25 — Metadata polish: drop "forensic-grade" claim
+
+Docs-only release. Closes the last 3 findings from the post-public
+launch verification audit (51 checks, 50 PASS, 3 documented findings):
+
+1. **`pyproject.toml` description** — was "Forensic-grade tamper-evident
+   audit chain..." → now "Tamper-evident HMAC audit chain for LLM
+   applications. HMAC-SHA256 chain, content-addressable storage,
+   pre-call policy gate, regression detection." Aligns with
+   bijotel.whiteandpoint.com landing tagline and README (which were
+   updated in v2.0.5 docs polish but couldn't propagate to PyPI
+   sidebar without a wheel re-release).
+2. **`src/bijotel/cli/main.py:25`** (CLI argparse description) —
+   was "BIJOTEL CLI: forensic audit chain — verify, inspect..." →
+   now "BIJOTEL CLI: tamper-evident HMAC audit chain — verify,
+   inspect...". `bijotel --help` now matches public messaging.
+3. **`src/bijotel/api/routes/chain.py:280`** (docstring on
+   POST /chain/verify) — was "use ``full=true`` for forensic-grade
+   answer" → now "use ``full=true`` for full chain verification".
+
+What's kept (intentional): "forensic" remains as a PyPI keyword tag
+(legitimate search anchor), and as a descriptive adjective in
+internal comments / model docstrings where it describes *purpose*
+("for forensic value", "forensic build trace") rather than making
+a *certification claim*. The M2-honest stance is: BIJOTEL provides
+tamper-evident records that *support* forensic-grade compliance
+workflows; it does not itself carry a forensic-grade certification.
+
+Bundled with this metadata fix:
+- GENA production sweep — all 4 ecosystems (v3-atelier, v4-piata,
+  v9-oracle, v8-ambasador) brought to v2.0.6 in one pass, closing
+  the v3-only deploy drift documented in the post-launch audit.
+
+No behavior change. Tests still 686 passing / 8 skipped / ruff clean.
+No schema migration. `bijotel verify` accepts spans from any v0.5+
+writer (backward-compatible canonical body format unchanged).
+
 ## [2.0.5] — 2026-05-24 — F11 patterns 35 → 50; R1 probe detection 34.8% → 100%
 
 Round 2 production test R2-A1 closes the F11 PARTIAL status documented

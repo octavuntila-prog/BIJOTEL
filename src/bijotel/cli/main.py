@@ -22,8 +22,8 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="bijotel",
         description=(
-            "BIJOTEL CLI: forensic audit chain — verify, inspect, stats, list, "
-            "export, regression, serve."
+            "BIJOTEL CLI: tamper-evident HMAC audit chain — verify, inspect, "
+            "stats, list, export, regression, serve."
         ),
     )
     subparsers = parser.add_subparsers(dest="command", required=True)

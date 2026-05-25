@@ -277,7 +277,7 @@ def chain_verify(
     * ``full=false``: smoke check — confirm row count, return first/last
       seq, and check the last row's ``prev_hash`` matches the previous
       row's ``hmac_hash`` (chain not broken at the tail). Does NOT
-      validate HMAC — use ``full=true`` for forensic-grade answer.
+      validate HMAC — use ``full=true`` for full chain verification.
     """
     path = _db_path(request)
     _ensure_db(path)
