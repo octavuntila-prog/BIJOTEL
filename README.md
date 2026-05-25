@@ -1,9 +1,10 @@
 # BIJOTEL
 
 [![PyPI](https://img.shields.io/pypi/v/bijotel.svg)](https://pypi.org/project/bijotel/)
+[![CI](https://github.com/octavuntila-prog/BIJOTEL/actions/workflows/ci.yml/badge.svg)](https://github.com/octavuntila-prog/BIJOTEL/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/pypi/pyversions/bijotel.svg)](https://pypi.org/project/bijotel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-649%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-686%20passing-brightgreen.svg)](#)
 [![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](#)
 [![Layers](https://img.shields.io/badge/layers-14%2F14%20active-brightgreen.svg)](#)
 [![Providers](https://img.shields.io/badge/chain%20providers-Anthropic%20%2B%20xAI-blue.svg)](#)
