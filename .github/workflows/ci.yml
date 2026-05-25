@@ -9,17 +9,25 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.11
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
+          cache: pip
       - name: Install dependencies
+        # [anthropic,ast,api,dev] = SDK + tree-sitter for AST tests + fastapi
+        # for API tests + pytest+ruff. Excludes [fingerprint] (sentence-
+        # transformers, ~1GB heavy) which is not needed for the test suite.
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,anthropic]"
+          pip install -e ".[anthropic,ast,api,dev]"
       - name: Lint with ruff
         run: ruff check .
       - name: Run tests
-        run: pytest -v
+        run: pytest -q
