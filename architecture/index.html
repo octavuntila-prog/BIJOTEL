@@ -1,0 +1,1735 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Tamper-evident HMAC audit chain for LLM applications">
+      
+      
+        <meta name="author" content="Aisophical SRL">
+      
+      
+        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/architecture/">
+      
+      
+        <link rel="prev" href="../api/python/">
+      
+      
+        <link rel="next" href="../security/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Architecture - BIJOTEL</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bijotel-architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="BIJOTEL" class="md-header__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BIJOTEL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/octavuntila-prog/BIJOTEL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    octavuntila-prog/BIJOTEL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../guides/policy-engine/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/cli/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../security/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Security
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="BIJOTEL" class="md-nav__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    BIJOTEL
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/octavuntila-prog/BIJOTEL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    octavuntila-prog/BIJOTEL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/first-verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    First Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/policy-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policy Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/regression-detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/multi-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Provider
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/dashboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/energy-tracking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Energy Tracking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/rest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-call-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime call flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#span-sealing-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Span sealing detail
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#on-disk-schema-chaindb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-disk schema (chain.db)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-layer-bijuterii-positioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14-layer bijuterii positioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploy-topologies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deploy topologies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploy topologies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-writer-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-writer (production)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forensic-export-to-auditor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forensic export to auditor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compatibility-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compatibility notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-call-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime call flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#span-sealing-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Span sealing detail
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#on-disk-schema-chaindb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-disk schema (chain.db)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-layer-bijuterii-positioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14-layer bijuterii positioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploy-topologies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deploy topologies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploy topologies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-writer-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-writer (production)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forensic-export-to-auditor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forensic export to auditor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compatibility-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compatibility notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="bijotel-architecture">BIJOTEL Architecture<a class="headerlink" href="#bijotel-architecture" title="Anchor link to this section">&para;</a></h1>
+<p>This document covers the runtime call path, on-disk schema, and the
+14-layer bijuterii positioning. Aimed at new contributors and at
+auditors trying to convince themselves the chain integrity story is
+real.</p>
+<h2 id="runtime-call-flow">Runtime call flow<a class="headerlink" href="#runtime-call-flow" title="Anchor link to this section">&para;</a></h2>
+<p>When a host application makes an LLM call wrapped by BIJOTEL, the
+following happens before the SDK reaches the network:</p>
+<pre class="mermaid"><code>flowchart TD
+    A[Host: client.messages.create]
+    A --&gt; B{PolicyEngine.evaluate}
+    B --&gt;|deny| Z[PolicyDeniedError raised&lt;br/&gt;synthetic span with&lt;br/&gt;bijotel.blocked=true]
+    B --&gt;|warn| C
+    B --&gt;|allow| C[Anthropic SDK call]
+
+    Z --&gt; X[HmacChainSpanProcessor]
+    C --&gt; D[AnthropicInstrumentor]
+    D --&gt; E[OTel ReadableSpan]
+    E --&gt; F[HmacChainSpanProcessor]
+    E --&gt; G[CasSpanProcessor]
+    E --&gt; H[Optional: FingerprintSpanProcessor]
+
+    F --&gt; I[(chain table)]
+    G --&gt; J[(cas table)]
+    H --&gt; K[(fingerprints table)]
+
+    I --&gt; L[bijotel verify]
+    I --&gt; M[bijotel serve&lt;br/&gt;FastAPI]
+    J --&gt; M
+    K --&gt; M
+    M --&gt; N[Dashboard pages]
+
+    style B fill:#fef3c7,stroke:#f59e0b
+    style F fill:#dcfce7,stroke:#16a34a
+    style G fill:#dcfce7,stroke:#16a34a
+    style M fill:#e0e7ff,stroke:#4f46e5</code></pre>
+<p>Key points:</p>
+<ul>
+<li>The <strong>policy gate runs <em>before</em> the SDK</strong> — no money spent on a
+  request the policy would block.</li>
+<li><code>deny</code> produces a <strong>synthetic span</strong> so the audit chain records the
+  block (with <code>bijotel.blocked=true</code> attribute), not a silent
+  refusal. The host receives <code>PolicyDeniedError</code>.</li>
+<li><code>warn</code> does NOT short-circuit — the call proceeds, and the warning
+  list attaches to the eventual span via <code>bijotel.policy.warning</code>.</li>
+<li>The host's existing <code>AnthropicInstrumentor</code> (or any OTel GenAI
+  instrumentor) is the source of spans. BIJOTEL <code>SpanProcessor</code>s do
+  <strong>not</strong> wrap the SDK call — they observe.</li>
+</ul>
+<h2 id="span-sealing-detail">Span sealing detail<a class="headerlink" href="#span-sealing-detail" title="Anchor link to this section">&para;</a></h2>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Span as OTel ReadableSpan
+    participant HMC as HmacChainSpanProcessor
+    participant CAS as CasSpanProcessor
+    participant DB as chain.db
+
+    Span-&gt;&gt;HMC: on_end(span)
+    HMC-&gt;&gt;HMC: canonical_dict = span_to_canonical_dict
+    HMC-&gt;&gt;HMC: canonical_body = JCS(canonical_dict)
+    HMC-&gt;&gt;HMC: canonical_hash = SHA-256(canonical_body)
+    HMC-&gt;&gt;DB: BEGIN IMMEDIATE
+    HMC-&gt;&gt;DB: SELECT MAX(hmac_hash) → prev_hash
+    HMC-&gt;&gt;HMC: hmac_hash = HMAC-SHA256(secret, prev_hash || canonical_hash)
+    HMC-&gt;&gt;DB: INSERT INTO chain (...)
+    HMC-&gt;&gt;DB: COMMIT
+
+    Span-&gt;&gt;CAS: on_end(span)
+    CAS-&gt;&gt;CAS: semantic_dict = span_to_semantic_dict
+    CAS-&gt;&gt;CAS: body_hash = SHA-256(JCS(semantic_dict))
+    CAS-&gt;&gt;DB: SELECT body_hash FROM cas
+    alt body_hash exists
+        CAS-&gt;&gt;DB: UPDATE cas SET ref_count = ref_count + 1
+    else not exists
+        CAS-&gt;&gt;DB: INSERT INTO cas (body_hash, body, ref_count=1)
+    end</code></pre>
+<ul>
+<li><strong>JCS</strong> = RFC 8785 JSON Canonicalization Scheme. Two different
+  serializers of the same object produce the <em>same byte sequence</em>, so
+  the hash is stable across SDK versions and Python interpreters.</li>
+<li><strong>BEGIN IMMEDIATE</strong> acquires the RESERVED lock before the SELECT,
+  serializing the SELECT-then-INSERT critical section across multiple
+  writer processes that share the same chain.db. The <code>busy_timeout</code>
+  PRAGMA makes concurrent writers wait up to 5 seconds instead of
+  raising <code>SQLITE_BUSY</code>.</li>
+</ul>
+<h2 id="on-disk-schema-chaindb">On-disk schema (chain.db)<a class="headerlink" href="#on-disk-schema-chaindb" title="Anchor link to this section">&para;</a></h2>
+<pre class="mermaid"><code>erDiagram
+    chain {
+        INTEGER seq PK
+        INTEGER timestamp_ns
+        TEXT trace_id
+        TEXT span_id
+        TEXT span_name
+        TEXT span_kind
+        BLOB canonical_body
+        TEXT canonical_hash
+        TEXT prev_hash
+        TEXT hmac_hash
+        TEXT semantic_body_hash "FK to cas.body_hash"
+    }
+    cas {
+        TEXT body_hash PK
+        BLOB body
+        INTEGER first_seen_ns
+        INTEGER ref_count
+    }
+    dag_nodes {
+        TEXT content_hash PK
+        TEXT refs_json
+        INTEGER created_ns
+    }
+    dag_refs {
+        TEXT from_hash
+        TEXT to_hash
+    }
+    regression_runs {
+        INTEGER id PK
+        INTEGER created_ns
+        INTEGER window
+        REAL z_threshold
+        TEXT filter_model
+        INTEGER total_anomalies
+        TEXT status
+        TEXT result_json
+    }
+
+    chain ||--o| cas : "semantic_body_hash"
+    dag_nodes ||--o{ dag_refs : "from_hash"
+    dag_nodes ||--o{ dag_refs : "to_hash"</code></pre>
+<p>The five tables coexist inside a single SQLite file. The chain table
+is the canonical source of truth (everything else is either dedup
+storage or derived); deleting <code>cas</code> / <code>dag_*</code> / <code>regression_runs</code>
+doesn't break verification, only loses dedup + history.</p>
+<h2 id="verification-path">Verification path<a class="headerlink" href="#verification-path" title="Anchor link to this section">&para;</a></h2>
+<pre class="mermaid"><code>flowchart LR
+    A[bijotel verify --db chain.db] --&gt; B[Open chain.db]
+    B --&gt; C[Iterate seq ASC]
+    C --&gt; D{Recompute&lt;br/&gt;SHA-256 canonical_body}
+    D --&gt;|mismatch| FAIL1[canonical_hash mismatch&lt;br/&gt;body mutated]
+    D --&gt;|match| E{prev_hash =&lt;br/&gt;previous hmac_hash?}
+    E --&gt;|no| FAIL2[chain broken]
+    E --&gt;|yes| F{Recompute&lt;br/&gt;HMAC prev_hash + canonical_hash}
+    F --&gt;|mismatch| FAIL3[hmac_hash mismatch&lt;br/&gt;secret wrong&lt;br/&gt;or hmac mutated]
+    F --&gt;|match| C
+    C --&gt;|EOF| OK[Chain VALID]
+
+    style FAIL1 fill:#fee2e2,stroke:#dc2626
+    style FAIL2 fill:#fee2e2,stroke:#dc2626
+    style FAIL3 fill:#fee2e2,stroke:#dc2626
+    style OK fill:#dcfce7,stroke:#16a34a</code></pre>
+<p>The same logic ships server-side in <code>POST /chain/verify</code> with
+<code>full=true</code>. The CLI and the API give the same answer on the same
+chain.db + secret.</p>
+<h2 id="14-layer-bijuterii-positioning">14-layer bijuterii positioning<a class="headerlink" href="#14-layer-bijuterii-positioning" title="Anchor link to this section">&para;</a></h2>
+<pre class="mermaid"><code>graph TB
+    subgraph HOST["Host application"]
+        UA[User-facing wrapper]
+    end
+
+    subgraph PRE["Pre-call layer"]
+        L10["#10 PolicyGate&lt;br/&gt;8 rule factories"]
+        L15["#15 Routing&lt;br/&gt;Pareto + Budget"]
+        L18["#18 Misalignment Probes"]
+    end
+
+    subgraph CALL["Call layer"]
+        L7P["#7 Provider Protocol&lt;br/&gt;Anthropic / OpenAI"]
+        L19["#19 OTel GenAI Semconv"]
+    end
+
+    subgraph SEAL["Sealing layer"]
+        L11["#11 Forensic Chain&lt;br/&gt;HMAC-SHA256"]
+        L2A["#2 CAS&lt;br/&gt;semantic dedup"]
+        L2B["#2 Merkle DAG"]
+        L7F["#7 Fingerprint&lt;br/&gt;deterministic + semantic"]
+        L5["#5 AST Safety&lt;br/&gt;Bash + Python"]
+    end
+
+    subgraph ANALYZE["Analysis layer"]
+        L16["#16 Regression Detection&lt;br/&gt;z-score + IQR"]
+        D["Combo D&lt;br/&gt;Containment Guard"]
+    end
+
+    subgraph PLANNED["Planned (v1.3+)"]
+        L3["#3 Energy Accounting"]
+        L9["#9 Consensus Voting"]
+    end
+
+    UA --&gt; L10
+    UA --&gt; L15
+    L10 --&gt; L7P
+    L15 --&gt; L7P
+    L7P --&gt; L19
+    L19 --&gt; L11
+    L19 --&gt; L2A
+    L2A --&gt; L2B
+    L19 --&gt; L7F
+    L19 --&gt; L5
+    L11 --&gt; L16
+    L11 --&gt; D
+    L10 --&gt; D
+
+    style L10 fill:#dcfce7,stroke:#16a34a
+    style L11 fill:#dcfce7,stroke:#16a34a
+    style L2A fill:#dcfce7,stroke:#16a34a
+    style L2B fill:#dbeafe,stroke:#2563eb
+    style L7P fill:#dcfce7,stroke:#16a34a
+    style L19 fill:#dcfce7,stroke:#16a34a
+    style L16 fill:#dcfce7,stroke:#16a34a
+    style L7F fill:#dbeafe,stroke:#2563eb
+    style L5 fill:#dbeafe,stroke:#2563eb
+    style L15 fill:#dbeafe,stroke:#2563eb
+    style L18 fill:#dbeafe,stroke:#2563eb
+    style D fill:#dbeafe,stroke:#2563eb
+    style L3 fill:#f3f4f6,stroke:#9ca3af
+    style L9 fill:#f3f4f6,stroke:#9ca3af</code></pre>
+<p>Green = active (runtime evidence present in this build). Blue =
+available (code ships, host opts in). Grey = planned (catalog entry,
+no code yet).</p>
+<h2 id="deploy-topologies">Deploy topologies<a class="headerlink" href="#deploy-topologies" title="Anchor link to this section">&para;</a></h2>
+<h3 id="single-process">Single-process<a class="headerlink" href="#single-process" title="Anchor link to this section">&para;</a></h3>
+<p>The simplest deploy: one Python process owns the chain.db. All
+processors are local. Used by smoke tests and small projects.</p>
+<h3 id="multi-writer-production">Multi-writer (production)<a class="headerlink" href="#multi-writer-production" title="Anchor link to this section">&para;</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    P1[Agent process 1] --&gt;|HmacChainSpanProcessor| DB[(chain.db&lt;br/&gt;WAL mode)]
+    P2[Agent process 2] --&gt;|HmacChainSpanProcessor| DB
+    P3[Agent process 3] --&gt;|HmacChainSpanProcessor| DB
+    P4[Agent process N] --&gt;|HmacChainSpanProcessor| DB
+
+    DB --&gt; RD[Read-only&lt;br/&gt;bijotel serve]
+    DB --&gt; CLI[bijotel verify / regression]
+    RD --&gt; DASH[Dashboard]</code></pre>
+<p>The pattern used on GENA (Day-10 integration test). Each agent
+container has its own <code>HmacChainSpanProcessor</code> writing into a
+shared <code>/data/bijotel_chain.db</code>. The chain stays linear and valid
+because every writer holds RESERVED via <code>BEGIN IMMEDIATE</code> for the
+critical SELECT-prev/INSERT section. WAL mode lets readers
+(<code>bijotel serve</code>, <code>bijotel verify</code>) coexist without blocking the
+writers.</p>
+<h3 id="forensic-export-to-auditor">Forensic export to auditor<a class="headerlink" href="#forensic-export-to-auditor" title="Anchor link to this section">&para;</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Ops as Operator
+    participant API as bijotel serve
+    participant DB as chain.db
+    participant File as audit_TS.json
+    participant Aud as Auditor (offline)
+
+    Ops-&gt;&gt;API: POST /export
+    API-&gt;&gt;DB: SELECT * FROM chain ORDER BY seq
+    API-&gt;&gt;API: build bijotel-chain-v1 envelope
+    API-&gt;&gt;API: chain_signature = HMAC(secret, head_hash + count)
+    API-&gt;&gt;File: signed JSON
+    File-&gt;&gt;Aud: (out-of-band — email / S3)
+    Aud-&gt;&gt;Aud: POST /export/verify (own server, same secret)
+    Aud-&gt;&gt;Aud: per-entry HMAC recompute
+    Aud-&gt;&gt;Aud: chain_signature match check
+    Note over Aud: valid=true, entries_count=4950</code></pre>
+<p>The auditor does <strong>not</strong> need SQLite access. The same HMAC secret
+(out-of-band) is sufficient to verify the entire chain offline.</p>
+<h2 id="compatibility-notes">Compatibility notes<a class="headerlink" href="#compatibility-notes" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li>Python 3.11+ (uses <code>|</code> for union types, <code>tomllib</code>, etc.).</li>
+<li>OTel SDK 1.27.0+ for stable <code>gen_ai.*</code> attribute names.</li>
+<li>SQLite ≥ 3.35.0 for the <code>BEGIN IMMEDIATE</code> + WAL combo used by the
+  hardening fix in v0.6.1.</li>
+<li>Tested OS: Linux (GENA production), macOS, Windows. Windows-specific
+  caveats documented in README "Known issues".</li>
+</ul>
+<hr />
+<p>For schema changes, see migration notes in
+<a href="../changelog/">Changelog</a>. Production integration tests are
+summarized in the v2.0.x changelog entries (Round 1 / 2 / 3
+production tests, 46 scenarios across security, chaos, performance,
+and data-integrity).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Aisophical SRL · MIT licensed
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/octavuntila-prog/BIJOTEL" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/bijotel/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://bijotel.whiteandpoint.com/" target="_blank" rel="noopener" title="bijotel.whiteandpoint.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.highlight", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
