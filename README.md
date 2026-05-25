@@ -17,13 +17,15 @@ It's a plug-in to whatever tracer you have (OpenLLMetry,
 `AnthropicInstrumentor`, custom wrappers) — it does not replace your
 tracer; it extends it.
 
-**Status:** v2.0.5 on PyPI; **GENA production runs v2.0.5** (deployed
-2026-05-25 via the F11 pattern-expansion release). Now also running on
-a second independent system (ARA, ai-research-agency on aarch64) since
-2026-05-25. Production-validated through 15 consecutive days on GENA:
-**5,889 chain entries, 14 wheel deploys (v0.5.0 → v2.0.5), 0 chain
-breaks, 2 LLM providers in the same chain** (Anthropic + xAI; the
-OpenAI SDK adapter is shipped, no `api.openai.com` calls in production).
+**Status:** v2.0.6 on PyPI; **GENA production runs v2.0.6** (deployed
+2026-05-25 via the metadata-polish release). Validated on **2 independent
+production systems**: **GENA** (9-ecosystem AI mesh, x86_64, Nuremberg —
+running BIJOTEL since 2026-05-10) and **ARA** (AI Research Agency,
+aarch64, Helsinki — running since 2026-05-25). Production-validated
+through 15 consecutive days on GENA: **5,889 chain entries, 15 wheel
+deploys (v0.5.0 → v2.0.6), 0 chain breaks, 2 LLM providers in the same
+chain** (Anthropic + xAI; the OpenAI SDK adapter is shipped, no
+`api.openai.com` calls in production).
 **All 14 bijuterii layers active** at the default `bijotel serve` engine.
 
 ## Multi-provider chain (v2.0.0)

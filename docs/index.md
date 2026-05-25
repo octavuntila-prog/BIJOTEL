@@ -2,11 +2,21 @@
 
 > **Tamper-evident HMAC audit chain for LLM applications.**
 
-Every AI decision. Sealed. Verified. Forever.
+Every AI decision. Sealed. Verified. Provable.
 
 ```bash
 pip install bijotel
 ```
+
+## 3 lines to add tamper-evident audit to your LLM calls
+
+```python
+provider.add_span_processor(HmacChainSpanProcessor(db_path="chain.db", secret_key=secret))
+provider.add_span_processor(CasSpanProcessor(db_path="chain.db"))
+AnthropicInstrumentor().instrument()
+```
+
+That's it. Every `messages.create()` is now HMAC-sealed into `chain.db`.
 
 ## What BIJOTEL does
 
@@ -67,7 +77,8 @@ SpanProcessors. Every call gets:
 ## Production validated
 
 - **5,889+ chain entries** across 15 days continuous operation
-- **2 independent production systems** — GENA (x86_64) + ARA (aarch64)
+- **2 independent production systems**: **GENA** (9-ecosystem AI mesh,
+  x86_64, Nuremberg) and **ARA** (AI Research Agency, aarch64, Helsinki)
 - **Cross-architecture** verification proven (R2-D)
 - **Cross-provider** chains (Anthropic + xAI via OpenAI adapter)
 - **686 unit tests** + **46 production tests** across 3 rounds (0 partial/fail)
