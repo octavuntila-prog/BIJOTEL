@@ -1,0 +1,101 @@
+site_name: BIJOTEL
+site_url: https://bijotel.whiteandpoint.com/docs/
+site_description: Tamper-evident HMAC audit chain for LLM applications
+site_author: Aisophical SRL
+
+repo_url: https://github.com/octavuntila-prog/BIJOTEL
+repo_name: octavuntila-prog/BIJOTEL
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: teal
+      accent: green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: teal
+      accent: green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - search.highlight
+    - search.suggest
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+      - First Verification: getting-started/first-verification.md
+  - Guides:
+      - Policy Engine: guides/policy-engine.md
+      - Regression Detection: guides/regression-detection.md
+      - Multi-Provider: guides/multi-provider.md
+      - Dashboard: guides/dashboard.md
+      - Energy Tracking: guides/energy-tracking.md
+  - API Reference:
+      - CLI: api/cli.md
+      - REST API: api/rest.md
+      - Python API: api/python.md
+  - Architecture: architecture.md
+  - Security: security.md
+  - Changelog: changelog.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.details
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+      permalink_title: Anchor link to this section
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/octavuntila-prog/BIJOTEL
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/bijotel/
+    - icon: fontawesome/solid/globe
+      link: https://bijotel.whiteandpoint.com/
+  generator: false
+
+copyright: Copyright &copy; 2026 Aisophical SRL · MIT licensed
