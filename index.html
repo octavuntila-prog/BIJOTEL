@@ -475,6 +475,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#3-lines-to-add-tamper-evident-audit-to-your-llm-calls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 lines to add tamper-evident audit to your LLM calls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-bijotel-does" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1158,6 +1169,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#3-lines-to-add-tamper-evident-audit-to-your-llm-calls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 lines to add tamper-evident audit to your LLM calls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-bijotel-does" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1236,9 +1258,15 @@
 <blockquote>
 <p><strong>Tamper-evident HMAC audit chain for LLM applications.</strong></p>
 </blockquote>
-<p>Every AI decision. Sealed. Verified. Forever.</p>
+<p>Every AI decision. Sealed. Verified. Provable.</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>bijotel
 </span></code></pre></div>
+<h2 id="3-lines-to-add-tamper-evident-audit-to-your-llm-calls">3 lines to add tamper-evident audit to your LLM calls<a class="headerlink" href="#3-lines-to-add-tamper-evident-audit-to-your-llm-calls" title="Anchor link to this section">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">provider</span><span class="o">.</span><span class="n">add_span_processor</span><span class="p">(</span><span class="n">HmacChainSpanProcessor</span><span class="p">(</span><span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;chain.db&quot;</span><span class="p">,</span> <span class="n">secret_key</span><span class="o">=</span><span class="n">secret</span><span class="p">))</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">provider</span><span class="o">.</span><span class="n">add_span_processor</span><span class="p">(</span><span class="n">CasSpanProcessor</span><span class="p">(</span><span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;chain.db&quot;</span><span class="p">))</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">AnthropicInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span>
+</span></code></pre></div>
+<p>That's it. Every <code>messages.create()</code> is now HMAC-sealed into <code>chain.db</code>.</p>
 <h2 id="what-bijotel-does">What BIJOTEL does<a class="headerlink" href="#what-bijotel-does" title="Anchor link to this section">&para;</a></h2>
 <p>BIJOTEL plugs into your LLM call pipeline via OpenTelemetry
 SpanProcessors. Every call gets:</p>
@@ -1288,7 +1316,8 @@ SpanProcessors. Every call gets:</p>
 <h2 id="production-validated">Production validated<a class="headerlink" href="#production-validated" title="Anchor link to this section">&para;</a></h2>
 <ul>
 <li><strong>5,889+ chain entries</strong> across 15 days continuous operation</li>
-<li><strong>2 independent production systems</strong> — GENA (x86_64) + ARA (aarch64)</li>
+<li><strong>2 independent production systems</strong>: <strong>GENA</strong> (9-ecosystem AI mesh,
+  x86_64, Nuremberg) and <strong>ARA</strong> (AI Research Agency, aarch64, Helsinki)</li>
 <li><strong>Cross-architecture</strong> verification proven (R2-D)</li>
 <li><strong>Cross-provider</strong> chains (Anthropic + xAI via OpenAI adapter)</li>
 <li><strong>686 unit tests</strong> + <strong>46 production tests</strong> across 3 rounds (0 partial/fail)</li>
