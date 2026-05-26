@@ -271,7 +271,7 @@ critical SELECT-prev/INSERT section. WAL mode lets readers
 (``bijotel serve``, ``bijotel verify``) coexist without blocking the
 writers.
 
-### Forensic export to auditor
+### Forensic export to auditor — symmetric (v1, default)
 
 ```mermaid
 sequenceDiagram
@@ -293,8 +293,77 @@ sequenceDiagram
     Note over Aud: valid=true, entries_count=4950
 ```
 
-The auditor does **not** need SQLite access. The same HMAC secret
-(out-of-band) is sufficient to verify the entire chain offline.
+The auditor verifies with the **shared HMAC secret**. That secret has
+to be transmitted out-of-band, and the auditor who holds it can also
+*forge* valid chains. This is the trust limitation v2.1.0 was built
+to close.
+
+### Forensic export with Ed25519 attestation (v2.1.0+)
+
+```mermaid
+sequenceDiagram
+    participant Ops as Operator
+    participant API as bijotel export --sign-key
+    participant DB as chain.db
+    participant File as audit_TS.json (v2)
+    participant Aud as Auditor (public key only)
+
+    Ops->>API: bijotel keygen → priv.pem + pub.pem
+    Note over Ops: priv.pem stays operator-side<br/>pub.pem distributed to auditor
+    Ops->>API: export --sign-key priv.pem
+    API->>DB: SELECT * FROM chain
+    API->>API: chain_signature = HMAC(secret, ...)
+    API->>API: ed25519_sig = sign(chain_signature, priv.pem)
+    API->>File: bijotel-chain-v2 envelope
+    File->>Aud: (out-of-band: export.json + pub.pem)
+    Aud->>Aud: verify-export --public-key pub.pem
+    Aud->>Aud: Ed25519 verify(chain_signature, sig, pub)
+    Aud->>Aud: per-entry body_hash + chain_link checks
+    Note over Aud: VALID — auditor never held the HMAC secret
+```
+
+Auditor mode requirements (v2.1.0+):
+
+- Operator holds the HMAC secret AND the Ed25519 *private* key.
+- Auditor receives the export JSON AND the Ed25519 *public* key.
+- Auditor cannot forge entries — they hold only verification material.
+- Cross-architecture portability: a v2 export signed on x86_64
+  verifies bit-identically on aarch64. Empirically confirmed
+  2026-05-26 (GENA Nuremberg → ARA Helsinki, 6,341 entries).
+
+### Chain segmentation and archival (v2.2.0+)
+
+At scale the active `chain.db` is peeled into archive segments while
+the boundary invariant `archive.last_hmac_hash ==
+next_segment.first.prev_hash` proves no entries went missing.
+
+```mermaid
+flowchart LR
+    subgraph T0["Day 0 — single chain"]
+        C0["chain.db<br/>seq 1..6332<br/>82 MB"]
+    end
+    subgraph T1["After bijotel archive --before 2026-05-20"]
+        A1["archive_may10-may20.db<br/>seq 1..3783<br/>42 MB"]
+        C1["chain.db<br/>seq 3784..6332<br/>40 MB"]
+        A1 -. "last_hmac_hash == first.prev_hash" .-> C1
+    end
+    subgraph T2["Verify continuity"]
+        VC["bijotel verify-continuity<br/>archive.db chain.db"]
+        VC --> R["VALID, CONTINUOUS<br/>6332 entries / 2 segments"]
+    end
+    C0 ==> A1
+    C0 ==> C1
+```
+
+Range-aware verify and export also live in v2.2.0:
+
+- `bijotel verify --range 5000:6000` / `--since 2026-05-20` /
+  `--until 2026-05-25` / `--last 1000`
+- `bijotel export ... --range A:B` produces a `segment` block with
+  `boundary_prev_hash` that the auditor anchors against, instead of
+  GENESIS, when the slice doesn't start at seq=1.
+
+See `docs/operations/chain-archival.md` for the operational playbook.
 
 ## Compatibility notes
 
@@ -308,7 +377,6 @@ The auditor does **not** need SQLite access. The same HMAC secret
 ---
 
 For schema changes, see migration notes in
-[Changelog](changelog.md). Production integration tests are
-summarized in the v2.0.x changelog entries (Round 1 / 2 / 3
-production tests, 46 scenarios across security, chaos, performance,
-and data-integrity).
+[CHANGELOG.md](CHANGELOG.md). For the production integration test
+that exercises all this, see
+[INTEGRATION_TEST_20260523.md](INTEGRATION_TEST_20260523.md).

@@ -5,6 +5,83 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] — 2026-05-26 — Internal-audit drift closure: REST API for v2.1/v2.2 features
+
+Surfaces the v2.1.0 (Ed25519) and v2.2.0 (chain segmentation +
+archival) features into the REST API and the top-level `bijotel`
+package façade so they match what was shipped on PyPI. Closes every
+drift the internal audit (2026-05-26) flagged across packaging,
+docs, lockfile and test coverage.
+
+### Added
+
+- **`POST /keygen`** — generates an Ed25519 keypair server-side and
+  returns the public key + fingerprint inline. Refuses overwrite of
+  an existing private key without `force=true`.
+- **`POST /archive`** — peels the oldest entries off `chain.db` into
+  a separate SQLite (boundary metadata + optional signed JSON
+  sidecar). `dry_run=true` reports the plan without writing anything.
+- **`POST /verify-continuity`** — walks an ordered list of chain DB
+  paths and confirms `archive_N.last_hmac == next.first_prev` for
+  each adjacent pair. Reports per-segment validity and per-pair
+  boundary status.
+- **`POST /chain/verify` range params** — `seq_start`, `seq_end`,
+  `since_ns`, `until_ns`, `last_n` mirror the CLI flags so the API
+  surfaces the same v2.2.0 capability the CLI got.
+- **Top-level `bijotel.__all__` includes v2.1/v2.2 symbols** —
+  `archive_chain`, `verify_continuity`, `chain_range_summary`,
+  `inspect_export`, `verify_chain`, `generate_keypair`,
+  `ed25519_sign`, `ed25519_verify`, `public_key_fingerprint`,
+  `public_key_raw_b64`, `load_private_pem`, `load_public_pem`.
+  `from bijotel import *` now reflects the actual feature set.
+
+### Changed
+
+- **`ARCHITECTURE.md` and `docs/architecture.md` synced for v2.x**
+  — added "Forensic export with Ed25519 attestation (v2.1.0+)"
+  sequence diagram, "Chain segmentation and archival (v2.2.0+)"
+  flowchart with boundary invariant, kept the v1 symmetric-HMAC
+  diagram for historical context with an explicit "v2.1.0 was
+  built to close this" note. Both files mirror exactly (canonical
+  source = root `ARCHITECTURE.md`).
+- **`requirements-lock.txt` regenerated** from a clean v2.3.0 venv.
+  `cryptography==48.0.0` is now pinned (was missing). `openai`,
+  `anthropic`, `opentelemetry-*`, `numpy` all refreshed.
+
+### Tests
+
+- `tests/test_api_energy.py` — 13 new tests for `/energy/*` (route
+  was 39% covered — was the only route without a dedicated test
+  file).
+- `tests/test_cli_keygen.py` — 5 subprocess tests for
+  `bijotel keygen` (refuses overwrite, force rotates, creates
+  output dir, prints fingerprint).
+- `tests/test_cli_archive.py` — 8 subprocess tests for
+  `bijotel archive`, `bijotel verify-continuity`, and `bijotel
+  verify --range`/`--last`.
+- `tests/test_api_archive.py` — 12 tests for the new REST endpoints
+  (keygen, archive dry-run + apply + sign-key sidecar, continuity
+  with break detection, chain verify with range params).
+- Suite: **783 pass / 8 skip / 0 fail** (was 745/8/0 in v2.2.0).
+  +38 new tests across 4 files. Ruff clean.
+
+### Operations / housekeeping
+
+- Cleaned 5 stale discovery artifacts at repo root
+  (`f1_spans.jsonl`, `f2_chain.db`, `f3_bijotel.db`, `f4_bijotel.db`,
+  `f5_decorator.db` — week-1 schema-exploration leftovers, gitignored
+  but never deleted).
+- ARA backend container upgraded v2.1.0 → v2.2.0 → v2.3.0 (fleet
+  now version-aligned with GENA across both production systems).
+- GENA fleet sweep: all 4 containers upgraded to v2.3.0.
+
+### Migration
+
+No schema break. No CLI behaviour change. The new REST endpoints
+are additive — every v2.2 endpoint still responds with the same
+shape. Hosts that don't call `/keygen`, `/archive`, or
+`/verify-continuity` see exactly the v2.2 API surface.
+
 ## [2.2.0] — 2026-05-26 — Chain segmentation + archival (100K+ scale)
 
 Range-aware verify, range-aware export, an archive command that peels

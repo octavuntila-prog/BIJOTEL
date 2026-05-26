@@ -90,6 +90,29 @@ class ChainVerifyRequest(BaseModel):
         "chain. If false, only verify the last row's prev_hash matches the "
         "previous row's hmac_hash (fast smoke check).",
     )
+    # v2.3.0: range filters mirror the CLI flags. When any is set,
+    # `full` is implied (we always do a per-row HMAC recompute over
+    # the slice — there's no smoke shortcut for ranges).
+    seq_start: int | None = Field(
+        None,
+        description="Inclusive lower bound on seq. v2.3.0+.",
+    )
+    seq_end: int | None = Field(
+        None,
+        description="Inclusive upper bound on seq. v2.3.0+.",
+    )
+    since_ns: int | None = Field(
+        None,
+        description="Inclusive lower bound on timestamp_ns. v2.3.0+.",
+    )
+    until_ns: int | None = Field(
+        None,
+        description="Inclusive upper bound on timestamp_ns. v2.3.0+.",
+    )
+    last_n: int | None = Field(
+        None,
+        description="Verify only the last N entries by seq. v2.3.0+.",
+    )
 
 
 class ChainVerifyResponse(BaseModel):
@@ -590,5 +613,128 @@ class ExportVerifyResponse(BaseModel):
         None, description="Last hmac_hash in the chain export."
     )
     format: str | None = Field(
-        None, description="Export schema version, e.g. 'bijotel-chain-v1'."
+        None, description="Export schema version, e.g. 'bijotel-chain-v1' or v2."
     )
+
+
+# ─────────── /archive + /keygen + /verify-continuity (v2.3.0) ───────────
+
+
+class KeygenResponse(BaseModel):
+    """Body of ``POST /keygen``.
+
+    Returns the PUBLIC key inline (caller distributes to auditors) and
+    the on-disk path of the PRIVATE key (which never leaves the server).
+    """
+
+    private_key_path: str = Field(
+        ..., description="Filesystem path of the PEM private key on the server."
+    )
+    public_key_pem: str = Field(
+        ..., description="PEM-encoded public key, safe to distribute."
+    )
+    fingerprint: str = Field(
+        ..., description="SHA-256(raw 32-byte pubkey)[:16] — short display id."
+    )
+
+
+class KeygenRequest(BaseModel):
+    """Body of ``POST /keygen``."""
+
+    output_dir: str = Field(
+        "./keys",
+        description="Server-side directory to write bijotel_private.pem + "
+        "bijotel_public.pem into. Created if missing.",
+    )
+    force: bool = Field(
+        False,
+        description="Overwrite an existing private key. Don't pass true "
+        "unless you really mean to rotate the signing key.",
+    )
+
+
+class ArchiveRequest(BaseModel):
+    """Body of ``POST /archive``."""
+
+    output_path: str = Field(
+        ...,
+        description="Destination SQLite path for the archive (must not exist).",
+    )
+    before_seq: int | None = Field(
+        None, description="Archive rows with seq < this. Mutually exclusive with before_iso."
+    )
+    before_iso: str | None = Field(
+        None,
+        description="Archive rows with timestamp_ns before this UTC date "
+        "(YYYY-MM-DD). Mutually exclusive with before_seq.",
+    )
+    sign_key_path: str | None = Field(
+        None,
+        description="Optional Ed25519 PEM private key path. When set, emit a "
+        "signed JSON sidecar of the archive slice next to the SQLite file.",
+    )
+    dry_run: bool = Field(
+        False,
+        description="When true, report the plan and DO NOT write the archive "
+        "or delete from source.",
+    )
+
+
+class ArchiveResponse(BaseModel):
+    """Body of ``POST /archive``."""
+
+    dry_run: bool
+    archived_count: int
+    first_seq: int
+    last_seq: int
+    first_prev_hash: str
+    last_hmac_hash: str
+    boundary_next_prev_hash: str | None
+    archive_path: str
+    segment_json_path: str | None = None
+    main_remaining_count: int
+
+
+class ContinuitySegmentSummary(BaseModel):
+    """One segment in ``POST /verify-continuity`` response."""
+
+    db_path: str
+    valid: bool
+    count: int | None = None
+    first_seq: int | None = None
+    last_seq: int | None = None
+    first_prev_hash: str | None = None
+    last_hmac_hash: str | None = None
+    reason: str | None = None
+
+
+class ContinuityBoundaryCheck(BaseModel):
+    """One adjacent-pair boundary check."""
+
+    from_db: str
+    to_db: str
+    matches: bool
+    expected: str | None = None
+    actual: str | None = None
+    reason: str | None = None
+
+
+class VerifyContinuityRequest(BaseModel):
+    """Body of ``POST /verify-continuity``."""
+
+    db_paths: list[str] = Field(
+        ...,
+        min_length=1,
+        description="Two or more chain DB paths in chronological order "
+        "(oldest archive first, live chain.db last). Single-segment input "
+        "still works — it just verifies the one segment with no boundary "
+        "checks.",
+    )
+
+
+class VerifyContinuityResponse(BaseModel):
+    """Body of ``POST /verify-continuity``."""
+
+    valid: bool
+    segments: list[ContinuitySegmentSummary]
+    boundaries: list[ContinuityBoundaryCheck]

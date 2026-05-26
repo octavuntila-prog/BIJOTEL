@@ -7,6 +7,15 @@ from bijotel.adapters import (
     ProviderResponse,
 )
 from bijotel.core.init import init, shutdown
+from bijotel.crypto.ed25519 import (
+    generate_keypair,
+    load_private_pem,
+    load_public_pem,
+    public_key_fingerprint,
+    public_key_raw_b64,
+)
+from bijotel.crypto.ed25519 import sign as ed25519_sign
+from bijotel.crypto.ed25519 import verify as ed25519_verify
 from bijotel.decorators import trace_genai, wrap
 from bijotel.layers import (
     ASTSafetyChecker,
@@ -54,7 +63,17 @@ from bijotel.policy import (
     prompt_pattern_deny,
     rate_limit_calls_per_minute,
 )
-from bijotel.processors import DAGNode, MerkleDAG, export_chain, verify_export
+from bijotel.processors import (
+    DAGNode,
+    MerkleDAG,
+    archive_chain,
+    chain_range_summary,
+    export_chain,
+    inspect_export,
+    verify_chain,
+    verify_continuity,
+    verify_export,
+)
 from bijotel.regression import (
     Anomaly,
     AnomalyMethod,
@@ -63,7 +82,7 @@ from bijotel.regression import (
     compute_baseline,
 )
 
-__version__ = "2.2.0"
+__version__ = "2.3.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -103,27 +122,41 @@ __all__ = [
     "StakesClassifier",
     "TaskClassifier",
     "__version__",
+    # v2.2.0 chain segmentation + archival public API
+    "archive_chain",
     "ast_safety_check",
+    "chain_range_summary",
     "compute_agreement",
     "compute_baseline",
     "consensus_requirement",
     "cost_per_call_max",
     "daily_token_budget",
+    # v2.1.0 Ed25519 asymmetric signature surface
+    "ed25519_sign",
+    "ed25519_verify",
     "energy_budget",
     "export_chain",
+    "generate_keypair",
     "guard",
     "init",
+    "inspect_export",
+    "load_private_pem",
+    "load_public_pem",
     "misalignment_check",
     "model_allowlist",
     "model_version_pin",
     "output_length_limit",
     "pii_detection",
     "prompt_pattern_deny",
+    "public_key_fingerprint",
+    "public_key_raw_b64",
     "rate_limit_calls_per_minute",
     "routing_recommendation",
     "shutdown",
     "similarity_search",
     "trace_genai",
+    "verify_chain",
+    "verify_continuity",
     "verify_export",
     "wrap",
 ]

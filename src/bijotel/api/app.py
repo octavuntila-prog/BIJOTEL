@@ -267,6 +267,7 @@ def create_app(
     _register_meta(app)
 
     # ----- Route modules (defer import so missing extras don't break /health) -----
+    from bijotel.api.routes import archive as archive_routes
     from bijotel.api.routes import chain as chain_routes
     from bijotel.api.routes import consensus as consensus_routes
     from bijotel.api.routes import containment as containment_routes
@@ -285,6 +286,7 @@ def create_app(
         containment_routes,
         consensus_routes,
         energy_routes,
+        archive_routes,
     ]
 
     if serve_dashboard:

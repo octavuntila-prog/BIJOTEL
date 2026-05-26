@@ -336,7 +336,15 @@ def chain_verify(
             ),
         )
 
-    valid, fail_seq, reason = verify_chain(path, secret)
+    # v2.3.0: pass range kwargs through when the request supplied any.
+    range_kwargs: dict = {}
+    if body:
+        for field in ("seq_start", "seq_end", "since_ns", "until_ns", "last_n"):
+            v = getattr(body, field, None)
+            if v is not None:
+                range_kwargs[field] = v
+
+    valid, fail_seq, reason = verify_chain(path, secret, **range_kwargs)
     return ChainVerifyResponse(
         valid=valid,
         entries_verified=total,
