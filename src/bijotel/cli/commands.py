@@ -29,6 +29,7 @@ from bijotel.cli.cmd_energy import (
     energy_cmd,
 )
 from bijotel.cli.cmd_export import export_cmd
+from bijotel.cli.cmd_federation import federation_cmd
 from bijotel.cli.cmd_integrity import integrity_cmd
 from bijotel.cli.cmd_keygen import keygen_cmd
 from bijotel.cli.cmd_regression import _print_anomalies, regression_cmd
@@ -49,6 +50,7 @@ __all__ = [
     "archive_cmd",
     "energy_cmd",
     "export_cmd",
+    "federation_cmd",
     "inspect_cmd",
     "integrity_cmd",
     "keygen_cmd",

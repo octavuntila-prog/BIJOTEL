@@ -28,6 +28,13 @@ from bijotel.crypto.ed25519 import (
 from bijotel.crypto.ed25519 import sign as ed25519_sign
 from bijotel.crypto.ed25519 import verify as ed25519_verify
 from bijotel.decorators import trace_genai, wrap
+from bijotel.federation import (
+    CrossAnchorReceipt,
+    FederationClient,
+    RegistrationReceipt,
+    SubmissionReceipt,
+    verify_cross_anchor_receipt,
+)
 from bijotel.integrity import (
     ChainIntegrityMonitor,
     IntegrityReport,
@@ -108,7 +115,7 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.10.0"
+__version__ = "2.11.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -125,6 +132,7 @@ __all__ = [
     "ConsensusVoter",
     "ContainmentDecision",
     "ContainmentGuard",
+    "CrossAnchorReceipt",
     "DAGNode",
     "Decision",
     "DeterministicFingerprinter",
@@ -133,6 +141,7 @@ __all__ = [
     "EnergySpanProcessor",
     "EnergySummary",
     "EnergyTracker",
+    "FederationClient",
     "FingerprintSpanProcessor",
     "IntegrityReport",
     "MerkleDAG",
@@ -149,12 +158,14 @@ __all__ = [
     "ProviderResponse",
     "RAGSource",
     "REKOR_PUBLIC_URL",
+    "RegistrationReceipt",
     "RegressionDetector",
     "RekorAnchor",
     "ReplayResult",
     "SemanticFingerprinter",
     "SoftwareAttestation",
     "StakesClassifier",
+    "SubmissionReceipt",
     "TaskClassifier",
     "__version__",
     # v2.8.0 chain integrity public API
@@ -200,6 +211,7 @@ __all__ = [
     "trace_genai",
     "verify_chain",
     "verify_continuity",
+    "verify_cross_anchor_receipt",
     "verify_export",
     "verify_rekor_anchor",
     "verify_replay",

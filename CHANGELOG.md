@@ -5,6 +5,105 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0] — 2026-05-26 — Cross-org federation (client + CLI)
+
+The fifth and last trust layer in the v2.x roadmap: a chain
+federation client analogue to Certificate Transparency for TLS. Where
+v2.9 anchors *your* chain head in Rekor and v2.10 attests the
+producing software, v2.11 lets multiple independent organisations
+co-sign each other's chain heads, so silent rollbacks are catchable
+by external auditors without needing trust in any single party.
+
+Ships the **client side** of the protocol designed in
+`docs/design/cross-org-federation.md` (v2.10 deliverable). The
+reference **service** lands in a separate repo
+(`octavuntila-prog/bijotel-federation`, FastAPI + SQLite + Ed25519).
+
+### Added
+
+- **`bijotel.federation` module**:
+  - `FederationClient` — stdlib `urllib`-based HTTP client (no new
+    dependency). Methods: `register`, `submit`, `status`,
+    `get_operator`, `get_anchor`, `verify_anchor`. Auth is Ed25519
+    challenge-response and self-contained Bearer tokens — no
+    passwords, no API keys.
+  - `RegistrationReceipt`, `SubmissionReceipt`, `CrossAnchorReceipt`
+    — frozen dataclasses with `to_dict()` for sidecar JSON.
+  - `verify_cross_anchor_receipt(receipt, federation_public_key_pem=None)`
+    — **local-only** verification of a federation receipt. Recomputes
+    the cross-anchor hash from `participating_operators + anchored_at`
+    and checks the federation Ed25519 signature. Works with **no
+    federation service** running — pure cryptographic check on the
+    sidecar JSON.
+
+- **`bijotel federation` CLI** — four subcommands:
+  - `register --service URL --public-key PATH --private-key PATH --org NAME`
+    — claims an `operator_id` via challenge-response. Supports
+    `--dry-run` to emit the payload locally without a network call.
+  - `submit --service URL --operator-id ID --private-key PATH --export PATH`
+    — submits a `bijotel-chain-v2` signed export. Also supports
+    `--dry-run`.
+  - `verify RECEIPT.json [--federation-key PUB.pem]` — **local-only**
+    verification. Exit code 0 on match, 3 on mismatch. Pass
+    `--federation-key` to bind to an externally-known trust anchor.
+  - `status --service URL` — unauthenticated health/discovery query.
+
+- **Docs**: `docs/guides/federation.md` — install, CLI recipes,
+  Python API, receipt format, threat model, honest scope.
+
+### Trust hierarchy (after v2.11)
+
+| Layer | Proves | Trust root |
+|---|---|---|
+| HMAC chain | entries not tampered post-seal | operator's HMAC secret |
+| Ed25519 | signed by a specific key | operator's Ed25519 key |
+| Rekor (v2.9) | existed at time T, publicly witnessed | Sigstore Rekor log |
+| Attestation (v2.10) | produced by trusted code | TPM/Nitro/SEV-SNP/SGX or software |
+| **Federation (v2.11)** | **multiple orgs witnessed the same chain head** | **federation operator + peer signatures** |
+
+### Honest scope (M2: reality > docs)
+
+What ships at v2.11.0:
+
+- ✓ `FederationClient` is functional against any conforming HTTP
+  service.
+- ✓ `bijotel federation verify` is **fully usable today** — given a
+  receipt JSON, it verifies the federation Ed25519 signature and
+  recomputes the cross-anchor hash with **no network call**.
+- ✓ `--dry-run` on `register` and `submit` emits the payload locally
+  so operators can mail it to a future federation or test client
+  wiring.
+
+What does **not** ship at v2.11.0:
+
+- ✗ **Zero external federation operators exist.** The reference
+  service skeleton is the next item in the queue, in a separate
+  repo (`octavuntila-prog/bijotel-federation`).
+- ✗ No live cross-anchors have been produced (cannot — no service).
+- ✗ Key rotation flow for federations is in the design doc (§11) but
+  not yet wired into the client; arrives with the service.
+
+The client is shipped first so the protocol contract is locked
+before the service is built — same pattern as v2.10 TEE backends
+locking the interface before hardware integration.
+
+### Tests
+
+- `tests/test_federation.py` — 16 tests covering: client
+  register/submit/status/get/verify happy paths, a mock-server-in-
+  fixture pattern (no external network), `verify_cross_anchor_receipt`
+  happy path + external pubkey binding + tampered-hash + tampered-
+  signature negatives, dataclass JSON roundtrip, CLI dry-run + local
+  verify + mismatch exit code 3, and public API exports.
+- Full suite: **927 passed, 8 skipped** (was 911 at v2.10.0).
+
+### Backward compatibility
+
+- Fully backward-compatible. No chain.db or archive schema changes.
+- Federation surface is opt-in; existing v2.10 deployments are
+  unaffected if they never run `bijotel federation …`.
+- No new runtime dependency — `FederationClient` is pure stdlib.
+
 ## [2.10.0] — 2026-05-26 — TEE attestation (software backend + hardware stubs)
 
 Closes the fourth trust gap. Where the HMAC chain proves entries

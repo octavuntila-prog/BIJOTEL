@@ -56,6 +56,7 @@ nav:
       - Chain Integrity Monitor: guides/chain-integrity.md
       - Rekor Anchoring: guides/rekor-anchoring.md
       - Attestation: guides/attestation.md
+      - Federation: guides/federation.md
   - API Reference:
       - CLI: api/cli.md
       - REST API: api/rest.md
