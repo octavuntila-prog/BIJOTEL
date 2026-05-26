@@ -6,6 +6,13 @@ from bijotel.adapters import (
     Provider,
     ProviderResponse,
 )
+from bijotel.anchoring import (
+    REKOR_PUBLIC_URL,
+    AnchorVerifyResult,
+    RekorAnchor,
+    anchor_chain_head,
+    verify_rekor_anchor,
+)
 from bijotel.core.init import init, shutdown
 from bijotel.crypto.ed25519 import (
     generate_keypair,
@@ -97,13 +104,14 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.8.0"
+__version__ = "2.9.0"
 
 __all__ = [
     "ASTSafetyChecker",
     "ASTViolation",
     "Anomaly",
     "AnomalyMethod",
+    "AnchorVerifyResult",
     "AnthropicAdapter",
     "Budget",
     "CarbonCalculator",
@@ -135,7 +143,9 @@ __all__ = [
     "Provider",
     "ProviderResponse",
     "RAGSource",
+    "REKOR_PUBLIC_URL",
     "RegressionDetector",
+    "RekorAnchor",
     "ReplayResult",
     "SemanticFingerprinter",
     "StakesClassifier",
@@ -143,6 +153,8 @@ __all__ = [
     "__version__",
     # v2.8.0 chain integrity public API
     "analyze_chain_integrity",
+    # v2.9.0 Rekor anchoring public API
+    "anchor_chain_head",
     # v2.2.0 chain segmentation + archival public API
     "archive_chain",
     "ast_safety_check",
@@ -183,6 +195,7 @@ __all__ = [
     "verify_chain",
     "verify_continuity",
     "verify_export",
+    "verify_rekor_anchor",
     "verify_replay",
     "with_rag_provenance",
     "wrap",

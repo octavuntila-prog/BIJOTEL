@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import sys
 
+from bijotel.cli.cmd_anchor import add_anchor_subparser
 from bijotel.cli.commands import (
+    anchor_cmd,
     archive_cmd,
     energy_cmd,
     export_cmd,
@@ -302,6 +304,9 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Filter to one agent.",
     )
 
+    # bijotel anchor publish/verify (v2.9.0)
+    add_anchor_subparser(subparsers)
+
     # bijotel integrity (v2.8.0)
     p_integrity = subparsers.add_parser(
         "integrity",
@@ -406,6 +411,7 @@ def main(argv: list[str] | None = None) -> int:
         "verify-export": verify_export_cmd,
         "regression": regression_cmd,
         "integrity": integrity_cmd,
+        "anchor": anchor_cmd,
         "replay": replay_cmd,
         "energy": energy_cmd,
         "serve": serve_cmd,

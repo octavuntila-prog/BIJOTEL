@@ -54,6 +54,7 @@ nav:
       - RAG Source Provenance: guides/rag-provenance.md
       - Replay Verification: guides/replay-verification.md
       - Chain Integrity Monitor: guides/chain-integrity.md
+      - Rekor Anchoring: guides/rekor-anchoring.md
   - API Reference:
       - CLI: api/cli.md
       - REST API: api/rest.md

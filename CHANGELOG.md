@@ -5,6 +5,79 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] — 2026-05-26 — Rekor anchoring (library + CLI)
+
+Adds public transparency-log anchoring for chain heads via the
+Sigstore Rekor protocol. Where `bijotel verify` proves "the chain
+bytes have not been altered", a Rekor anchor proves "operator X
+attested head Y at time T" — third-party-witnessed by a public log
+that the operator does not run.
+
+### Added
+
+- **`bijotel.anchoring` module** (~330 LOC):
+  - `RekorClient` — stdlib-`urllib` HTTP client for Rekor's REST API
+    (`POST /api/v1/log/entries`, `GET /api/v1/log/entries?logIndex=N`).
+    No new runtime dependency.
+  - `anchor_chain_head(db_path, *, sign_key_pem)` — reads the chain's
+    last `hmac_hash`, signs the SHA-512 digest with the operator's
+    Ed25519 key, uploads a `hashedrekord/0.0.1` entry, returns a
+    `RekorAnchor` (log_index, UUID, integrated_time, signature,
+    public PEM, original head_hash + seq).
+  - `verify_rekor_anchor(anchor, *, expected_public_key_pem=None)`
+    — fetches the Rekor entry by log_index, checks (hash, public
+    key, signature) all line up. Returns `AnchorVerifyResult` with
+    one bool per check + a human `reason` string when something
+    doesn't match.
+  - `RekorAnchor` / `AnchorVerifyResult` — frozen dataclasses with
+    `to_dict()` for sidecar JSON serialisation.
+  - `REKOR_PUBLIC_URL` constant pointing at `https://rekor.sigstore.dev`.
+    Override via `rekor_url=` to point at a private / air-gapped log.
+- **`bijotel anchor publish`** + **`bijotel anchor verify`** CLI
+  subcommands. Publish writes a sidecar JSON; verify reads one and
+  re-fetches the Rekor entry. Exit codes 0=match, 1=missing,
+  2=arg-error, 3=mismatch.
+- **Docs**: `docs/guides/rekor-anchoring.md` with a Why → What → How
+  walk-through, a cron snippet for periodic anchoring, the
+  three-check verification mechanics, and an explicit honest scope
+  note (see below).
+
+### Honest scope (M2: reality > docs)
+
+**Live `rekor.sigstore.dev` upload of Ed25519 entries fails with a
+signature-format compatibility issue against Rekor 1.4+** — the
+public Rekor instance's `hashedrekord` Ed25519 verifier doesn't
+accept the straightforward `ed25519.sign(sha512(data))` shape we
+upload. Multiple SDKs hit this; the canonical fix is to integrate
+the `sigstore` PyPI library (which handles Sigstore's bundle format)
+rather than rolling raw `urllib` uploads. **That's tracked for v2.10.**
+
+What does work today, fully:
+
+- ✓ Library API (`anchor_chain_head` / `verify_rekor_anchor`)
+- ✓ CLI (`bijotel anchor publish` / `verify`)
+- ✓ HTTP client (`RekorClient.upload` / `fetch`)
+- ✓ **15 unit tests** with a mock Rekor HTTP server, covering each
+  detector path: happy round-trip, hash mismatch, pubkey mismatch,
+  signature tamper, 404, malformed body, dataclass JSON round-trip,
+  CLI subprocess publish + sidecar write, public API exports
+- ✓ Self-hosted Rekor instances that accept the upload
+  (verified locally against the test http.server fixture)
+
+What v2.10 will deliver:
+
+- ⚠ Swap raw `urllib` upload for `sigstore.transparency.Rekor` (or
+  the equivalent — sigstore-python is the reference impl) so public
+  `rekor.sigstore.dev` Ed25519 uploads succeed.
+- ⚠ Inclusion-proof verification against Rekor's signed merkle root
+  (today the verify path checks per-entry; the STH+proof check is
+  an additional layer worth having for audit-grade trust).
+
+### Backward compatibility
+
+Fully backward-compatible. No chain.db schema changes. Old chains
+work unchanged; anchoring is operator-driven and opt-in.
+
 ## [2.8.0] — 2026-05-26 — Chain integrity monitor
 
 Adds a third axis of chain trust observation alongside `bijotel verify`

@@ -20,6 +20,7 @@ from bijotel.cli._helpers import (
     _parse_range_args,
     _resolve_secret,
 )
+from bijotel.cli.cmd_anchor import anchor_cmd
 from bijotel.cli.cmd_archive import archive_cmd
 from bijotel.cli.cmd_chain import inspect_cmd, list_cmd, stats_cmd
 from bijotel.cli.cmd_energy import (
@@ -44,6 +45,7 @@ from bijotel.processors.export import FORMAT_ID_V2 as FORMAT_ID_V2_NAME
 
 __all__ = [
     # Public handlers
+    "anchor_cmd",
     "archive_cmd",
     "energy_cmd",
     "export_cmd",
