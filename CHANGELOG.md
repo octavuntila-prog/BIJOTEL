@@ -5,6 +5,56 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] — 2026-05-26 — RAG source provenance
+
+The chain now records *which retrieved chunks informed the answer*, not
+only the prompt and response. This closes the "decision based on what
+input" gap that Article 12 of the EU AI Act calls out for high-risk
+systems, without forcing operators to store full document bytes in the
+chain itself.
+
+### Added
+
+- **`bijotel.rag` module** — small, focused public surface.
+  - `RAGSource` — frozen dataclass for one retrieved chunk
+    (document_id, chunk_index, source_uri, retriever, embedding_model,
+    similarity_score, retrieved_at, metadata).
+  - `rag_context(sources, *, total_context_tokens=None)` — builds the
+    `bijotel.rag.*` attribute dict to set on the current span.
+  - `with_rag_provenance(sources, ...)` — decorator form that attaches
+    the same attributes to the currently active span.
+- **Five sealed attributes** (auto-captured by canonical body):
+  `bijotel.rag.source_count`, `.sources`, `.retriever_id`,
+  `.embedding_model`, and optional `.total_context_tokens`.
+- **`bijotel inspect`** now renders a `RAG Provenance` section when a
+  chain entry carries the attributes — table of the first 5 sources,
+  collapsed count of the rest, full list still visible in the canonical
+  body dump.
+- **F12 regression dimension** `rag_source_count` — drift in retrieved
+  chunk counts catches retriever-index shrinkage or unintended query
+  filter changes. Non-RAG entries yield `None` and are ignored.
+- **Docs** — `docs/guides/rag-provenance.md` with a Why → What → Wire →
+  Inspect walk-through, plus the honest caveat that BIJOTEL stores
+  hashes (`document_id`), not document bytes.
+
+### Changed
+
+- `SEMANTIC_EXCLUDE_ATTRS` adds `bijotel.rag.sources` so per-call
+  timestamps and similarity scores no longer break CAS dedup. The
+  *stable* RAG fields (retriever, embedding model, source_count) stay
+  in the dedup key so identical-pipeline calls still match.
+- Top-level `bijotel.__all__` gains `RAGSource`, `rag_context`,
+  `with_rag_provenance`. Backwards-compatible — no existing import path
+  changed.
+
+### Backward compatibility
+
+- Chains written by v2.5.0 and earlier verify unchanged.
+- Non-RAG calls are unaffected — the `bijotel.rag.*` attributes are
+  present only when callers opt in. F12 dimensions that touch them
+  return `None` for old rows, which the detector treats as "no
+  datapoint" (same pattern as v2.4.0 v1.41 dimensions).
+
 ## [2.5.0] — 2026-05-26 — Dashboard catches up: Keys + Archive pages, energy panel
 
 The React/Vite dashboard finally surfaces the v2.1.0 (Ed25519) +

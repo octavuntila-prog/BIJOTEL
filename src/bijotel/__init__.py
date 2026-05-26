@@ -74,6 +74,11 @@ from bijotel.processors import (
     verify_continuity,
     verify_export,
 )
+from bijotel.rag import (
+    RAGSource,
+    rag_context,
+    with_rag_provenance,
+)
 from bijotel.regression import (
     Anomaly,
     AnomalyMethod,
@@ -82,7 +87,7 @@ from bijotel.regression import (
     compute_baseline,
 )
 
-__version__ = "2.5.0"
+__version__ = "2.6.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -117,6 +122,7 @@ __all__ = [
     "ProbeLibrary",
     "Provider",
     "ProviderResponse",
+    "RAGSource",
     "RegressionDetector",
     "SemanticFingerprinter",
     "StakesClassifier",
@@ -150,6 +156,8 @@ __all__ = [
     "prompt_pattern_deny",
     "public_key_fingerprint",
     "public_key_raw_b64",
+    # v2.6.0 RAG provenance surface
+    "rag_context",
     "rate_limit_calls_per_minute",
     "routing_recommendation",
     "shutdown",
@@ -158,5 +166,6 @@ __all__ = [
     "verify_chain",
     "verify_continuity",
     "verify_export",
+    "with_rag_provenance",
     "wrap",
 ]

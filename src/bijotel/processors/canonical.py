@@ -43,6 +43,12 @@ SEMANTIC_EXCLUDE_ATTRS = frozenset({
     "gen_ai.usage.cache_read.input_tokens",
     "gen_ai.usage.cache_creation.input_tokens",
     "gen_ai.usage.reasoning.output_tokens",  # v1.41 reasoning/thinking tokens
+    # v2.6.0: RAG sources JSON carries per-call timestamps + similarity scores,
+    # so it is unique per call even when the same documents are retrieved twice.
+    # Excluded from semantic dedup so identical-prompt + identical-corpus calls
+    # still match on the *stable* RAG fields (retriever, embedding model,
+    # source_count) that stay in the dedup key.
+    "bijotel.rag.sources",
 })
 
 

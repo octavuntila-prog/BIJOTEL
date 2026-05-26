@@ -35,6 +35,7 @@ VALID_DIMENSIONS = (
     "cache_ratio",        # v2.4.0: cache_read / (cache_read + input)
     "reasoning_ratio",    # v2.4.0: reasoning_output / (reasoning + output)
     "ttfc_ms",            # v2.4.0: time_to_first_chunk in ms
+    "rag_source_count",   # v2.6.0: count of RAG sources per call
 )
 MIN_SAMPLES = 5
 
@@ -125,6 +126,14 @@ def _extract_dimension_value(
     if dimension == "ttfc_ms":
         ttfc = attrs.get("gen_ai.response.time_to_first_chunk")
         return float(ttfc) if ttfc is not None else None
+
+    if dimension == "rag_source_count":
+        # v2.6.0: drift in the number of retrieved sources can indicate
+        # retriever-corpus changes (e.g. shrinking index, broken filter).
+        # Absent attribute → None → no datapoint, so non-RAG chains keep
+        # working unchanged.
+        v = attrs.get("bijotel.rag.source_count")
+        return float(v) if v is not None else None
 
     return None
 

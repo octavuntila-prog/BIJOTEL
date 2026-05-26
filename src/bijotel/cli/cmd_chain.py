@@ -24,6 +24,57 @@ from bijotel.cli._helpers import (
 from bijotel.processors import cas_lookup, cas_stats
 
 
+def _print_rag_sources(body_dict: dict) -> None:
+    """Render the ``bijotel.rag.*`` block of a chain entry, if present.
+
+    Skipped silently when the span carries no RAG attributes — which is
+    the common case (most LLM calls are not RAG-augmented). When present,
+    the sources JSON is parsed and the first ~5 entries shown in a
+    compact table; the full record stays visible in the canonical-body
+    dump below.
+    """
+    attrs = body_dict.get("attributes", {})
+    src_count = attrs.get("bijotel.rag.source_count")
+    if src_count is None:
+        return
+
+    retriever = attrs.get("bijotel.rag.retriever_id") or "(none)"
+    embedding = attrs.get("bijotel.rag.embedding_model") or "(none)"
+    total_tokens = attrs.get("bijotel.rag.total_context_tokens")
+
+    print("\n=== RAG Provenance ===")
+    print(f"source_count:   {src_count}")
+    print(f"retriever:      {retriever}")
+    print(f"embedding:      {embedding}")
+    if total_tokens is not None:
+        print(f"context_tokens: {total_tokens}")
+
+    sources_raw = attrs.get("bijotel.rag.sources")
+    if not sources_raw:
+        return
+    try:
+        sources = json.loads(sources_raw)
+    except (json.JSONDecodeError, TypeError):
+        print(f"  (sources JSON unparseable: {sources_raw!r})")
+        return
+    if not isinstance(sources, list):
+        return
+
+    # Display first 5; if more, show count of remainder.
+    shown = sources[:5]
+    for i, s in enumerate(shown, start=1):
+        doc = (s.get("document_id") or "")[:36]
+        chunk = s.get("chunk_index", "?")
+        sim = s.get("similarity_score", 0.0)
+        retr = s.get("retriever") or "-"
+        print(
+            f"  source {i}: doc={doc}  chunk={chunk}  "
+            f"retriever={retr}  sim={sim:.3f}"
+        )
+    if len(sources) > len(shown):
+        print(f"  ... and {len(sources) - len(shown)} more")
+
+
 def inspect_cmd(args: argparse.Namespace) -> int:
     """Inspect span by hex span_id or integer seq."""
     db_path = Path(args.db)
@@ -69,6 +120,9 @@ def inspect_cmd(args: argparse.Namespace) -> int:
     body_dict = _parse_canonical_body(row_dict["canonical_body"])
     print(f"\n=== Status: {_detect_status(body_dict)} ===")
     print(f"Cost (real): {_calc_cost(body_dict)}")
+
+    # v2.6.0: surface RAG provenance if present.
+    _print_rag_sources(body_dict)
 
     print("\n=== Canonical Body (decoded) ===")
     print(json.dumps(body_dict, indent=2, ensure_ascii=False))
