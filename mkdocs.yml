@@ -53,6 +53,7 @@ nav:
       - Energy Tracking: guides/energy-tracking.md
       - RAG Source Provenance: guides/rag-provenance.md
       - Replay Verification: guides/replay-verification.md
+      - Chain Integrity Monitor: guides/chain-integrity.md
   - API Reference:
       - CLI: api/cli.md
       - REST API: api/rest.md

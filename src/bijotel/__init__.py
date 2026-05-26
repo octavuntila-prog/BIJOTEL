@@ -17,6 +17,11 @@ from bijotel.crypto.ed25519 import (
 from bijotel.crypto.ed25519 import sign as ed25519_sign
 from bijotel.crypto.ed25519 import verify as ed25519_verify
 from bijotel.decorators import trace_genai, wrap
+from bijotel.integrity import (
+    ChainIntegrityMonitor,
+    IntegrityReport,
+    analyze_chain_integrity,
+)
 from bijotel.layers import (
     ASTSafetyChecker,
     ASTViolation,
@@ -92,7 +97,7 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.7.0"
+__version__ = "2.8.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -102,6 +107,7 @@ __all__ = [
     "AnthropicAdapter",
     "Budget",
     "CarbonCalculator",
+    "ChainIntegrityMonitor",
     "ConsensusResult",
     "ConsensusVoter",
     "ContainmentDecision",
@@ -115,6 +121,7 @@ __all__ = [
     "EnergySummary",
     "EnergyTracker",
     "FingerprintSpanProcessor",
+    "IntegrityReport",
     "MerkleDAG",
     "MisalignmentReport",
     "ModelRegistry",
@@ -134,6 +141,8 @@ __all__ = [
     "StakesClassifier",
     "TaskClassifier",
     "__version__",
+    # v2.8.0 chain integrity public API
+    "analyze_chain_integrity",
     # v2.2.0 chain segmentation + archival public API
     "archive_chain",
     "ast_safety_check",

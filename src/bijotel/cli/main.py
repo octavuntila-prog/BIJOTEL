@@ -10,6 +10,7 @@ from bijotel.cli.commands import (
     energy_cmd,
     export_cmd,
     inspect_cmd,
+    integrity_cmd,
     keygen_cmd,
     list_cmd,
     regression_cmd,
@@ -301,6 +302,28 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Filter to one agent.",
     )
 
+    # bijotel integrity (v2.8.0)
+    p_integrity = subparsers.add_parser(
+        "integrity",
+        help=(
+            "Run chain-integrity anomaly detection: sequence gaps, "
+            "timestamp anomalies, hash duplicates, provider drift, "
+            "rate changes. Exits 1 when any anomaly is detected."
+        ),
+    )
+    p_integrity.add_argument("--db", required=True, help="SQLite chain DB path.")
+    p_integrity.add_argument(
+        "--window",
+        type=int,
+        default=100,
+        help="How many recent entries to analyze (default 100).",
+    )
+    p_integrity.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit one compact JSON line (cron-friendly) instead of human output.",
+    )
+
     # bijotel replay (v2.7.0)
     p_replay = subparsers.add_parser(
         "replay",
@@ -382,6 +405,7 @@ def main(argv: list[str] | None = None) -> int:
         "verify-continuity": verify_continuity_cmd,
         "verify-export": verify_export_cmd,
         "regression": regression_cmd,
+        "integrity": integrity_cmd,
         "replay": replay_cmd,
         "energy": energy_cmd,
         "serve": serve_cmd,

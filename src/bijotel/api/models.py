@@ -770,3 +770,31 @@ class ReplayVerifyResponse(BaseModel):
     deterministic: bool
     model_version: str | None
     reason: str | None
+
+
+# ----------------------------------------------------------------------
+# v2.8.0 — Chain integrity monitor
+# ----------------------------------------------------------------------
+
+
+class IntegrityReportResponse(BaseModel):
+    """Body of ``GET /integrity`` — full integrity report.
+
+    Mirrors :class:`bijotel.integrity.IntegrityReport.to_dict()`. Nested
+    structures are typed as ``Any`` because the exact shape of each
+    anomaly list is documented per-detector in
+    :mod:`bijotel.integrity.monitor` and changing them shouldn't break
+    the API response model.
+    """
+
+    window: int
+    first_seq: int | None
+    last_seq: int | None
+    clean: bool
+    anomaly_count: int
+    sequence_gaps: list[dict]
+    timestamp_anomalies: list[dict]
+    hash_anomalies: list[dict]
+    provider_shift: dict | None
+    rate_anomalies: list[dict]
+    rotation_boundaries: list[dict]

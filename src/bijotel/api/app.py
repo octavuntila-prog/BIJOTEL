@@ -273,6 +273,7 @@ def create_app(
     from bijotel.api.routes import containment as containment_routes
     from bijotel.api.routes import energy as energy_routes
     from bijotel.api.routes import export as export_routes
+    from bijotel.api.routes import integrity as integrity_routes
     from bijotel.api.routes import layers as layers_routes
     from bijotel.api.routes import policy as policy_routes
     from bijotel.api.routes import regression as regression_routes
@@ -289,6 +290,7 @@ def create_app(
         energy_routes,
         archive_routes,
         replay_routes,
+        integrity_routes,
     ]
 
     if serve_dashboard:

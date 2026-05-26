@@ -5,6 +5,57 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] — 2026-05-26 — Chain integrity monitor
+
+Adds a third axis of chain trust observation alongside `bijotel verify`
+(cryptographic) and F12 regression (payload drift):
+**continuous structural monitoring of the chain itself**. Looks at the
+*chain* rather than the payload — sequence gaps, backward timestamps,
+hash duplicates, provider-mix shifts, rate changes. Universally absent
+from competitor tools, called out in the external research audit.
+
+### Added
+
+- **`bijotel.integrity` module**:
+  - `ChainIntegrityMonitor(db_path, window=100)` — load N recent rows,
+    run six detectors, return one `IntegrityReport`.
+  - `analyze_chain_integrity(db_path, *, window=100)` — convenience
+    function over the class.
+  - `IntegrityReport` — frozen dataclass with `.clean` /
+    `.anomaly_count` properties and `.to_dict()` for JSON.
+  - Six anomaly dataclasses: `SequenceGap`, `TimestampAnomaly`,
+    `HashAnomaly`, `ProviderShift`, `RateAnomaly`, `RotationBoundary`.
+- **`bijotel integrity` CLI** — exits 0 on clean, 1 on anomalies, 2 on
+  argument/DB errors. `--json` flag for cron-friendly output.
+- **`GET /integrity?window=N`** REST endpoint — returns full
+  `IntegrityReport` as JSON. Anomalies are still 200 (the comparison
+  succeeded); 503 reserved for "DB missing".
+- **Docs** — `docs/guides/chain-integrity.md` with CLI / REST /
+  Python recipes, threshold tuning table, and explicit
+  *what-it-does-not-do* section (does not verify HMACs, does not read
+  payloads, does not modify the chain).
+
+### Threshold defaults
+
+| Constant | Default | Meaning |
+|---|---:|---|
+| `BURST_THRESHOLD` | 10 | rows/sec above this → burst anomaly |
+| `LARGE_GAP_SEC` | 3600 | inter-row pause flagging as large_gap |
+| `PROVIDER_SHIFT_PCT` | 20.0 | provider-share delta (pp) to flag |
+| `RATE_TOL` | 0.5 | first-half-vs-second rate ratio tolerance |
+
+### Backward compatibility
+
+Fully backward-compatible. No chain.db schema changes. Old chains
+analyze cleanly under the defaults; the integrity check is purely
+read-only.
+
+### Tests
+
+877 total (805 baseline + 72 new across RAG, replay, integrity), 0 fail,
+8 skipped. 27 integrity-specific tests cover each detector
+independently plus CLI + REST surfaces.
+
 ## [2.7.0] — 2026-05-26 — Deterministic-seed replay verification
 
 Extends BIJOTEL from "tamper-evident" to "tamper-evident + replay-evident":
