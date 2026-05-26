@@ -73,9 +73,12 @@ def test_verify_export_detects_tampered_entry(
     export_chain(chain_db, out, SECRET)
 
     data = json.loads(out.read_text(encoding="utf-8"))
-    # Tamper: flip a char in canonical_hash of entry 1
+    # Tamper: flip the first char of canonical_hash of entry 1.
+    # Pick a replacement guaranteed to differ from the original (otherwise
+    # ~6.25% of runs the hash starts with '0' and the mutation is a no-op).
     original = data["entries"][1]["canonical_hash"]
-    data["entries"][1]["canonical_hash"] = "0" + original[1:]
+    flipped = "f" if original[0] != "f" else "0"
+    data["entries"][1]["canonical_hash"] = flipped + original[1:]
     out.write_text(json.dumps(data), encoding="utf-8")
 
     valid, reason = verify_export(out, SECRET)
