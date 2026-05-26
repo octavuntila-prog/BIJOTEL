@@ -13,6 +13,7 @@ from bijotel.cli.commands import (
     keygen_cmd,
     list_cmd,
     regression_cmd,
+    replay_cmd,
     serve_cmd,
     stats_cmd,
     verify_cmd,
@@ -300,6 +301,31 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Filter to one agent.",
     )
 
+    # bijotel replay (v2.7.0)
+    p_replay = subparsers.add_parser(
+        "replay",
+        help=(
+            "Compare a replayed LLM output against the sealed output_hash "
+            "of a chain entry. Does NOT call any LLM — caller provides "
+            "the replayed text via --output or --output-file."
+        ),
+    )
+    p_replay.add_argument("--db", required=True, help="SQLite chain DB path.")
+    p_replay.add_argument(
+        "--seq",
+        required=True,
+        type=int,
+        help="Chain seq of the entry to verify against.",
+    )
+    p_replay.add_argument(
+        "--output",
+        help="The replayed output text, inline.",
+    )
+    p_replay.add_argument(
+        "--output-file",
+        help="Path to a file containing the replayed output (UTF-8).",
+    )
+
     # bijotel serve
     p_serve = subparsers.add_parser(
         "serve",
@@ -356,6 +382,7 @@ def main(argv: list[str] | None = None) -> int:
         "verify-continuity": verify_continuity_cmd,
         "verify-export": verify_export_cmd,
         "regression": regression_cmd,
+        "replay": replay_cmd,
         "energy": energy_cmd,
         "serve": serve_cmd,
     }

@@ -738,3 +738,35 @@ class VerifyContinuityResponse(BaseModel):
     valid: bool
     segments: list[ContinuitySegmentSummary]
     boundaries: list[ContinuityBoundaryCheck]
+
+
+# ----------------------------------------------------------------------
+# v2.7.0 — Replay verification
+# ----------------------------------------------------------------------
+
+
+class ReplayVerifyRequest(BaseModel):
+    """Body of ``POST /replay/verify``.
+
+    Chain seq + the replayed output text. The endpoint computes SHA-256
+    of ``replayed_output`` and compares it to the sealed
+    ``bijotel.replay.output_hash`` from the entry at ``seq``.
+    """
+
+    seq: int
+    replayed_output: str
+
+
+class ReplayVerifyResponse(BaseModel):
+    """Body of ``POST /replay/verify`` — verdict + context.
+
+    Mirrors :class:`bijotel.replay.ReplayResult` field-for-field so that
+    REST clients see the same shape as Python-API callers.
+    """
+
+    match: bool
+    original_hash: str | None
+    replay_hash: str
+    deterministic: bool
+    model_version: str | None
+    reason: str | None

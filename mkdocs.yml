@@ -52,6 +52,7 @@ nav:
       - Dashboard: guides/dashboard.md
       - Energy Tracking: guides/energy-tracking.md
       - RAG Source Provenance: guides/rag-provenance.md
+      - Replay Verification: guides/replay-verification.md
   - API Reference:
       - CLI: api/cli.md
       - REST API: api/rest.md

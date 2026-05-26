@@ -5,6 +5,60 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] — 2026-05-26 — Deterministic-seed replay verification
+
+Extends BIJOTEL from "tamper-evident" to "tamper-evident + replay-evident":
+record enough per-call metadata at log time that an auditor can rerun the
+prompt later against the same model/seed/temperature and compare the
+sealed `output_hash` to a fresh hash of the replayed answer. Mismatch
+means either the model drifted, the seed wasn't honored, or the chain
+was tampered with after sealing.
+
+### Added
+
+- **`bijotel.replay` module**:
+  - `record_replay_context(*, prompt, output, model, seed=None,
+    temperature=1.0, top_p=1.0, model_version=None)` — builds the seven
+    `bijotel.replay.*` span attributes (prompt_hash, output_hash, seed,
+    temperature, top_p, model_version, deterministic). `seed` is
+    omitted from the dict when `None`, and `deterministic=False` is
+    recorded honestly.
+  - `verify_replay(chain_entry, replayed_output)` — compares the sealed
+    `output_hash` against `SHA-256(replayed_output)`. Returns
+    `ReplayResult` with a specific `reason` field that distinguishes
+    the deterministic-mismatch, non-deterministic-mismatch, and
+    pre-v2.7.0-entry cases.
+  - `ReplayResult` — frozen dataclass with `to_dict()` for JSON
+    serialization (used by the REST endpoint).
+- **`bijotel replay` CLI**:
+  - `--db PATH --seq N --output "text"` or `--output-file PATH`.
+  - Exit codes: 0=match, 1=DB/seq/file missing, 2=arg errors, 3=mismatch.
+- **`POST /replay/verify`** REST endpoint:
+  - Body: `{"seq": int, "replayed_output": str}`.
+  - Returns 200 + `ReplayVerifyResponse` for match and mismatch alike
+    (4xx reserved for "comparison itself could not run", e.g. 404 on
+    unknown seq).
+- **Docs** — `docs/guides/replay-verification.md` with CLI / REST /
+  Python recipes plus the four honest limitations: hashes-not-content,
+  model-version drift, provider-specific seed support, no live LLM
+  calls from BIJOTEL.
+
+### Changed
+
+- `bijotel.__all__` gains `ReplayResult`, `record_replay_context`,
+  `verify_replay`. No existing import path changes.
+- `bijotel.api.routes` adds the `replay` router to the standard mount
+  list (root-level in non-dashboard mode, under `/api/` in dashboard
+  mode).
+
+### Backward compatibility
+
+- Chains written by v2.6.0 and earlier verify unchanged — there are no
+  schema additions in chain.db.
+- `verify_replay` on an entry without replay metadata returns a clean
+  `ReplayResult(match=False, original_hash=None, reason="logged before
+  v2.7.0 ...")` — never raises.
+
 ## [2.6.0] — 2026-05-26 — RAG source provenance
 
 The chain now records *which retrieved chunks informed the answer*, not

@@ -86,8 +86,13 @@ from bijotel.regression import (
     RegressionDetector,
     compute_baseline,
 )
+from bijotel.replay import (
+    ReplayResult,
+    record_replay_context,
+    verify_replay,
+)
 
-__version__ = "2.6.0"
+__version__ = "2.7.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -124,6 +129,7 @@ __all__ = [
     "ProviderResponse",
     "RAGSource",
     "RegressionDetector",
+    "ReplayResult",
     "SemanticFingerprinter",
     "StakesClassifier",
     "TaskClassifier",
@@ -159,6 +165,8 @@ __all__ = [
     # v2.6.0 RAG provenance surface
     "rag_context",
     "rate_limit_calls_per_minute",
+    # v2.7.0 replay verification surface
+    "record_replay_context",
     "routing_recommendation",
     "shutdown",
     "similarity_search",
@@ -166,6 +174,7 @@ __all__ = [
     "verify_chain",
     "verify_continuity",
     "verify_export",
+    "verify_replay",
     "with_rag_provenance",
     "wrap",
 ]

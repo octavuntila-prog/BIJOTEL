@@ -276,6 +276,7 @@ def create_app(
     from bijotel.api.routes import layers as layers_routes
     from bijotel.api.routes import policy as policy_routes
     from bijotel.api.routes import regression as regression_routes
+    from bijotel.api.routes import replay as replay_routes
 
     route_modules = [
         chain_routes,
@@ -287,6 +288,7 @@ def create_app(
         consensus_routes,
         energy_routes,
         archive_routes,
+        replay_routes,
     ]
 
     if serve_dashboard:

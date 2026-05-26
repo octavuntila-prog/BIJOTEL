@@ -30,6 +30,7 @@ from bijotel.cli.cmd_energy import (
 from bijotel.cli.cmd_export import export_cmd
 from bijotel.cli.cmd_keygen import keygen_cmd
 from bijotel.cli.cmd_regression import _print_anomalies, regression_cmd
+from bijotel.cli.cmd_replay import replay_cmd
 from bijotel.cli.cmd_serve import serve_cmd
 from bijotel.cli.cmd_verify import (
     verify_cmd,
@@ -49,6 +50,7 @@ __all__ = [
     "keygen_cmd",
     "list_cmd",
     "regression_cmd",
+    "replay_cmd",
     "serve_cmd",
     "stats_cmd",
     "verify_cmd",
