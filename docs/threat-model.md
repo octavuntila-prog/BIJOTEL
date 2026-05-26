@@ -70,13 +70,13 @@ repository for replay.
 
 ### Insider with the HMAC secret
 
-BIJOTEL uses **symmetric HMAC**. Anyone who possesses
+BIJOTEL's HMAC chain uses a **symmetric** secret. Anyone who possesses
 `BIJOTEL_HMAC_SECRET` can append valid entries to the chain. This is
 the same trust model as TLS pre-shared keys or git's SSH deploy keys.
 
-BIJOTEL's tamper-evidence is for **post-factum** modification by a
-party that *doesn't* hold the secret, not for malicious operators who
-do.
+BIJOTEL's HMAC tamper-evidence is for **post-factum** modification by
+a party that *doesn't* hold the secret, not for malicious operators
+who do.
 
 **Mitigation:**
 
@@ -85,9 +85,12 @@ do.
   Manager) — not in repo config or `.env` files in production.
 - Rotate periodically. The verifier handles rotation boundaries
   correctly: `bijotel verify` returns the exact `seq` where the old
-  secret stops verifying.
-- Roadmap: optional Ed25519 asymmetric signatures on export, so an
-  auditor never needs the seal-time secret.
+  secret stops verifying. See the
+  [Secret Rotation Playbook](operations/secret-rotation.md).
+- **For external auditors: use v2.1.0+ Ed25519 signed exports.** An
+  auditor never needs the seal-time HMAC secret — they verify the
+  export with the operator's public key only, and cannot forge entries.
+  See "Auditor verification without the HMAC secret" below.
 
 ### Secret leakage
 
@@ -201,6 +204,48 @@ current chain length (that's the boundary), swap
 half of the chain with its corresponding secret. The old half stays
 verifiable under the old key; the new half under the new key. There
 is no re-signing.
+
+---
+
+## Auditor verification without the HMAC secret
+
+**Added in v2.1.0.** Pre-v2.1.0 the auditor needed the HMAC secret to
+verify an export — which made the auditor a potential forger. v2.1.0
+adds Ed25519 asymmetric signatures on exports as an outer attestation
+layer over the unchanged HMAC chain.
+
+```bash
+# Operator side (once):
+bijotel keygen --output-dir ./keys
+#  → keys/bijotel_private.pem  (keep secret)
+#  → keys/bijotel_public.pem   (share with auditors)
+
+# Operator side (each export):
+bijotel export --db chain.db -o export.json \
+               --sign-key keys/bijotel_private.pem
+
+# Auditor side (with only the public key — NO HMAC secret):
+bijotel verify-export export.json \
+                      --public-key bijotel_public.pem
+# → Export VALID — Ed25519 signature verified
+```
+
+The auditor verifies the export's Ed25519 signature, then checks that
+each entry's canonical body still hashes to its stored
+`canonical_hash` and that the `prev_hash` chain links remain
+consistent. They never see the seal-time HMAC secret, so they cannot
+mint new entries that would verify under it.
+
+**Empirical evidence (2026-05-26):** a 6,341-entry chain signed on
+GENA (x86_64, Nuremberg) verified bit-identically on ARA (aarch64,
+Helsinki) using only the operator's public key. No HMAC secret left
+the operator host. See `tests/test_export_signed.py` for the property
+tests covering signature tamper, key-swap attack, and canonical-body
+tamper under auditor mode.
+
+The v1 export format (`bijotel-chain-v1`) is still produced when
+`--sign-key` is not supplied — backward-compatible with every reader
+since v1.1.
 
 ---
 

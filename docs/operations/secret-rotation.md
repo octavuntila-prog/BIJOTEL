@@ -237,14 +237,35 @@ as the rotation point.
 
 ---
 
+## Ed25519 signed exports (v2.1.0+)
+
+As of v2.1.0, BIJOTEL ships **`bijotel keygen`** for Ed25519 keypair
+generation and **`--sign-key` / `--public-key`** flags on export /
+verify. This is independent of HMAC rotation — but it changes who needs
+which secret:
+
+- The **HMAC secret** rotates as documented above. It's used by the
+  sealing process and by the operator when verifying with `bijotel
+  verify`.
+- The **Ed25519 keypair** stays stable across HMAC rotations. The
+  private key signs exports; the public key the auditor holds verifies
+  signed exports without ever needing the HMAC secret.
+
+So a chain with rotated HMAC secrets is still verifiable end-to-end by
+an auditor: each segment of the chain is signed under the same Ed25519
+key at export time, and the auditor's public-key verification proves
+the operator attested to the full chain. The HMAC rotation boundary is
+internal forensic detail the auditor doesn't need to handle directly.
+
+If you rotate the **Ed25519** key (e.g. on key compromise), redistribute
+the new public key to auditors. Old signed exports still verify under
+the old public key.
+
 ## Roadmap
 
 - **Multi-secret verify in one pass.** A `--secrets` argument that
   takes `secret:from-to` triples and verifies the whole chain in one
   invocation. Planned, not yet shipped.
-- **Ed25519 signatures on exports.** Asymmetric attestation so an
-  auditor never needs the seal-time secret, only the operator's
-  public key. Planned (P2 on the roadmap).
 - **Automated rotation reminder.** Optional cron that warns when the
   current secret has been in use longer than a configurable
   threshold. Not built; would live in `bijotel ops` if/when added.
