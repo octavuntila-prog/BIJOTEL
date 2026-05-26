@@ -2,7 +2,7 @@
 
 from bijotel.processors.cas import CasSpanProcessor, cas_lookup, cas_stats
 from bijotel.processors.dag import DAGNode, MerkleDAG
-from bijotel.processors.export import export_chain, verify_export
+from bijotel.processors.export import export_chain, inspect_export, verify_export
 from bijotel.processors.hmac_chain import HmacChainSpanProcessor, verify_chain
 
 __all__ = [
@@ -13,6 +13,7 @@ __all__ = [
     "cas_lookup",
     "cas_stats",
     "export_chain",
+    "inspect_export",
     "verify_chain",
     "verify_export",
 ]

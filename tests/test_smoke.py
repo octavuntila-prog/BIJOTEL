@@ -5,7 +5,7 @@ def test_import():
     """Verify bijotel imports and exposes version."""
     import bijotel
 
-    assert bijotel.__version__ == "2.0.6"
+    assert bijotel.__version__ == "2.1.0"
 
 
 def test_subpackages_importable():

@@ -15,6 +15,7 @@ from bijotel.processors import (
     cas_lookup,
     cas_stats,
     export_chain,
+    inspect_export,
     verify_chain,
     verify_export,
 )
@@ -357,7 +358,13 @@ def list_cmd(args: argparse.Namespace) -> int:
 
 
 def export_cmd(args: argparse.Namespace) -> int:
-    """Export chain.db to portable signed JSON file (F8)."""
+    """Export chain.db to portable signed JSON file (F8).
+
+    With ``--sign-key PATH``, additionally embeds an Ed25519 signature so
+    auditors can verify the export without holding the HMAC secret
+    (v2.1.0+). Without the flag, the export is the same v1 format
+    BIJOTEL has shipped since v1.1.
+    """
     secret = _resolve_secret(args)
     if secret is None:
         print(
@@ -371,23 +378,87 @@ def export_cmd(args: argparse.Namespace) -> int:
         print(f"ERROR: chain DB not found: {db_path}", file=sys.stderr)
         return 2
 
+    sign_key_path = getattr(args, "sign_key", None)
+    if sign_key_path and not Path(sign_key_path).exists():
+        print(f"ERROR: --sign-key path not found: {sign_key_path}", file=sys.stderr)
+        return 2
+
     try:
-        out = export_chain(db_path, args.output, secret)
+        out = export_chain(db_path, args.output, secret, sign_key_path=sign_key_path)
     except Exception as e:  # noqa: BLE001
         print(f"ERROR: export failed: {e}", file=sys.stderr)
         return 2
 
     print(f"Exported chain to {out}")
-    # Quick stat for user feedback
-    try:
-        data = json.loads(Path(out).read_text(encoding="utf-8"))
-        print(f"  format:        {data['format']}")
-        print(f"  entries_count: {data['entries_count']}")
-        print(f"  head_hash:     {data['head_hash'][:16]}...")
-        print(f"  size:          {Path(out).stat().st_size:,} bytes")
-    except Exception:  # noqa: BLE001
-        pass
+    info = inspect_export(out)
+    fmt = info.get("format", "?")
+    print(f"  format:        {fmt}")
+    print(f"  entries_count: {info.get('entries_count', '?')}")
+    head_hash = info.get("head_hash") or "?"
+    print(f"  head_hash:     {head_hash[:16]}...")
+    print(f"  size:          {info.get('size_bytes', 0):,} bytes")
+    if info.get("signed"):
+        fp = info.get("public_key_fingerprint") or "?"
+        print(f"  signed by:     {fp} (Ed25519)")
+    return 0
 
+
+# ───────────────────── bijotel keygen ─────────────────────
+
+
+def keygen_cmd(args: argparse.Namespace) -> int:
+    """Generate an Ed25519 keypair for signing chain exports.
+
+    Writes two PEM files into ``--output-dir`` (default ``./keys``):
+
+      * ``bijotel_private.pem`` — keep secret. Used by ``bijotel export
+        --sign-key``.
+      * ``bijotel_public.pem``  — distribute to auditors. Used by
+        ``bijotel verify-export --public-key``.
+
+    Refuses to overwrite an existing private key file unless ``--force``
+    is passed; rotating a signing key by accident is bad.
+    """
+    from bijotel.crypto.ed25519 import generate_keypair, public_key_fingerprint
+
+    out_dir = Path(args.output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    priv_path = out_dir / "bijotel_private.pem"
+    pub_path = out_dir / "bijotel_public.pem"
+
+    if priv_path.exists() and not args.force:
+        print(
+            f"ERROR: {priv_path} already exists. Pass --force to overwrite "
+            "(this rotates your signing key — old signed exports will no "
+            "longer carry a matching key).",
+            file=sys.stderr,
+        )
+        return 2
+
+    private_pem, public_pem = generate_keypair()
+    priv_path.write_bytes(private_pem)
+    pub_path.write_bytes(public_pem)
+    # Lock down private key permissions where the OS supports it.
+    # On Windows / restricted FS the chmod is a no-op and we don't
+    # treat it as fatal — the private key is still inside the user's
+    # directory and the documented expectation is they protect it via
+    # secrets manager in production.
+    import contextlib
+    with contextlib.suppress(OSError):
+        os.chmod(priv_path, 0o600)
+
+    fp = public_key_fingerprint(public_pem)
+    print(f"Generated Ed25519 keypair in {out_dir}/")
+    print(f"  Private key: {priv_path}  (mode 0o600 — keep secret)")
+    print(f"  Public key:  {pub_path}   (share with auditors)")
+    print(f"  Fingerprint: {fp}")
+    print()
+    print("Next steps:")
+    print(f"  bijotel export --db chain.db -o export.json --sign-key {priv_path}")
+    print(
+        f"  bijotel verify-export export.json --public-key {pub_path} "
+        "[--secret-hex <hex>]"
+    )
     return 0
 
 
@@ -395,23 +466,86 @@ def export_cmd(args: argparse.Namespace) -> int:
 
 
 def verify_export_cmd(args: argparse.Namespace) -> int:
-    """Verify integrity of exported chain JSON file (F8)."""
+    """Verify integrity of exported chain JSON file (F8).
+
+    Three modes:
+
+      * Operator (HMAC only)::
+
+            bijotel verify-export export.json --secret-hex <hex>
+
+      * Operator + asymmetric attestation::
+
+            bijotel verify-export export.json --secret-hex <hex>
+                                              --public-key keys/public.pem
+
+      * Auditor (no secret, public key only) — requires a v2 export::
+
+            bijotel verify-export export.json --public-key keys/public.pem
+
+    The auditor mode proves the operator with the matching private key
+    attested to this chain at export time, without ever handing the HMAC
+    secret out of band.
+    """
     secret = _resolve_secret(args)
-    if secret is None:
+    public_key_path = getattr(args, "public_key", None)
+
+    # Credential check BEFORE touching the file — preserves the v1.x
+    # exit-code contract: missing credentials returns 2, file errors
+    # return 1.
+    if secret is None and public_key_path is None:
         print(
-            "ERROR: HMAC secret required (--secret-hex or BIJOTEL_HMAC_SECRET).",
+            "ERROR: HMAC secret required (--secret-hex or "
+            "BIJOTEL_HMAC_SECRET) OR --public-key for auditor mode "
+            "against a v2 export — at least one is required.",
             file=sys.stderr,
         )
         return 2
 
-    valid, reason = verify_export(args.path, secret)
+    # Now show what's in the file so the user knows what they're verifying.
+    try:
+        info = inspect_export(args.path)
+    except Exception:  # noqa: BLE001 — defensive; inspect_export rarely raises
+        info = {}
+
+    if info.get("error"):
+        print(f"ERROR: cannot read export file: {info['error']}", file=sys.stderr)
+        return 1
+    fmt = info.get("format", "?")
+    print(f"File:          {args.path}")
+    print(f"  format:        {fmt}")
+    print(f"  entries_count: {info.get('entries_count', '?')}")
+    print(f"  size:          {info.get('size_bytes', 0):,} bytes")
+    if info.get("signed"):
+        print(f"  signed by:     {info.get('public_key_fingerprint', '?')} (Ed25519)")
+    print()
+    if secret is None and public_key_path is not None and fmt != FORMAT_ID_V2_NAME:
+        print(
+            f"ERROR: auditor mode requires a v2 export; this file is {fmt}. "
+            "Either provide --secret-hex or ask the operator to re-export "
+            "with --sign-key.",
+            file=sys.stderr,
+        )
+        return 1
+
+    valid, reason = verify_export(
+        args.path, secret_key=secret, public_key_path=public_key_path
+    )
     if valid:
-        print(f"Export VALID: {args.path}")
+        if public_key_path and secret is not None:
+            print("Export VALID — HMAC chain + Ed25519 signature both verified.")
+        elif public_key_path:
+            print("Export VALID — Ed25519 signature verified (auditor mode, HMAC not re-checked).")
+        else:
+            print("Export VALID — HMAC chain verified.")
         return 0
 
     print(f"Export INVALID: {reason}", file=sys.stderr)
     return 1
 
+
+# Imported here to avoid a top-of-file circular if processors changes.
+from bijotel.processors.export import FORMAT_ID_V2 as FORMAT_ID_V2_NAME  # noqa: E402
 
 # ─────────────────── bijotel regression ────────────────────
 

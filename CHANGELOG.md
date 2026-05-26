@@ -5,6 +5,75 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] — 2026-05-26 — Ed25519-signed exports (auditor-friendly attestation)
+
+Adds asymmetric signatures on chain exports. The HMAC chain stays
+unchanged — Ed25519 is an additional outer layer that lets an external
+auditor verify an export with *only* the operator's public key, never
+holding the seal-time HMAC secret. This closes the v2.0.x scope
+limitation documented in `docs/threat-model.md`: pre-v2.1.0, the
+auditor needed the HMAC secret, which made the auditor a potential
+forger.
+
+### Added
+
+- **`bijotel.crypto.ed25519`** — thin wrapper over
+  `cryptography.hazmat.primitives.asymmetric.ed25519`. Exports:
+  `generate_keypair`, `sign`, `verify`, `load_private_pem`,
+  `load_public_pem`, `public_key_raw_b64`,
+  `public_key_fingerprint`.
+- **`bijotel keygen`** CLI subcommand. Writes
+  `bijotel_private.pem` (mode 0600) + `bijotel_public.pem` into the
+  given output directory. `--force` required to overwrite an existing
+  private key (rotation is a deliberate operation).
+- **`bijotel export --sign-key PATH`** — when supplied, the exported
+  file uses `bijotel-chain-v2` schema and embeds an Ed25519 signature
+  over `chain_signature` plus the raw public key. Backward-compatible:
+  without the flag, the output is the same `bijotel-chain-v1` shape
+  shipped since v1.1.
+- **`bijotel verify-export --public-key PATH`** — adds asymmetric
+  attestation to the verifier. Three modes:
+  - HMAC only: `verify-export export.json --secret-hex <hex>`
+    (existing behaviour, v1 and v2 both supported).
+  - HMAC + Ed25519: pass both `--secret-hex` and `--public-key`.
+  - Auditor mode: `--public-key` alone, against a v2 export. No HMAC
+    secret needed; signature + body-hash + chain-link checks form a
+    self-contained tamper-evidence proof.
+- **`bijotel.processors.inspect_export(path)`** — read-only helper
+  returning a metadata dict (format, entries_count, signed,
+  public_key_fingerprint, size_bytes). Used by the CLI to print
+  "what's in this file" before attempting verify.
+
+### Changed
+
+- **`pyproject.toml` dependencies** — `cryptography>=42.0` is now a
+  required dependency (was implicit via OTel / Anthropic SDK pulls).
+  Adding it as an explicit requirement makes the Ed25519 surface
+  available out of the box and pins the version we test against.
+- **Export schema** — `bijotel-chain-v2` is identical to v1 plus an
+  `ed25519_signature` block. v1 exports remain valid forever; the
+  verifier accepts both.
+- **`verify_export(path, secret_key=None, public_key_path=None)`** —
+  signature broadened. Both kwargs are optional. The 2-arg form
+  `verify_export(path, secret)` is unchanged for backward
+  compatibility with every test and caller from v1.x.
+
+### Tests
+
+- `tests/test_ed25519.py` — 15 unit tests for the crypto wrapper.
+- `tests/test_export_signed.py` — 17 end-to-end tests: v1 / v2 format
+  detection, all three verify modes, signature tamper, key-swap
+  attack, canonical_body tamper under auditor mode, etc.
+
+### Verified
+
+- Round 2 portability still holds: a v2 chain signed on x86_64
+  verifies bit-identically on aarch64 under the same public key
+  (HMAC + JCS are platform-independent; Ed25519 is too).
+
+No schema break for v1 readers. No HMAC-chain behaviour change.
+v2.0.6 → v2.1.0 is a drop-in `pip install --upgrade bijotel`.
+
 ## [2.0.6] — 2026-05-25 — Metadata polish: drop "forensic-grade" claim
 
 Docs-only release. Closes the last 3 findings from the post-public

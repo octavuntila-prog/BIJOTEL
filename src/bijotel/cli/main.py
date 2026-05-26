@@ -9,6 +9,7 @@ from bijotel.cli.commands import (
     energy_cmd,
     export_cmd,
     inspect_cmd,
+    keygen_cmd,
     list_cmd,
     regression_cmd,
     serve_cmd,
@@ -93,6 +94,33 @@ def _build_parser() -> argparse.ArgumentParser:
         "--secret-hex",
         help="HMAC secret as hex string. Default: env BIJOTEL_HMAC_SECRET.",
     )
+    p_export.add_argument(
+        "--sign-key",
+        help=(
+            "Path to an Ed25519 PEM private key. When supplied, the export "
+            "additionally embeds an asymmetric signature so auditors can "
+            "verify without holding the HMAC secret (produces v2 format). "
+            "Generate a key with `bijotel keygen`."
+        ),
+    )
+
+    # bijotel keygen
+    p_keygen = subparsers.add_parser(
+        "keygen",
+        help="Generate Ed25519 keypair for signing chain exports.",
+    )
+    p_keygen.add_argument(
+        "--output-dir",
+        default="./keys",
+        help="Directory to write keys into (default ./keys). "
+        "Creates bijotel_private.pem (mode 0600) and bijotel_public.pem.",
+    )
+    p_keygen.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing private key file. Don't use this unless "
+        "you understand that old signed exports will no longer match.",
+    )
 
     # bijotel verify-export
     p_vexp = subparsers.add_parser(
@@ -103,6 +131,15 @@ def _build_parser() -> argparse.ArgumentParser:
     p_vexp.add_argument(
         "--secret-hex",
         help="HMAC secret as hex string. Default: env BIJOTEL_HMAC_SECRET.",
+    )
+    p_vexp.add_argument(
+        "--public-key",
+        help=(
+            "Path to an Ed25519 PEM public key for asymmetric attestation "
+            "(v2 exports only). With this flag alone (no --secret-hex), "
+            "runs auditor mode: verifies the export's Ed25519 signature + "
+            "entry structure without ever needing the HMAC seal-time secret."
+        ),
     )
 
     # bijotel regression
@@ -222,6 +259,7 @@ def main(argv: list[str] | None = None) -> int:
         "stats": stats_cmd,
         "list": list_cmd,
         "export": export_cmd,
+        "keygen": keygen_cmd,
         "verify-export": verify_export_cmd,
         "regression": regression_cmd,
         "energy": energy_cmd,
