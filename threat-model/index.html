@@ -12,31 +12,31 @@
         <meta name="author" content="Aisophical SRL">
       
       
-        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/api/cli/">
+        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/threat-model/">
       
       
-        <link rel="prev" href="../../guides/energy-tracking/">
+        <link rel="prev" href="../security/">
       
       
-        <link rel="next" href="../rest/">
+        <link rel="next" href="../changelog/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>CLI - BIJOTEL</title>
+        <title>Threat Model - BIJOTEL</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,7 +55,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cli-reference" class="md-skip">
+        <a href="#threat-model" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +94,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="BIJOTEL" class="md-header__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
+    <a href=".." title="BIJOTEL" class="md-header__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CLI
+              Threat Model
             
           </span>
         </div>
@@ -227,7 +227,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -248,7 +248,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../getting-started/installation/" class="md-tabs__link">
+        <a href="../getting-started/installation/" class="md-tabs__link">
           
   
   
@@ -270,7 +270,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../guides/policy-engine/" class="md-tabs__link">
+        <a href="../guides/policy-engine/" class="md-tabs__link">
           
   
   
@@ -288,13 +288,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../api/cli/" class="md-tabs__link">
           
   
   
@@ -314,7 +312,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../architecture/" class="md-tabs__link">
+      <a href="../architecture/" class="md-tabs__link">
         
   
   
@@ -333,7 +331,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../security/" class="md-tabs__link">
+      <a href="../security/" class="md-tabs__link">
         
   
   
@@ -350,9 +348,11 @@
   
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../../threat-model/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -371,7 +371,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../changelog/" class="md-tabs__link">
+      <a href="../changelog/" class="md-tabs__link">
         
   
   
@@ -406,7 +406,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="BIJOTEL" class="md-nav__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
+    <a href=".." title="BIJOTEL" class="md-nav__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -436,7 +436,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -523,7 +523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/installation/" class="md-nav__link">
+      <a href="../getting-started/installation/" class="md-nav__link">
         
   
   
@@ -551,7 +551,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/quickstart/" class="md-nav__link">
+      <a href="../getting-started/quickstart/" class="md-nav__link">
         
   
   
@@ -579,7 +579,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/first-verification/" class="md-nav__link">
+      <a href="../getting-started/first-verification/" class="md-nav__link">
         
   
   
@@ -678,7 +678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/policy-engine/" class="md-nav__link">
+      <a href="../guides/policy-engine/" class="md-nav__link">
         
   
   
@@ -706,7 +706,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/regression-detection/" class="md-nav__link">
+      <a href="../guides/regression-detection/" class="md-nav__link">
         
   
   
@@ -734,7 +734,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/multi-provider/" class="md-nav__link">
+      <a href="../guides/multi-provider/" class="md-nav__link">
         
   
   
@@ -762,7 +762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/dashboard/" class="md-nav__link">
+      <a href="../guides/dashboard/" class="md-nav__link">
         
   
   
@@ -790,7 +790,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/energy-tracking/" class="md-nav__link">
+      <a href="../guides/energy-tracking/" class="md-nav__link">
         
   
   
@@ -822,10 +822,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -839,22 +837,19 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -872,7 +867,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -887,37 +882,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    CLI
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../api/cli/" class="md-nav__link">
         
   
   
@@ -933,169 +901,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#subcommands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Subcommands
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        verify
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-export" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        verify-export
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inspect" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        inspect
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        stats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#list" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        list
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#export" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        export
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#regression" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        regression
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#energy-backfill" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        energy backfill
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#energy-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        energy summary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#serve" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        serve
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-patterns" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common patterns
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1108,7 +913,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rest/" class="md-nav__link">
+      <a href="../api/rest/" class="md-nav__link">
         
   
   
@@ -1136,7 +941,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../python/" class="md-nav__link">
+      <a href="../api/python/" class="md-nav__link">
         
   
   
@@ -1171,7 +976,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   
@@ -1198,7 +1003,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/" class="md-nav__link">
+      <a href="../security/" class="md-nav__link">
         
   
   
@@ -1222,10 +1027,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../threat-model/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1241,6 +1073,192 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-bijotel-protects-against" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What BIJOTEL protects against
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What BIJOTEL protects against">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#post-factum-database-tampering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-factum database tampering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-version-and-cross-architecture-portability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-version and cross-architecture portability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#silent-model-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Silent model degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-injection-and-jailbreak-attempts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt injection and jailbreak attempts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-bijotel-does-not-protect-against" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What BIJOTEL does NOT protect against
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What BIJOTEL does NOT protect against">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#insider-with-the-hmac-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Insider with the HMAC secret
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secret-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secret leakage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-deletion-or-filesystem-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database deletion or filesystem loss
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lost-spans-on-disk-pressure-or-write-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lost spans on disk pressure or write failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-writer-contention-at-extreme-scale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-writer contention at extreme scale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paraphrase-and-multimodal-attacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paraphrase and multimodal attacks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#formal-correctness-of-agent-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Formal correctness of agent actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bijotel-vs-substrate-guard-scope-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BIJOTEL vs substrate-guard — scope boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1252,7 +1270,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../changelog/" class="md-nav__link">
+      <a href="../changelog/" class="md-nav__link">
         
   
   
@@ -1299,142 +1317,165 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#subcommands" class="md-nav__link">
+  <a href="#what-bijotel-protects-against" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Subcommands
+        What BIJOTEL protects against
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What BIJOTEL protects against">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#post-factum-database-tampering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-factum database tampering
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#verify" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#cross-version-and-cross-architecture-portability" class="md-nav__link">
     <span class="md-ellipsis">
       
-        verify
+        Cross-version and cross-architecture portability
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-export" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#silent-model-degradation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        verify-export
+        Silent model degradation
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#inspect" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#prompt-injection-and-jailbreak-attempts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        inspect
+        Prompt injection and jailbreak attempts
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#stats" class="md-nav__link">
+  <a href="#what-bijotel-does-not-protect-against" class="md-nav__link">
     <span class="md-ellipsis">
       
-        stats
+        What BIJOTEL does NOT protect against
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What BIJOTEL does NOT protect against">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#insider-with-the-hmac-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Insider with the HMAC secret
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#list" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#secret-leakage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        list
+        Secret leakage
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#export" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#database-deletion-or-filesystem-loss" class="md-nav__link">
     <span class="md-ellipsis">
       
-        export
+        Database deletion or filesystem loss
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#regression" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#lost-spans-on-disk-pressure-or-write-failure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        regression
+        Lost spans on disk pressure or write failure
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#energy-backfill" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#multi-writer-contention-at-extreme-scale" class="md-nav__link">
     <span class="md-ellipsis">
       
-        energy backfill
+        Multi-writer contention at extreme scale
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#energy-summary" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#paraphrase-and-multimodal-attacks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        energy summary
+        Paraphrase and multimodal attacks
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#serve" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#formal-correctness-of-agent-actions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        serve
+        Formal correctness of agent actions
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#common-patterns" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common patterns
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
+  <a href="#bijotel-vs-substrate-guard-scope-boundary" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next
+        BIJOTEL vs substrate-guard — scope boundary
       
     </span>
   </a>
@@ -1461,194 +1502,215 @@
   
 
 
-<h1 id="cli-reference">CLI Reference<a class="headerlink" href="#cli-reference" title="Anchor link to this section">&para;</a></h1>
-<p>The <code>bijotel</code> CLI is installed when you <code>pip install bijotel</code>.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>bijotel<span class="w"> </span>--help
-</span></code></pre></div>
-<h2 id="subcommands">Subcommands<a class="headerlink" href="#subcommands" title="Anchor link to this section">&para;</a></h2>
+<h1 id="threat-model">Threat Model<a class="headerlink" href="#threat-model" title="Anchor link to this section">&para;</a></h1>
+<p>BIJOTEL is a tamper-evident HMAC audit chain for LLM applications. This
+page documents exactly what BIJOTEL <strong>does</strong> protect against, what it
+<strong>does not</strong>, and where to reach for stronger guarantees.</p>
+<p>The framing follows the same M2 principle the rest of the docs use:
+reality beats marketing. If a threat sits outside our scope, that's
+stated explicitly here rather than implied away.</p>
+<hr />
+<h2 id="what-bijotel-protects-against">What BIJOTEL protects against<a class="headerlink" href="#what-bijotel-protects-against" title="Anchor link to this section">&para;</a></h2>
+<h3 id="post-factum-database-tampering">Post-factum database tampering<a class="headerlink" href="#post-factum-database-tampering" title="Anchor link to this section">&para;</a></h3>
+<p>An attacker who gains read/write access to <code>chain.db</code> <strong>after</strong> an entry
+has been sealed cannot:</p>
+<ul>
+<li>Modify any entry's body without breaking the HMAC chain at the exact
+  <code>seq</code>.</li>
+<li>Delete entries without creating a gap detected by <code>bijotel verify</code>.</li>
+<li>Insert fake entries without the HMAC secret.</li>
+<li>Alter <code>canonical_body</code> while keeping the chain links valid — the
+  v2.0.3+ verifier re-hashes the body and compares against
+  <code>canonical_hash</code>. Tampering at this layer raises
+  <code>Export INVALID: canonical_body tampered at seq=N</code>.</li>
+</ul>
+<p><strong>Verification:</strong></p>
+<ul>
+<li><code>bijotel verify --db chain.db</code> walks the full SQLite chain.</li>
+<li><code>bijotel verify-export some_export.json</code> verifies an exported archive
+  with no SQLite or filesystem dependency on the auditor side.</li>
+</ul>
+<h3 id="cross-version-and-cross-architecture-portability">Cross-version and cross-architecture portability<a class="headerlink" href="#cross-version-and-cross-architecture-portability" title="Anchor link to this section">&para;</a></h3>
+<p>Chain exports are bit-identical across platforms. A chain sealed on
+x86_64 (e.g. GENA, Nuremberg) verifies identically on aarch64 (e.g. ARA,
+Helsinki). JCS canonicalization (RFC 8785) makes the hash inputs
+deterministic regardless of CPU, Python build, or JSON serializer.</p>
+<p><strong>Evidence:</strong> Round 2 Test D verified 5,687 entries cross-architecture
+at ~15,328 entries/sec on a stock ARM64 instance.</p>
+<h3 id="silent-model-degradation">Silent model degradation<a class="headerlink" href="#silent-model-degradation" title="Anchor link to this section">&para;</a></h3>
+<p>The F12 regression detector watches statistical drift in token counts,
+costs, and latency using z-score and IQR methods over the sealed chain.</p>
+<p><strong>Evidence:</strong> an hourly <code>/regression/run</code> cron on GENA fires against
+the live chain; baselines are recomputed automatically and anomalies
+appear in <code>/api/regression/latest</code>.</p>
+<h3 id="prompt-injection-and-jailbreak-attempts">Prompt injection and jailbreak attempts<a class="headerlink" href="#prompt-injection-and-jailbreak-attempts" title="Anchor link to this section">&para;</a></h3>
+<p>The F11 <code>PolicyEngine</code> evaluates prompts pre-call against 50 patterns
+in 7 categories (instruction override, system prompt extraction, role
+override, jailbreak framing, encoding bypass, hypothetical framing,
+multi-turn priming). The <code>ast_safety_check</code> rule additionally inspects
+code blocks structurally with <code>tree-sitter-bash</code> and Python's <code>ast</code>
+module.</p>
+<p><strong>Evidence:</strong> 100% detection on the R1 probe corpus with 0 false
+positives on the benign corpus. Probes and corpus are checked into the
+repository for replay.</p>
+<hr />
+<h2 id="what-bijotel-does-not-protect-against">What BIJOTEL does NOT protect against<a class="headerlink" href="#what-bijotel-does-not-protect-against" title="Anchor link to this section">&para;</a></h2>
+<h3 id="insider-with-the-hmac-secret">Insider with the HMAC secret<a class="headerlink" href="#insider-with-the-hmac-secret" title="Anchor link to this section">&para;</a></h3>
+<p>BIJOTEL uses <strong>symmetric HMAC</strong>. Anyone who possesses
+<code>BIJOTEL_HMAC_SECRET</code> can append valid entries to the chain. This is
+the same trust model as TLS pre-shared keys or git's SSH deploy keys.</p>
+<p>BIJOTEL's tamper-evidence is for <strong>post-factum</strong> modification by a
+party that <em>doesn't</em> hold the secret, not for malicious operators who
+do.</p>
+<p><strong>Mitigation:</strong></p>
+<ul>
+<li>Treat the secret like a database credential.</li>
+<li>Store it in a secrets manager (Vault, AWS Secrets Manager, GCP Secret
+  Manager) — not in repo config or <code>.env</code> files in production.</li>
+<li>Rotate periodically. The verifier handles rotation boundaries
+  correctly: <code>bijotel verify</code> returns the exact <code>seq</code> where the old
+  secret stops verifying.</li>
+<li>Roadmap: optional Ed25519 asymmetric signatures on export, so an
+  auditor never needs the seal-time secret.</li>
+</ul>
+<h3 id="secret-leakage">Secret leakage<a class="headerlink" href="#secret-leakage" title="Anchor link to this section">&para;</a></h3>
+<p>If the HMAC secret is leaked, an attacker can:</p>
+<ul>
+<li>Generate valid chain entries from scratch.</li>
+<li>Forge exports that pass <code>verify-export</code> against the same secret.</li>
+</ul>
+<p>They still <strong>cannot</strong>:</p>
+<ul>
+<li>Modify existing entries in a chain they don't have write access to.</li>
+<li>Break the linkage of an already-distributed export without detection.</li>
+</ul>
+<p><strong>Mitigation:</strong> rotate the secret on suspicion and re-seal new entries
+under the new key. Older entries verify under the old key by design;
+the boundary <code>seq</code> is detectable.</p>
+<h3 id="database-deletion-or-filesystem-loss">Database deletion or filesystem loss<a class="headerlink" href="#database-deletion-or-filesystem-loss" title="Anchor link to this section">&para;</a></h3>
+<p>If <code>chain.db</code> is deleted entirely, the audit trail is lost. BIJOTEL is
+an <strong>integrity</strong> layer, not a <strong>backup</strong> system.</p>
+<p><strong>Mitigation:</strong> standard backup discipline — periodic snapshots,
+periodic <code>bijotel export</code> of the chain to an external location, and
+ideally a 3-2-1 backup posture for the seal host.</p>
+<h3 id="lost-spans-on-disk-pressure-or-write-failure">Lost spans on disk pressure or write failure<a class="headerlink" href="#lost-spans-on-disk-pressure-or-write-failure" title="Anchor link to this section">&para;</a></h3>
+<p>If <code>on_end()</code> fails (disk full, SQLite locked beyond retry, container
+killed mid-write), the span is logged at ERROR level but <strong>not</strong> sealed
+into the chain. The host application continues unaffected (crash
+isolation, v0.6.0+).</p>
+<p>The result is a gap in the audit trail, not a host crash. The chain
+itself remains <code>VALID</code> — the gap is detectable by inspecting <code>seq</code>
+numbering. Round 3 Test B1 (<code>kill -9</code> mid-write) and Test B2
+(read-only DB) confirmed this isolation behaviour empirically.</p>
+<h3 id="multi-writer-contention-at-extreme-scale">Multi-writer contention at extreme scale<a class="headerlink" href="#multi-writer-contention-at-extreme-scale" title="Anchor link to this section">&para;</a></h3>
+<p>SQLite with WAL + <code>BEGIN IMMEDIATE</code> handles concurrent writers cleanly
+up to roughly 200 spans/sec on a single chain file (Round 3 Test D2).
+Past that, contention shows up as <code>BUSY</code> retries that eat into latency
+budget. At extreme scale (≫1,000 concurrent writers on one chain),
+consider PostgreSQL with the chain table or partition by writer
+identity.</p>
+<h3 id="paraphrase-and-multimodal-attacks">Paraphrase and multimodal attacks<a class="headerlink" href="#paraphrase-and-multimodal-attacks" title="Anchor link to this section">&para;</a></h3>
+<p>The F11 detector is regex-based. Synonym-substitution paraphrases,
+unicode confusables outside the catalogued set, or multimodal attacks
+(prompts embedded in images, audio, or files) are outside F11 scope.</p>
+<p>For defence in depth, layer F11 with a model-based guard such as
+Lakera Guard, Prompt Security, or Rebuff. F11 catches the cheap surface
+forms quickly and cheaply; the model-based guard catches the long tail.</p>
+<h3 id="formal-correctness-of-agent-actions">Formal correctness of agent actions<a class="headerlink" href="#formal-correctness-of-agent-actions" title="Anchor link to this section">&para;</a></h3>
+<p>BIJOTEL proves <strong>integrity</strong> of the audit log (the log wasn't
+tampered). It does <strong>not</strong> prove <strong>correctness</strong> of what the agent
+did. A perfectly sealed chain can document a perfectly disastrous
+decision.</p>
+<p>For formal verification of agent actions (Z3 SMT solver, OPA/Rego
+policy decisions over actions, eBPF syscall enforcement, ZK proofs
+over training data), see
+<a href="https://github.com/octavuntila-prog/substrate-guard">substrate-guard</a>.
+BIJOTEL and substrate-guard are designed to be deployed together when
+the application demands both properties.</p>
+<hr />
+<h2 id="bijotel-vs-substrate-guard-scope-boundary">BIJOTEL vs substrate-guard — scope boundary<a class="headerlink" href="#bijotel-vs-substrate-guard-scope-boundary" title="Anchor link to this section">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Command</th>
-<th>Description</th>
+<th>Claim</th>
+<th>BIJOTEL</th>
+<th>substrate-guard</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>verify</code></td>
-<td>Verify HMAC chain integrity end-to-end</td>
+<td>"Log wasn't tampered"</td>
+<td>✅ HMAC chain</td>
+<td>✅ HMAC chain (same primitive)</td>
 </tr>
 <tr>
-<td><code>verify-export</code></td>
-<td>Verify an exported chain JSON file</td>
+<td>"Agent action was safe"</td>
+<td>❌</td>
+<td>✅ Z3 SMT + OPA/Rego</td>
 </tr>
 <tr>
-<td><code>inspect</code></td>
-<td>Show full canonical body for one span</td>
+<td>"No unauthorized syscalls"</td>
+<td>❌</td>
+<td>✅ eBPF kernel layer</td>
 </tr>
 <tr>
-<td><code>stats</code></td>
-<td>Summary stats: chain, CAS, policy state</td>
+<td>"Training data compliant"</td>
+<td>❌</td>
+<td>✅ ZK-SNM</td>
 </tr>
 <tr>
-<td><code>list</code></td>
-<td>List spans with optional filters</td>
+<td>"Signed by hardware"</td>
+<td>❌</td>
+<td>✅ Ed25519 / TPM attestation</td>
 </tr>
 <tr>
-<td><code>export</code></td>
-<td>Export chain to portable signed JSON</td>
+<td>"Works offline (CRDT)"</td>
+<td>❌</td>
+<td>✅</td>
 </tr>
 <tr>
-<td><code>regression</code></td>
-<td>Run F12 regression detection</td>
+<td>"<code>pip install</code> one-liner"</td>
+<td>✅</td>
+<td>❌</td>
 </tr>
 <tr>
-<td><code>energy backfill</code></td>
-<td>Compute Wh + gCO₂ for all existing chain rows</td>
-</tr>
-<tr>
-<td><code>energy summary</code></td>
-<td>Aggregate energy per model / per region</td>
-</tr>
-<tr>
-<td><code>serve</code></td>
-<td>Start the BIJOTEL HTTP API + dashboard</td>
+<td>"Bundled REST API + dashboard"</td>
+<td>✅</td>
+<td>❌</td>
 </tr>
 </tbody>
 </table>
-<h2 id="verify"><code>verify</code><a class="headerlink" href="#verify" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># → Chain VALID (5889 entries).</span>
-</span></code></pre></div>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Use a hex secret instead of $BIJOTEL_HMAC_SECRET env var</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--secret-hex<span class="w"> </span>deadbeef...
-</span></code></pre></div>
-<p><strong>Exit codes</strong>:</p>
-<ul>
-<li><code>0</code> — chain valid</li>
-<li><code>3</code> — chain broken (failure reason on stderr, with exact <code>seq</code>)</li>
-</ul>
-<h2 id="verify-export"><code>verify-export</code><a class="headerlink" href="#verify-export" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>bijotel<span class="w"> </span>verify-export<span class="w"> </span>demo_chain.json<span class="w"> </span>--secret-hex<span class="w"> </span>deadbeef...
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># → Export VALID: demo_chain.json</span>
-</span></code></pre></div>
-<p><strong>Exit codes</strong>:</p>
-<ul>
-<li><code>0</code> — export valid</li>
-<li><code>1</code> — export invalid (failure reason on stderr, with <code>seq</code>)</li>
-</ul>
-<h2 id="inspect"><code>inspect</code><a class="headerlink" href="#inspect" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>bijotel<span class="w"> </span>inspect<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--seq<span class="w"> </span><span class="m">100</span>
-</span></code></pre></div>
-<p>Prints the full canonical body of the span at seq=100, including all
-<code>gen_ai.*</code> attributes, plus the CAS entry it dedups to.</p>
-<h2 id="stats"><code>stats</code><a class="headerlink" href="#stats" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>bijotel<span class="w"> </span>stats<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span></code></pre></div>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>=== Chain ===
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Total spans:    5889
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  ALLOWED:      5887
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  WARN:         2
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  BLOCKED:      0
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>=== CAS ===
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>Unique bodies:  4521
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>Total refs:     5889
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>Dedup factor:   1.30x
-</span></code></pre></div>
-<h2 id="list"><code>list</code><a class="headerlink" href="#list" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Last 10 entries</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>bijotel<span class="w"> </span>list<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--limit<span class="w"> </span><span class="m">10</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Filter by provider</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>bijotel<span class="w"> </span>list<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--provider<span class="w"> </span>anthropic<span class="w"> </span>--limit<span class="w"> </span><span class="m">20</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Filter by model</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>bijotel<span class="w"> </span>list<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--model<span class="w"> </span>claude-haiku-4-5-20251001<span class="w"> </span>--limit<span class="w"> </span><span class="m">50</span>
-</span></code></pre></div>
-<h2 id="export"><code>export</code><a class="headerlink" href="#export" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>bijotel<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--output<span class="w"> </span>my_export.json
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># Exported chain to my_export.json</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1">#   format:        bijotel-chain-v1</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1">#   entries_count: 5889</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1">#   head_hash:     02db0af4...</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1">#   size:          56,033,175 bytes</span>
-</span></code></pre></div>
-<p>The export is the portable, auditable format. Ship it to your auditor
-along with the HMAC secret (out of band) and they <code>verify-export</code> it.</p>
-<h2 id="regression"><code>regression</code><a class="headerlink" href="#regression" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>bijotel<span class="w"> </span>regression<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--window<span class="w"> </span><span class="m">100</span>
-</span></code></pre></div>
-<p>Output is JSON with z-score + IQR anomalies per dimension
-(input_tokens, output_tokens, cost, latency). Pipe to <code>jq</code> for
-human-readable filtering.</p>
-<h2 id="energy-backfill"><code>energy backfill</code><a class="headerlink" href="#energy-backfill" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>bijotel<span class="w"> </span>energy<span class="w"> </span>backfill<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--region<span class="w"> </span>us-east
-</span></code></pre></div>
-<p>Idempotent. Walks every <code>chain</code> row, computes Wh and gCO₂, populates
-the <code>energy_log</code> table.</p>
-<h2 id="energy-summary"><code>energy summary</code><a class="headerlink" href="#energy-summary" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>bijotel<span class="w"> </span>energy<span class="w"> </span>summary<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span></code></pre></div>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Total: 19.95 Wh / 7.58 g CO₂ over 5459 calls
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>By model:
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>  claude-haiku-4-5-20251001:  8.21 Wh / 3.12 g CO₂ (4102 calls)
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>  claude-sonnet-4-20250514:  11.74 Wh / 4.46 g CO₂ (1357 calls)
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>By region:
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>  us-east: 19.95 Wh / 7.58 g CO₂ (5459 calls)
-</span></code></pre></div>
-<h2 id="serve"><code>serve</code><a class="headerlink" href="#serve" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>bijotel<span class="w"> </span>serve<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span><span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--dashboard
-</span></code></pre></div>
-<table>
-<thead>
-<tr>
-<th>Flag</th>
-<th>Default</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>--port</code></td>
-<td>8080</td>
-<td>HTTP port</td>
-</tr>
-<tr>
-<td><code>--host</code></td>
-<td>127.0.0.1</td>
-<td>Bind address</td>
-</tr>
-<tr>
-<td><code>--db</code></td>
-<td><code>chain.db</code></td>
-<td>Chain SQLite path</td>
-</tr>
-<tr>
-<td><code>--dashboard</code></td>
-<td>off</td>
-<td>Serve the React SPA bundle at <code>/</code></td>
-</tr>
-</tbody>
-</table>
-<p>Auth via <code>BIJOTEL_API_KEY</code> env var (Bearer). See <a href="../../guides/dashboard/#authentication">Dashboard guide</a>.</p>
-<h2 id="common-patterns">Common patterns<a class="headerlink" href="#common-patterns" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Inspect what&#39;s in chain.db</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>bijotel<span class="w"> </span>stats<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>bijotel<span class="w"> </span>list<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--limit<span class="w"> </span><span class="m">5</span>
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Cron audit</span>
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="m">0</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>/data/chain.db<span class="w"> </span><span class="o">||</span><span class="w"> </span>alert-on-call.sh
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1"># Periodic export to S3</span>
-</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>bijotel<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>-o<span class="w"> </span>/tmp/export.json<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>aws<span class="w"> </span>s3<span class="w"> </span>cp<span class="w"> </span>/tmp/export.json<span class="w"> </span>s3://audits/<span class="k">$(</span>date<span class="w"> </span>+%Y%m%d<span class="k">)</span>.json
-</span></code></pre></div>
-<h2 id="next">Next<a class="headerlink" href="#next" title="Anchor link to this section">&para;</a></h2>
-<ul>
-<li><a href="../rest/">REST API</a> — same operations over HTTP</li>
-<li><a href="../python/">Python API</a> — programmatic access</li>
-</ul>
+<p>BIJOTEL is the PyPI-installable subset focused on LLM observability +
+forensic chain — the demonstrator of bijuteria #11 (Forensic-First
+Architecture) at scale. The remaining safety bijuterii (#1 Z3,</p>
+<h1 id="6-zk-8-ebpf-12-hardware-trust-live-in-substrate-guard-not">6 ZK, #8 eBPF, #12 hardware trust) live in <code>substrate-guard</code>, not<a class="headerlink" href="#6-zk-8-ebpf-12-hardware-trust-live-in-substrate-guard-not" title="Anchor link to this section">&para;</a></h1>
+<p>here. The README and CHANGELOG state this explicitly; this page exists
+so that scope distinction is visible from the docs site too.</p>
+<hr />
+<h2 id="secret-rotation">Secret rotation<a class="headerlink" href="#secret-rotation" title="Anchor link to this section">&para;</a></h2>
+<p>The chain verifier handles HMAC secret rotation correctly: it detects
+the exact <code>seq</code> where the old secret stops verifying and the new
+secret takes over. Round 2 Test E3 confirmed boundary detection at
+<code>seq=51</code> with zero false positives on either half of the chain.</p>
+<p>A dedicated rotation playbook (<code>docs/operations/secret-rotation.md</code>)
+is on the near-term roadmap. Until that page lands, the short version
+is:</p>
+<ol>
+<li>Generate the new secret (<code>python -c "import secrets;
+   print(secrets.token_hex(32))"</code>).</li>
+<li>Update <code>BIJOTEL_HMAC_SECRET</code> in the secrets manager / environment.</li>
+<li>Restart the sealing process(es). New spans seal under the new
+   secret immediately.</li>
+<li>The old half of the chain still verifies under the old secret. The
+   new half verifies under the new secret. <code>bijotel verify</code> reports
+   the boundary explicitly when both secrets are supplied.</li>
+</ol>
+<hr />
+<h2 id="reporting-a-finding">Reporting a finding<a class="headerlink" href="#reporting-a-finding" title="Anchor link to this section">&para;</a></h2>
+<p>Security issues should go to <code>contact@aisophical.com</code> rather than the
+public GitHub issue tracker. See
+<a href="https://github.com/octavuntila-prog/BIJOTEL/blob/main/SECURITY.md"><code>SECURITY.md</code></a>
+for the disclosure window.</p>
 
 
 
@@ -1743,10 +1805,10 @@ the <code>energy_log</code> table.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.highlight", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.highlight", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
