@@ -12,13 +12,13 @@
         <meta name="author" content="Aisophical SRL">
       
       
-        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/guides/energy-tracking/">
+        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/guides/chain-integrity/">
       
       
-        <link rel="prev" href="../dashboard/">
+        <link rel="prev" href="../replay-verification/">
       
       
-        <link rel="next" href="../rag-provenance/">
+        <link rel="next" href="../../api/cli/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Energy Tracking - BIJOTEL</title>
+        <title>Chain Integrity Monitor - BIJOTEL</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#energy-carbon-tracking" class="md-skip">
+        <a href="#chain-integrity-monitor" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Energy Tracking
+              Chain Integrity Monitor
             
           </span>
         </div>
@@ -842,37 +842,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Energy Tracking
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../energy-tracking/" class="md-nav__link">
         
   
   
@@ -888,114 +861,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#why" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#backfill-existing-chain" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Backfill existing chain
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rest-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        REST API
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#real-production-example-gena" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Real production example (GENA)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#energy-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Energy model
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#supported-regions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Supported regions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accuracy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accuracy
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1061,10 +926,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../chain-integrity/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chain Integrity Monitor
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1080,6 +972,186 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-detects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it detects
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What it detects">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-sequence-gaps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Sequence gaps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-timestamp-anomalies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Timestamp anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-hash-anomalies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Hash anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-provider-distribution-shift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Provider distribution shift
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-rate-anomalies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Rate anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-rotation-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Rotation boundaries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rest-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REST API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cron-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cron integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tuning-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tuning thresholds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it does not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public API
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1620,21 +1692,93 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#why" class="md-nav__link">
+  <a href="#what-it-detects" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why
+        What it detects
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What it detects">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-sequence-gaps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Sequence gaps
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#backfill-existing-chain" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#2-timestamp-anomalies" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Backfill existing chain
+        2. Timestamp anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-hash-anomalies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Hash anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-provider-distribution-shift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Provider distribution shift
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-rate-anomalies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Rate anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-rotation-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Rotation boundaries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
       
     </span>
   </a>
@@ -1653,10 +1797,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#real-production-example-gena" class="md-nav__link">
+  <a href="#python-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Real production example (GENA)
+        Python API
       
     </span>
   </a>
@@ -1664,10 +1808,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#energy-model" class="md-nav__link">
+  <a href="#cron-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Energy model
+        Cron integration
       
     </span>
   </a>
@@ -1675,10 +1819,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#supported-regions" class="md-nav__link">
+  <a href="#tuning-thresholds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supported regions
+        Tuning thresholds
       
     </span>
   </a>
@@ -1686,10 +1830,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#accuracy" class="md-nav__link">
+  <a href="#what-it-does-not-do" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Accuracy
+        What it does not do
       
     </span>
   </a>
@@ -1697,10 +1841,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
+  <a href="#public-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next
+        Public API
       
     </span>
   </a>
@@ -1727,123 +1871,234 @@
   
 
 
-<h1 id="energy-carbon-tracking">Energy &amp; Carbon Tracking<a class="headerlink" href="#energy-carbon-tracking" title="Anchor link to this section">&para;</a></h1>
-<p>Every LLM call has an energy cost. BIJOTEL estimates Wh and gCO₂ per
-call based on model and token count, then aggregates per region's grid
-intensity.</p>
-<h2 id="why">Why<a class="headerlink" href="#why" title="Anchor link to this section">&para;</a></h2>
-<ul>
-<li><strong>Carbon reporting</strong> for ESG / sustainability claims</li>
-<li><strong>Cost-of-energy</strong> as a routing signal (some models are 8× more
-  efficient per token)</li>
-<li><strong>Provider migration justification</strong> — show the real CO₂ delta
-  before committing</li>
-</ul>
-<h2 id="backfill-existing-chain">Backfill existing chain<a class="headerlink" href="#backfill-existing-chain" title="Anchor link to this section">&para;</a></h2>
-<p>If you already have a <code>chain.db</code> from before energy tracking was
-wired, run a one-shot backfill:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>bijotel<span class="w"> </span>energy<span class="w"> </span>backfill<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--region<span class="w"> </span>us-east
-</span></code></pre></div>
-<p>This populates an <code>energy_log</code> table linked to <code>chain.seq</code>. Idempotent
-— re-running doesn't double-count.</p>
-<h2 id="rest-api">REST API<a class="headerlink" href="#rest-api" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>http://localhost:8080/api/energy/summary
-</span></code></pre></div>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;total_wh&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">19.95</span><span class="p">,</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;total_co2_grams&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">7.58</span><span class="p">,</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">&quot;total_calls&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5459</span><span class="p">,</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">&quot;by_model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">&quot;claude-haiku-4-5-20251001&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;wh&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">8.21</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;co2_grams&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.12</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;calls&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4102</span><span class="p">},</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">&quot;claude-sonnet-4-20250514&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="nt">&quot;wh&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">11.74</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;co2_grams&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.46</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;calls&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1357</span><span class="p">}</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="nt">&quot;by_region&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nt">&quot;us-east&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;wh&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">19.95</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;co2_grams&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">7.58</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;calls&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5459</span><span class="p">}</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
-</span></code></pre></div>
-<p>Estimate energy for a hypothetical call:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/api/energy/estimate<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;model&quot;:&quot;claude-haiku-4-5-20251001&quot;,&quot;tokens&quot;:1500,&quot;region&quot;:&quot;us-east&quot;}&#39;</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># → {&quot;wh&quot;: 0.0015, &quot;co2_grams&quot;: 0.00057}</span>
-</span></code></pre></div>
-<h2 id="real-production-example-gena">Real production example (GENA)<a class="headerlink" href="#real-production-example-gena" title="Anchor link to this section">&para;</a></h2>
-<p>15 days of operation, 5,459 LLM-call rows in <code>energy_log</code>:</p>
-<ul>
-<li><strong>Total</strong>: 19.95 Wh / 7.58 g CO₂</li>
-<li><strong>Per call avg</strong>: 3.66 mWh / 1.39 mg CO₂</li>
-</ul>
-<p>The migration from Sonnet to Haiku on 2026-05-21 cut daily CO₂ <strong>≈ 8×</strong>
-— captured retroactively, not designed in. The signal lives in the
-chain forever and is auditable.</p>
-<h2 id="energy-model">Energy model<a class="headerlink" href="#energy-model" title="Anchor link to this section">&para;</a></h2>
-<p>The estimate is intentionally simple — Wh per 1K tokens, looked up per
-model, then converted to gCO₂ via region intensity:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">wh</span> <span class="o">=</span> <span class="p">(</span><span class="n">tokens</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="n">rate_wh_per_1k_tokens</span><span class="p">[</span><span class="n">model</span><span class="p">]</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">co2_grams</span> <span class="o">=</span> <span class="p">(</span><span class="n">wh</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="n">grid_intensity_g_per_kwh</span><span class="p">[</span><span class="n">region</span><span class="p">]</span>
-</span></code></pre></div>
-<p>The rate dictionary <code>DEFAULT_ENERGY_RATES</code> and the regional grid
-intensity <code>DEFAULT_GRID_INTENSITY</code> are public constants in
-<code>bijotel.layers.energy</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.layers.energy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_ENERGY_RATES</span><span class="p">,</span> <span class="n">DEFAULT_GRID_INTENSITY</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">DEFAULT_ENERGY_RATES</span><span class="p">[</span><span class="s2">&quot;claude-haiku-4-5-20251001&quot;</span><span class="p">]</span>  <span class="c1"># 0.001  (Wh per 1K tokens)</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">DEFAULT_GRID_INTENSITY</span><span class="p">[</span><span class="s2">&quot;us-east&quot;</span><span class="p">]</span>                  <span class="c1"># 380.0  (gCO₂ per kWh)</span>
-</span></code></pre></div>
-<p>Override with your own dicts for higher fidelity.</p>
-<h2 id="supported-regions">Supported regions<a class="headerlink" href="#supported-regions" title="Anchor link to this section">&para;</a></h2>
+<h1 id="chain-integrity-monitor">Chain Integrity Monitor<a class="headerlink" href="#chain-integrity-monitor" title="Anchor link to this section">&para;</a></h1>
+<p><strong>Available from v2.8.0.</strong></p>
+<p>BIJOTEL has always had two ways to look at chain trust:</p>
+<ol>
+<li><strong><code>bijotel verify</code></strong> — point-in-time cryptographic verification (does
+   every row's HMAC still validate?).</li>
+<li><strong>F12 regression</strong> — payload drift detection (are token counts,
+   costs, latencies behaving normally over the last N spans?).</li>
+</ol>
+<p>v2.8.0 adds a third: <strong>continuous structural monitoring of the chain
+itself</strong>. Different layer entirely.</p>
 <table>
 <thead>
 <tr>
-<th>Region</th>
-<th>gCO₂/kWh</th>
-<th>Notes</th>
+<th>Tool</th>
+<th>Watches</th>
+<th>Reads</th>
+<th>Trigger</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>us-east</code></td>
-<td>380</td>
-<td>Virginia (Anthropic, AWS us-east-1)</td>
+<td><code>bijotel verify</code></td>
+<td>every row's HMAC</td>
+<td>full chain</td>
+<td>on-demand audit</td>
 </tr>
 <tr>
-<td><code>us-west</code></td>
-<td>250</td>
-<td>Oregon</td>
+<td>F12 regression</td>
+<td>payload (tokens, cost, latency)</td>
+<td>span attributes</td>
+<td>every N min</td>
 </tr>
 <tr>
-<td><code>eu-west</code></td>
-<td>300</td>
-<td>Ireland</td>
-</tr>
-<tr>
-<td><code>eu-central</code></td>
-<td>350</td>
-<td>Germany / Frankfurt</td>
-</tr>
-<tr>
-<td><code>eu-north</code></td>
-<td>30</td>
-<td>Sweden / Norway (hydropower)</td>
+<td><strong>integrity</strong></td>
+<td>structural patterns (gaps, dups, bursts)</td>
+<td>chain metadata</td>
+<td>every N min</td>
 </tr>
 </tbody>
 </table>
-<p>Custom regions: pass <code>intensity_overrides={"my-region": 120.0}</code> to
-<code>CarbonCalculator</code>.</p>
-<h2 id="accuracy">Accuracy<a class="headerlink" href="#accuracy" title="Anchor link to this section">&para;</a></h2>
-<p>R3-E4 production test: <strong>20/20 = 100% exact match</strong> between
-<code>energy_log</code> rows and manual recompute from
-<code>DEFAULT_ENERGY_RATES</code> × <code>DEFAULT_GRID_INTENSITY</code>.</p>
-<p>The rates themselves are estimates (we don't measure your data
-center). What this validates is that <strong>the engine's storage matches
-its config</strong> — i.e. no silent rate drift between live calculation
-and persisted records.</p>
-<h2 id="next">Next<a class="headerlink" href="#next" title="Anchor link to this section">&para;</a></h2>
+<p>F12 answers "is the model degrading?" Integrity answers "is the chain
+behaving abnormally?" The two are orthogonal.</p>
+<h2 id="what-it-detects">What it detects<a class="headerlink" href="#what-it-detects" title="Anchor link to this section">&para;</a></h2>
+<p>Six structural anomaly categories, all derived from chain rows
+themselves (no payload reading required):</p>
+<h3 id="1-sequence-gaps">1. Sequence gaps<a class="headerlink" href="#1-sequence-gaps" title="Anchor link to this section">&para;</a></h3>
+<p>A jump in <code>chain.seq</code> larger than 1. Almost always means: crashed
+writer (span dropped), manual <code>DELETE FROM chain</code>, or file truncation.
+None of those should ever happen.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>WARN seq 6390 -&gt; 6392 (1 missing)
+</span></code></pre></div>
+<h3 id="2-timestamp-anomalies">2. Timestamp anomalies<a class="headerlink" href="#2-timestamp-anomalies" title="Anchor link to this section">&para;</a></h3>
 <ul>
-<li><a href="../dashboard/">Dashboard / Energy panel</a></li>
-<li><a href="../../api/rest/#energy">REST API: /energy/*</a></li>
+<li><strong>Backward</strong>: row N+1 has a smaller <code>timestamp_ns</code> than row N.
+  Clock jumped, or rows were inserted out of order.</li>
+<li><strong>Large gap</strong>: &gt; 1h between consecutive entries on a chain that
+  normally records 20/h. Likely an outage.</li>
+<li><strong>Burst</strong>: more than 10 entries in a single wall-clock second.
+  Possible replay attack or runaway script.</li>
 </ul>
+<h3 id="3-hash-anomalies">3. Hash anomalies<a class="headerlink" href="#3-hash-anomalies" title="Anchor link to this section">&para;</a></h3>
+<p>Duplicate <code>canonical_hash</code>. The CAS dedup layer is supposed to prevent
+this — if it fires, either CAS was bypassed or someone edited the DB.</p>
+<h3 id="4-provider-distribution-shift">4. Provider distribution shift<a class="headerlink" href="#4-provider-distribution-shift" title="Anchor link to this section">&para;</a></h3>
+<p>Split the window in half. If any provider's share moves by more than
+20 percentage points between the two halves, flag it. Useful for
+catching silent gateway failover, traffic routing changes, or a model
+disappearing from the rotation.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>anthropic: 95.0% -&gt; 50.0% (-45.0pp)
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>xai:        5.0% -&gt; 50.0% (+45.0pp)
+</span></code></pre></div>
+<h3 id="5-rate-anomalies">5. Rate anomalies<a class="headerlink" href="#5-rate-anomalies" title="Anchor link to this section">&para;</a></h3>
+<p>First-half hourly rate vs second-half. Flag when the ratio is outside
+<code>[0.5, 1.5]</code> × baseline. Catches "the digestor went down at 2pm"
+without needing an out-of-band metric.</p>
+<h3 id="6-rotation-boundaries">6. Rotation boundaries<a class="headerlink" href="#6-rotation-boundaries" title="Anchor link to this section">&para;</a></h3>
+<p>Placeholder in v2.8.0 — detecting "this row was sealed under a
+different HMAC secret" requires a candidate key set, which is operator
+state. Operators who need this run <code>bijotel verify-continuity</code> with
+the old + new secret across segment boundaries.</p>
+<h2 id="cli">CLI<a class="headerlink" href="#cli" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$<span class="w"> </span>bijotel<span class="w"> </span>integrity<span class="w"> </span>--db<span class="w"> </span>chain.db
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Chain<span class="w"> </span>integrity:<span class="w"> </span>CLEAN<span class="w"> </span><span class="o">(</span>last<span class="w"> </span><span class="m">100</span><span class="w"> </span>entries,<span class="w"> </span>seq<span class="w"> </span><span class="m">6296</span>..6395<span class="o">)</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>------------------------------------------------------------
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Sequence:<span class="w"> </span>no<span class="w"> </span>gaps
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Timestamps:<span class="w"> </span>no<span class="w"> </span>anomalies
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>Hashes:<span class="w"> </span>no<span class="w"> </span>duplicates
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>Provider<span class="w"> </span>distribution:<span class="w"> </span>stable
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>Rate:<span class="w"> </span>stable
+</span></code></pre></div>
+<p>With anomalies:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$<span class="w"> </span>bijotel<span class="w"> </span>integrity<span class="w"> </span>--db<span class="w"> </span>chain.db
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Chain<span class="w"> </span>integrity:<span class="w"> </span><span class="m">2</span><span class="w"> </span>ANOMALIES<span class="w"> </span><span class="o">(</span>last<span class="w"> </span><span class="m">100</span><span class="w"> </span>entries,<span class="w"> </span>seq<span class="w"> </span><span class="m">6296</span>..6395<span class="o">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>------------------------------------------------------------
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Sequence:<span class="w"> </span><span class="m">1</span><span class="w"> </span>gap<span class="o">(</span>s<span class="o">)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>WARN<span class="w">  </span>seq<span class="w"> </span><span class="m">6390</span><span class="w"> </span>-&gt;<span class="w"> </span><span class="m">6392</span><span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="w"> </span>missing<span class="o">)</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>Timestamps:<span class="w"> </span>no<span class="w"> </span>anomalies
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>Hashes:<span class="w"> </span>no<span class="w"> </span>duplicates
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>Provider<span class="w"> </span>distribution:<span class="w"> </span>stable
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>Rate:<span class="w"> </span><span class="m">19</span>.2/h<span class="w"> </span>-&gt;<span class="w"> </span><span class="m">8</span>.4/h<span class="w"> </span><span class="o">(</span>-56.3%<span class="o">)</span>
+</span></code></pre></div>
+<p>JSON for cron / pipelines:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$<span class="w"> </span>bijotel<span class="w"> </span>integrity<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--json
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="o">{</span><span class="s2">&quot;window&quot;</span>:100,<span class="s2">&quot;first_seq&quot;</span>:6296,...,<span class="s2">&quot;clean&quot;</span>:false,<span class="s2">&quot;anomaly_count&quot;</span>:2,...<span class="o">}</span>
+</span></code></pre></div>
+<p>Exit codes:</p>
+<ul>
+<li><code>0</code> — clean</li>
+<li><code>1</code> — anomalies detected</li>
+<li><code>2</code> — DB missing or arg error</li>
+</ul>
+<h2 id="rest-api">REST API<a class="headerlink" href="#rest-api" title="Anchor link to this section">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$<span class="w"> </span>curl<span class="w"> </span>http://localhost:8080/integrity?window<span class="o">=</span><span class="m">500</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="o">{</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="s2">&quot;window&quot;</span>:<span class="w"> </span><span class="m">500</span>,
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="s2">&quot;first_seq&quot;</span>:<span class="w"> </span><span class="m">5896</span>,
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="s2">&quot;last_seq&quot;</span>:<span class="w"> </span><span class="m">6395</span>,
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="s2">&quot;clean&quot;</span>:<span class="w"> </span>true,
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="s2">&quot;anomaly_count&quot;</span>:<span class="w"> </span><span class="m">0</span>,
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="s2">&quot;sequence_gaps&quot;</span>:<span class="w"> </span><span class="o">[]</span>,
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span><span class="s2">&quot;timestamp_anomalies&quot;</span>:<span class="w"> </span><span class="o">[]</span>,
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span><span class="s2">&quot;hash_anomalies&quot;</span>:<span class="w"> </span><span class="o">[]</span>,
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">  </span><span class="s2">&quot;provider_shift&quot;</span>:<span class="w"> </span>null,
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span><span class="s2">&quot;rate_anomalies&quot;</span>:<span class="w"> </span><span class="o">[]</span>,
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span><span class="s2">&quot;rotation_boundaries&quot;</span>:<span class="w"> </span><span class="o">[]</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="o">}</span>
+</span></code></pre></div>
+<p>Anomalies return <strong>HTTP 200</strong> with <code>clean: false</code> and the populated
+arrays. HTTP 4xx/5xx is reserved for "analysis itself could not run"
+(503 when the DB is missing).</p>
+<p>Window range: 2 ≤ window ≤ 10000.</p>
+<h2 id="python-api">Python API<a class="headerlink" href="#python-api" title="Anchor link to this section">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.integrity</span><span class="w"> </span><span class="kn">import</span> <span class="n">analyze_chain_integrity</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">report</span> <span class="o">=</span> <span class="n">analyze_chain_integrity</span><span class="p">(</span><span class="s2">&quot;chain.db&quot;</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">report</span><span class="o">.</span><span class="n">clean</span><span class="p">:</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">anomaly_count</span><span class="si">}</span><span class="s2"> anomalies in seq &quot;</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">first_seq</span><span class="si">}</span><span class="s2">..</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">last_seq</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="k">for</span> <span class="n">gap</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">sequence_gaps</span><span class="p">:</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  gap: </span><span class="si">{</span><span class="n">gap</span><span class="o">.</span><span class="n">after_seq</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">gap</span><span class="o">.</span><span class="n">before_seq</span><span class="si">}</span><span class="s2"> &quot;</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>              <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">gap</span><span class="o">.</span><span class="n">missing_count</span><span class="si">}</span><span class="s2"> missing)&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The class form gives you control over threshold tuning:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.integrity</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChainIntegrityMonitor</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.integrity.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">BURST_THRESHOLD</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Subclass if you need different thresholds for a particular</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># deployment — most operators just use the convenience function.</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="n">monitor</span> <span class="o">=</span> <span class="n">ChainIntegrityMonitor</span><span class="p">(</span><span class="s2">&quot;chain.db&quot;</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">report</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
+</span></code></pre></div>
+<h2 id="cron-integration">Cron integration<a class="headerlink" href="#cron-integration" title="Anchor link to this section">&para;</a></h2>
+<p>Drop into your existing BIJOTEL cron alongside F12 regression:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a># Every 30 minutes — chain integrity
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>*/30 * * * * docker exec gena-v3-atelier-1 bijotel integrity \
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    --db /data/bijotel_chain.db --json \
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    &gt;&gt; /var/log/bijotel/integrity.log 2&gt;&amp;1
+</span></code></pre></div>
+<p>The <code>--json</code> flag prints one compact line per run, perfect for grep /
+<code>jq</code> parsing later. The non-zero exit code on anomaly lets you wire
+this into a notification pipeline:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>bijotel<span class="w"> </span>integrity<span class="w"> </span>--db<span class="w"> </span>/data/chain.db<span class="w"> </span>--json<span class="w"> </span>&gt;<span class="w"> </span>/tmp/last.json
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="nv">$WEBHOOK_URL</span><span class="w"> </span>-d<span class="w"> </span>@/tmp/last.json
+</span></code></pre></div>
+<h2 id="tuning-thresholds">Tuning thresholds<a class="headerlink" href="#tuning-thresholds" title="Anchor link to this section">&para;</a></h2>
+<p>The defaults are deliberately conservative — false positives in a
+monitoring loop are painful. The constants live near the top of
+<code>src/bijotel/integrity/monitor.py</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th style="text-align: right;">Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BURST_THRESHOLD</code></td>
+<td style="text-align: right;">10</td>
+<td>Rows per second above which "burst" fires</td>
+</tr>
+<tr>
+<td><code>LARGE_GAP_SEC</code></td>
+<td style="text-align: right;">3600</td>
+<td>Inter-row pause flagging as a large_gap</td>
+</tr>
+<tr>
+<td><code>PROVIDER_SHIFT_PCT</code></td>
+<td style="text-align: right;">20.0</td>
+<td>Provider-share movement, in pp</td>
+</tr>
+<tr>
+<td><code>RATE_TOL</code></td>
+<td style="text-align: right;">0.5</td>
+<td>First-half-vs-second-half rate ratio tolerance</td>
+</tr>
+<tr>
+<td><code>MIN_SPLIT_SIZE</code></td>
+<td style="text-align: right;">10</td>
+<td>Minimum half-window for provider/rate checks</td>
+</tr>
+</tbody>
+</table>
+<p>If your traffic is naturally burstier than 10/sec, raise
+<code>BURST_THRESHOLD</code>. If your chain normally idles for hours, raise
+<code>LARGE_GAP_SEC</code>. Don't lower the thresholds blindly — every false
+positive is a missed signal next time.</p>
+<h2 id="what-it-does-not-do">What it does <em>not</em> do<a class="headerlink" href="#what-it-does-not-do" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><strong>Does not verify HMACs.</strong> That is <code>bijotel verify</code>. Integrity reads
+  the canonical_hash and prev_hash as opaque tokens — it checks for
+  <em>patterns</em>, not cryptographic validity.</li>
+<li><strong>Does not read span payloads.</strong> That is F12 regression. Integrity
+  pulls <code>canonical_body</code> only to extract the provider name; everything
+  else is metadata.</li>
+<li><strong>Does not modify the chain.</strong> Pure read.</li>
+</ul>
+<h2 id="public-api">Public API<a class="headerlink" href="#public-api" title="Anchor link to this section">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.integrity</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="n">ChainIntegrityMonitor</span><span class="p">,</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="n">IntegrityReport</span><span class="p">,</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">analyze_chain_integrity</span><span class="p">,</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>Each is re-exported from <code>bijotel</code> directly.</p>
 
 
 
