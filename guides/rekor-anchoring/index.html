@@ -12,13 +12,13 @@
         <meta name="author" content="Aisophical SRL">
       
       
-        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/guides/chain-integrity/">
+        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/guides/rekor-anchoring/">
       
       
-        <link rel="prev" href="../replay-verification/">
+        <link rel="prev" href="../chain-integrity/">
       
       
-        <link rel="next" href="../rekor-anchoring/">
+        <link rel="next" href="../../api/cli/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Chain Integrity Monitor - BIJOTEL</title>
+        <title>Rekor Anchoring - BIJOTEL</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#chain-integrity-monitor" class="md-skip">
+        <a href="#rekor-anchoring" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Chain Integrity Monitor
+              Rekor Anchoring
             
           </span>
         </div>
@@ -928,6 +928,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../chain-integrity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chain Integrity Monitor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -947,7 +975,7 @@
   <span class="md-ellipsis">
     
   
-    Chain Integrity Monitor
+    Rekor Anchoring
   
 
     
@@ -965,7 +993,7 @@
   <span class="md-ellipsis">
     
   
-    Chain Integrity Monitor
+    Rekor Anchoring
   
 
     
@@ -991,93 +1019,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-it-detects" class="md-nav__link">
+  <a href="#why-bother" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What it detects
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What it detects">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-sequence-gaps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Sequence gaps
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-timestamp-anomalies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Timestamp anomalies
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-hash-anomalies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Hash anomalies
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-provider-distribution-shift" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Provider distribution shift
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-rate-anomalies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. Rate anomalies
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-rotation-boundaries" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. Rotation boundaries
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CLI
+        Why bother
       
     </span>
   </a>
@@ -1085,10 +1030,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rest-api" class="md-nav__link">
+  <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        REST API
+        Usage
       
     </span>
   </a>
@@ -1096,10 +1041,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#python-api" class="md-nav__link">
+  <a href="#rest-not-yet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python API
+        REST? Not yet.
       
     </span>
   </a>
@@ -1107,10 +1052,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cron-integration" class="md-nav__link">
+  <a href="#honest-scope-notes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cron integration
+        Honest scope notes
       
     </span>
   </a>
@@ -1118,21 +1063,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tuning-thresholds" class="md-nav__link">
+  <a href="#how-verification-works-mechanics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tuning thresholds
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-it-does-not-do" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What it does not do
+        How verification works (mechanics)
       
     </span>
   </a>
@@ -1154,34 +1088,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../rekor-anchoring/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Rekor Anchoring
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1722,93 +1628,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-it-detects" class="md-nav__link">
+  <a href="#why-bother" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What it detects
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What it detects">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-sequence-gaps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Sequence gaps
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-timestamp-anomalies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Timestamp anomalies
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-hash-anomalies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Hash anomalies
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-provider-distribution-shift" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Provider distribution shift
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-rate-anomalies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. Rate anomalies
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-rotation-boundaries" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. Rotation boundaries
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CLI
+        Why bother
       
     </span>
   </a>
@@ -1816,10 +1639,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rest-api" class="md-nav__link">
+  <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        REST API
+        Usage
       
     </span>
   </a>
@@ -1827,10 +1650,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#python-api" class="md-nav__link">
+  <a href="#rest-not-yet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python API
+        REST? Not yet.
       
     </span>
   </a>
@@ -1838,10 +1661,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cron-integration" class="md-nav__link">
+  <a href="#honest-scope-notes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cron integration
+        Honest scope notes
       
     </span>
   </a>
@@ -1849,21 +1672,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tuning-thresholds" class="md-nav__link">
+  <a href="#how-verification-works-mechanics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tuning thresholds
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-it-does-not-do" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What it does not do
+        How verification works (mechanics)
       
     </span>
   </a>
@@ -1901,234 +1713,166 @@
   
 
 
-<h1 id="chain-integrity-monitor">Chain Integrity Monitor<a class="headerlink" href="#chain-integrity-monitor" title="Anchor link to this section">&para;</a></h1>
-<p><strong>Available from v2.8.0.</strong></p>
-<p>BIJOTEL has always had two ways to look at chain trust:</p>
-<ol>
-<li><strong><code>bijotel verify</code></strong> — point-in-time cryptographic verification (does
-   every row's HMAC still validate?).</li>
-<li><strong>F12 regression</strong> — payload drift detection (are token counts,
-   costs, latencies behaving normally over the last N spans?).</li>
-</ol>
-<p>v2.8.0 adds a third: <strong>continuous structural monitoring of the chain
-itself</strong>. Different layer entirely.</p>
+<h1 id="rekor-anchoring">Rekor Anchoring<a class="headerlink" href="#rekor-anchoring" title="Anchor link to this section">&para;</a></h1>
+<p><strong>Available from v2.9.0.</strong></p>
+<p>BIJOTEL's HMAC chain proves that the bytes haven't been altered.
+<code>bijotel verify</code> answers "is this chain intact?" exactly. What it
+<em>cannot</em> answer on its own is <strong>when</strong> the chain reached a given
+state — the operator runs the writer, so an operator could in
+principle backdate everything they control.</p>
+<p><strong>Rekor anchoring closes that gap.</strong> It records, in a public
+Sigstore-run transparency log, that operator X attested chain head Y
+at time T. Rekor is append-only, produces inclusion proofs against a
+published merkle root, and is run by the Linux Foundation — so an
+operator cannot retroactively change which head_hash they attested
+once it's in the log.</p>
 <table>
 <thead>
 <tr>
 <th>Tool</th>
-<th>Watches</th>
-<th>Reads</th>
-<th>Trigger</th>
+<th>Answers</th>
+<th>Trust anchor</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>bijotel verify</code></td>
-<td>every row's HMAC</td>
-<td>full chain</td>
-<td>on-demand audit</td>
+<td>"the chain bytes have not been altered"</td>
+<td>operator's HMAC secret</td>
 </tr>
 <tr>
-<td>F12 regression</td>
-<td>payload (tokens, cost, latency)</td>
-<td>span attributes</td>
-<td>every N min</td>
-</tr>
-<tr>
-<td><strong>integrity</strong></td>
-<td>structural patterns (gaps, dups, bursts)</td>
-<td>chain metadata</td>
-<td>every N min</td>
+<td><code>bijotel anchor publish</code></td>
+<td>"operator X attested head Y at time T (witnessed)"</td>
+<td>Sigstore Rekor + operator's Ed25519 key</td>
 </tr>
 </tbody>
 </table>
-<p>F12 answers "is the model degrading?" Integrity answers "is the chain
-behaving abnormally?" The two are orthogonal.</p>
-<h2 id="what-it-detects">What it detects<a class="headerlink" href="#what-it-detects" title="Anchor link to this section">&para;</a></h2>
-<p>Six structural anomaly categories, all derived from chain rows
-themselves (no payload reading required):</p>
-<h3 id="1-sequence-gaps">1. Sequence gaps<a class="headerlink" href="#1-sequence-gaps" title="Anchor link to this section">&para;</a></h3>
-<p>A jump in <code>chain.seq</code> larger than 1. Almost always means: crashed
-writer (span dropped), manual <code>DELETE FROM chain</code>, or file truncation.
-None of those should ever happen.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>WARN seq 6390 -&gt; 6392 (1 missing)
-</span></code></pre></div>
-<h3 id="2-timestamp-anomalies">2. Timestamp anomalies<a class="headerlink" href="#2-timestamp-anomalies" title="Anchor link to this section">&para;</a></h3>
+<p>The two are complementary. A complete audit story uses both.</p>
+<h2 id="why-bother">Why bother<a class="headerlink" href="#why-bother" title="Anchor link to this section">&para;</a></h2>
+<p>Without a public anchor, an auditor only has <em>your</em> word that the
+chain reached state Y at time T. With one, they have:</p>
 <ul>
-<li><strong>Backward</strong>: row N+1 has a smaller <code>timestamp_ns</code> than row N.
-  Clock jumped, or rows were inserted out of order.</li>
-<li><strong>Large gap</strong>: &gt; 1h between consecutive entries on a chain that
-  normally records 20/h. Likely an outage.</li>
-<li><strong>Burst</strong>: more than 10 entries in a single wall-clock second.
-  Possible replay attack or runaway script.</li>
+<li>The Rekor entry's <code>integratedTime</code> (Linux-Foundation-stamped)</li>
+<li>The chain's <code>head_hash</code> at that moment</li>
+<li>Your Ed25519 signature over that hash</li>
+<li>An inclusion proof against Rekor's signed merkle root</li>
 </ul>
-<h3 id="3-hash-anomalies">3. Hash anomalies<a class="headerlink" href="#3-hash-anomalies" title="Anchor link to this section">&para;</a></h3>
-<p>Duplicate <code>canonical_hash</code>. The CAS dedup layer is supposed to prevent
-this — if it fires, either CAS was bypassed or someone edited the DB.</p>
-<h3 id="4-provider-distribution-shift">4. Provider distribution shift<a class="headerlink" href="#4-provider-distribution-shift" title="Anchor link to this section">&para;</a></h3>
-<p>Split the window in half. If any provider's share moves by more than
-20 percentage points between the two halves, flag it. Useful for
-catching silent gateway failover, traffic routing changes, or a model
-disappearing from the rotation.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>anthropic: 95.0% -&gt; 50.0% (-45.0pp)
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>xai:        5.0% -&gt; 50.0% (+45.0pp)
+<p>If you ever rewrite history, the <em>old</em> Rekor entry is still there.
+Anyone holding a copy of an old anchor can re-fetch by log_index and
+prove the divergence. The "operator runs the writer" trust gap
+collapses to "operator runs the writer <strong>and</strong> owns Sigstore Rekor",
+which they don't.</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Anchor link to this section">&para;</a></h2>
+<p>Generate a keypair once (or reuse the one from <code>bijotel keygen</code>):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>bijotel<span class="w"> </span>keygen<span class="w"> </span>--output-dir<span class="w"> </span>./keys
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># keys/bijotel_ed25519_private.pem</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># keys/bijotel_ed25519_public.pem</span>
 </span></code></pre></div>
-<h3 id="5-rate-anomalies">5. Rate anomalies<a class="headerlink" href="#5-rate-anomalies" title="Anchor link to this section">&para;</a></h3>
-<p>First-half hourly rate vs second-half. Flag when the ratio is outside
-<code>[0.5, 1.5]</code> × baseline. Catches "the digestor went down at 2pm"
-without needing an out-of-band metric.</p>
-<h3 id="6-rotation-boundaries">6. Rotation boundaries<a class="headerlink" href="#6-rotation-boundaries" title="Anchor link to this section">&para;</a></h3>
-<p>Placeholder in v2.8.0 — detecting "this row was sealed under a
-different HMAC secret" requires a candidate key set, which is operator
-state. Operators who need this run <code>bijotel verify-continuity</code> with
-the old + new secret across segment boundaries.</p>
-<h2 id="cli">CLI<a class="headerlink" href="#cli" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$<span class="w"> </span>bijotel<span class="w"> </span>integrity<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Chain<span class="w"> </span>integrity:<span class="w"> </span>CLEAN<span class="w"> </span><span class="o">(</span>last<span class="w"> </span><span class="m">100</span><span class="w"> </span>entries,<span class="w"> </span>seq<span class="w"> </span><span class="m">6296</span>..6395<span class="o">)</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>------------------------------------------------------------
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Sequence:<span class="w"> </span>no<span class="w"> </span>gaps
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Timestamps:<span class="w"> </span>no<span class="w"> </span>anomalies
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>Hashes:<span class="w"> </span>no<span class="w"> </span>duplicates
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>Provider<span class="w"> </span>distribution:<span class="w"> </span>stable
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>Rate:<span class="w"> </span>stable
+<p>Anchor the current chain head:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>bijotel<span class="w"> </span>anchor<span class="w"> </span>publish<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--db<span class="w"> </span>chain.db<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--sign-key<span class="w"> </span>keys/bijotel_ed25519_private.pem<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--output<span class="w"> </span>anchor.json
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># === Rekor anchor PUBLISHED ===</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">#   rekor:           https://rekor.sigstore.dev</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1">#   log_index:       1511534821</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1">#   log_uuid:        24296fb24b8...</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1">#   integrated_time: 1716730000</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1">#   head_seq:        6421</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1">#   head_hash:       a3f9c8d2e7b1...</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="c1">#   public url:      https://rekor.sigstore.dev/api/v1/log/entries?logIndex=1511534821</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1">#   sidecar:         anchor.json</span>
 </span></code></pre></div>
-<p>With anomalies:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$<span class="w"> </span>bijotel<span class="w"> </span>integrity<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Chain<span class="w"> </span>integrity:<span class="w"> </span><span class="m">2</span><span class="w"> </span>ANOMALIES<span class="w"> </span><span class="o">(</span>last<span class="w"> </span><span class="m">100</span><span class="w"> </span>entries,<span class="w"> </span>seq<span class="w"> </span><span class="m">6296</span>..6395<span class="o">)</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>------------------------------------------------------------
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Sequence:<span class="w"> </span><span class="m">1</span><span class="w"> </span>gap<span class="o">(</span>s<span class="o">)</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>WARN<span class="w">  </span>seq<span class="w"> </span><span class="m">6390</span><span class="w"> </span>-&gt;<span class="w"> </span><span class="m">6392</span><span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="w"> </span>missing<span class="o">)</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>Timestamps:<span class="w"> </span>no<span class="w"> </span>anomalies
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>Hashes:<span class="w"> </span>no<span class="w"> </span>duplicates
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>Provider<span class="w"> </span>distribution:<span class="w"> </span>stable
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>Rate:<span class="w"> </span><span class="m">19</span>.2/h<span class="w"> </span>-&gt;<span class="w"> </span><span class="m">8</span>.4/h<span class="w"> </span><span class="o">(</span>-56.3%<span class="o">)</span>
-</span></code></pre></div>
-<p>JSON for cron / pipelines:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$<span class="w"> </span>bijotel<span class="w"> </span>integrity<span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>--json
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="o">{</span><span class="s2">&quot;window&quot;</span>:100,<span class="s2">&quot;first_seq&quot;</span>:6296,...,<span class="s2">&quot;clean&quot;</span>:false,<span class="s2">&quot;anomaly_count&quot;</span>:2,...<span class="o">}</span>
+<p>Verify the anchor weeks/months later:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>bijotel<span class="w"> </span>anchor<span class="w"> </span>verify<span class="w"> </span>anchor.json<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>--public-key<span class="w"> </span>keys/bijotel_ed25519_public.pem
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># === Rekor anchor MATCH (logIndex=1511534821) ===</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1">#   integrated_time:  1716730000</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1">#   hash_matches:     True</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1">#   pubkey_matches:   True</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1">#   signature_valid:  True</span>
 </span></code></pre></div>
 <p>Exit codes:</p>
 <ul>
-<li><code>0</code> — clean</li>
-<li><code>1</code> — anomalies detected</li>
-<li><code>2</code> — DB missing or arg error</li>
+<li><code>0</code> — match</li>
+<li><code>1</code> — operational error (DB/sign-key/anchor file missing)</li>
+<li><code>2</code> — argument error</li>
+<li><code>3</code> — mismatch (replay, tamper, wrong key)</li>
 </ul>
-<h2 id="rest-api">REST API<a class="headerlink" href="#rest-api" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$<span class="w"> </span>curl<span class="w"> </span>http://localhost:8080/integrity?window<span class="o">=</span><span class="m">500</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="o">{</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="s2">&quot;window&quot;</span>:<span class="w"> </span><span class="m">500</span>,
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="s2">&quot;first_seq&quot;</span>:<span class="w"> </span><span class="m">5896</span>,
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="s2">&quot;last_seq&quot;</span>:<span class="w"> </span><span class="m">6395</span>,
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="s2">&quot;clean&quot;</span>:<span class="w"> </span>true,
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="s2">&quot;anomaly_count&quot;</span>:<span class="w"> </span><span class="m">0</span>,
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="s2">&quot;sequence_gaps&quot;</span>:<span class="w"> </span><span class="o">[]</span>,
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span><span class="s2">&quot;timestamp_anomalies&quot;</span>:<span class="w"> </span><span class="o">[]</span>,
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span><span class="s2">&quot;hash_anomalies&quot;</span>:<span class="w"> </span><span class="o">[]</span>,
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">  </span><span class="s2">&quot;provider_shift&quot;</span>:<span class="w"> </span>null,
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span><span class="s2">&quot;rate_anomalies&quot;</span>:<span class="w"> </span><span class="o">[]</span>,
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">  </span><span class="s2">&quot;rotation_boundaries&quot;</span>:<span class="w"> </span><span class="o">[]</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="o">}</span>
+<h2 id="rest-not-yet">REST? Not yet.<a class="headerlink" href="#rest-not-yet" title="Anchor link to this section">&para;</a></h2>
+<p>There's no <code>/anchor/*</code> endpoint in v2.9.0 — anchoring is an
+operator-driven snapshot action, not a per-request flow. Adding a
+REST endpoint that does network I/O to Rekor on every call would
+both slow the API and tie its uptime to Sigstore's. The Python /
+CLI surface is the v2.9 way.</p>
+<p>If you want to run anchoring on a cron, that's exactly the right
+pattern:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Every 6h: anchor the chain head + keep the last 30 sidecars</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="m">0</span><span class="w"> </span>*/6<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/opt/bijotel<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>bijotel<span class="w"> </span>anchor<span class="w"> </span>publish<span class="w"> </span>--db<span class="w"> </span>/data/chain.db<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span>--sign-key<span class="w"> </span>/keys/private.pem<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span>--output<span class="w"> </span>/anchors/anchor-<span class="k">$(</span>date<span class="w"> </span>+<span class="se">\%</span>s<span class="k">)</span>.json<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>ls<span class="w"> </span>-t<span class="w"> </span>/anchors/anchor-*.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span>+31<span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>rm<span class="w"> </span>-f
 </span></code></pre></div>
-<p>Anomalies return <strong>HTTP 200</strong> with <code>clean: false</code> and the populated
-arrays. HTTP 4xx/5xx is reserved for "analysis itself could not run"
-(503 when the DB is missing).</p>
-<p>Window range: 2 ≤ window ≤ 10000.</p>
-<h2 id="python-api">Python API<a class="headerlink" href="#python-api" title="Anchor link to this section">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.integrity</span><span class="w"> </span><span class="kn">import</span> <span class="n">analyze_chain_integrity</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">report</span> <span class="o">=</span> <span class="n">analyze_chain_integrity</span><span class="p">(</span><span class="s2">&quot;chain.db&quot;</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">report</span><span class="o">.</span><span class="n">clean</span><span class="p">:</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">anomaly_count</span><span class="si">}</span><span class="s2"> anomalies in seq &quot;</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">first_seq</span><span class="si">}</span><span class="s2">..</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">last_seq</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="k">for</span> <span class="n">gap</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">sequence_gaps</span><span class="p">:</span>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  gap: </span><span class="si">{</span><span class="n">gap</span><span class="o">.</span><span class="n">after_seq</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">gap</span><span class="o">.</span><span class="n">before_seq</span><span class="si">}</span><span class="s2"> &quot;</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>              <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">gap</span><span class="o">.</span><span class="n">missing_count</span><span class="si">}</span><span class="s2"> missing)&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<p>The class form gives you control over threshold tuning:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.integrity</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChainIntegrityMonitor</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.integrity.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">BURST_THRESHOLD</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Subclass if you need different thresholds for a particular</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># deployment — most operators just use the convenience function.</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="n">monitor</span> <span class="o">=</span> <span class="n">ChainIntegrityMonitor</span><span class="p">(</span><span class="s2">&quot;chain.db&quot;</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">report</span> <span class="o">=</span> <span class="n">monitor</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
-</span></code></pre></div>
-<h2 id="cron-integration">Cron integration<a class="headerlink" href="#cron-integration" title="Anchor link to this section">&para;</a></h2>
-<p>Drop into your existing BIJOTEL cron alongside F12 regression:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a># Every 30 minutes — chain integrity
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>*/30 * * * * docker exec gena-v3-atelier-1 bijotel integrity \
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    --db /data/bijotel_chain.db --json \
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    &gt;&gt; /var/log/bijotel/integrity.log 2&gt;&amp;1
-</span></code></pre></div>
-<p>The <code>--json</code> flag prints one compact line per run, perfect for grep /
-<code>jq</code> parsing later. The non-zero exit code on anomaly lets you wire
-this into a notification pipeline:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>bijotel<span class="w"> </span>integrity<span class="w"> </span>--db<span class="w"> </span>/data/chain.db<span class="w"> </span>--json<span class="w"> </span>&gt;<span class="w"> </span>/tmp/last.json
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="nv">$WEBHOOK_URL</span><span class="w"> </span>-d<span class="w"> </span>@/tmp/last.json
-</span></code></pre></div>
-<h2 id="tuning-thresholds">Tuning thresholds<a class="headerlink" href="#tuning-thresholds" title="Anchor link to this section">&para;</a></h2>
-<p>The defaults are deliberately conservative — false positives in a
-monitoring loop are painful. The constants live near the top of
-<code>src/bijotel/integrity/monitor.py</code>:</p>
-<table>
-<thead>
-<tr>
-<th>Constant</th>
-<th style="text-align: right;">Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>BURST_THRESHOLD</code></td>
-<td style="text-align: right;">10</td>
-<td>Rows per second above which "burst" fires</td>
-</tr>
-<tr>
-<td><code>LARGE_GAP_SEC</code></td>
-<td style="text-align: right;">3600</td>
-<td>Inter-row pause flagging as a large_gap</td>
-</tr>
-<tr>
-<td><code>PROVIDER_SHIFT_PCT</code></td>
-<td style="text-align: right;">20.0</td>
-<td>Provider-share movement, in pp</td>
-</tr>
-<tr>
-<td><code>RATE_TOL</code></td>
-<td style="text-align: right;">0.5</td>
-<td>First-half-vs-second-half rate ratio tolerance</td>
-</tr>
-<tr>
-<td><code>MIN_SPLIT_SIZE</code></td>
-<td style="text-align: right;">10</td>
-<td>Minimum half-window for provider/rate checks</td>
-</tr>
-</tbody>
-</table>
-<p>If your traffic is naturally burstier than 10/sec, raise
-<code>BURST_THRESHOLD</code>. If your chain normally idles for hours, raise
-<code>LARGE_GAP_SEC</code>. Don't lower the thresholds blindly — every false
-positive is a missed signal next time.</p>
-<h2 id="what-it-does-not-do">What it does <em>not</em> do<a class="headerlink" href="#what-it-does-not-do" title="Anchor link to this section">&para;</a></h2>
+<h2 id="honest-scope-notes">Honest scope notes<a class="headerlink" href="#honest-scope-notes" title="Anchor link to this section">&para;</a></h2>
+<p>The library and CLI are real. The unit tests are real. <strong>The
+live-public-Rekor upload path has a known compatibility gap with
+Rekor 1.4+'s Ed25519 hashedrekord verifier</strong> that needs <code>sigstore</code>
+PyPI library integration to resolve cleanly.</p>
+<p>What does work today:</p>
 <ul>
-<li><strong>Does not verify HMACs.</strong> That is <code>bijotel verify</code>. Integrity reads
-  the canonical_hash and prev_hash as opaque tokens — it checks for
-  <em>patterns</em>, not cryptographic validity.</li>
-<li><strong>Does not read span payloads.</strong> That is F12 regression. Integrity
-  pulls <code>canonical_body</code> only to extract the provider name; everything
-  else is metadata.</li>
-<li><strong>Does not modify the chain.</strong> Pure read.</li>
+<li>✓ The full library API (<code>anchor_chain_head</code> / <code>verify_rekor_anchor</code>)</li>
+<li>✓ The CLI (<code>bijotel anchor publish</code> / <code>verify</code>)</li>
+<li>✓ The HTTP client (<code>RekorClient.upload</code> / <code>fetch</code>)</li>
+<li>✓ 15 unit tests covering hash, signature, pubkey, mismatch paths
+  via a mocked Rekor HTTP server inside the test</li>
+<li>✓ A custom Rekor instance (self-hosted) accepting the upload, if
+  the operator wants to run their own log</li>
 </ul>
+<p>What's a v2.10 follow-up:</p>
+<ul>
+<li>⚠ Live <code>rekor.sigstore.dev</code> upload of Ed25519 signatures returns
+  HTTP 400 with <code>failed to verify signature: ed25519: invalid
+  signature</code>. The signature-encoding interpretation across Rekor
+  1.4+'s <code>hashedrekord</code> and <code>dsse</code> types is more nuanced than a
+  straight <code>ed25519.sign(sha512(data))</code> — the canonical path goes
+  through the <code>sigstore</code> PyPI library which handles the bundle
+  format. v2.10 will swap our raw <code>urllib</code> upload for
+  <code>sigstore.transparency.Rekor</code>, which is purpose-built for this.</li>
+</ul>
+<p>If you want to anchor today against the public Rekor while v2.10 is
+in flight, use <code>sigstore-python</code> directly to sign + upload the
+<code>anchor.head_hash</code> and store the returned UUID in your own sidecar.
+The verify path (<code>bijotel anchor verify</code>) can read any Rekor entry
+regardless of how it was uploaded.</p>
+<h2 id="how-verification-works-mechanics">How verification works (mechanics)<a class="headerlink" href="#how-verification-works-mechanics" title="Anchor link to this section">&para;</a></h2>
+<p>The verifier checks three independent things, all of which must pass:</p>
+<ol>
+<li><strong>hash_matches</strong>: Rekor's stored hash equals SHA-512 of the
+   head_hash bytes we expect.</li>
+<li><strong>pubkey_matches</strong>: When <code>--public-key</code> is given, the Rekor entry's
+   public key equals the operator's expected key (PEM-equal,
+   strip-whitespace). Without <code>--public-key</code> the check falls back to
+   "anchor's pubkey matches Rekor's pubkey" — useful but weaker.</li>
+<li><strong>signature_valid</strong>: The Ed25519 signature in the anchor still
+   verifies against <code>SHA-512(head_hash_bytes)</code>.</li>
+</ol>
+<p>The <code>reason</code> field in <code>AnchorVerifyResult</code> names which check failed
+when <code>match</code> is <code>False</code>, so the CLI's error messages are precise.</p>
 <h2 id="public-api">Public API<a class="headerlink" href="#public-api" title="Anchor link to this section">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.integrity</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="n">ChainIntegrityMonitor</span><span class="p">,</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="n">IntegrityReport</span><span class="p">,</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">analyze_chain_integrity</span><span class="p">,</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.anchoring</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">anchor_chain_head</span><span class="p">,</span>    <span class="c1"># sign + upload</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">verify_rekor_anchor</span><span class="p">,</span>  <span class="c1"># fetch + check</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">RekorAnchor</span><span class="p">,</span>          <span class="c1"># frozen dataclass with .to_dict()</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">AnchorVerifyResult</span><span class="p">,</span>   <span class="c1"># frozen dataclass with .to_dict()</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">REKOR_PUBLIC_URL</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">)</span>
 </span></code></pre></div>
-<p>Each is re-exported from <code>bijotel</code> directly.</p>
+<p>Each is re-exported from <code>bijotel</code> directly:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel</span><span class="w"> </span><span class="kn">import</span> <span class="n">RekorAnchor</span><span class="p">,</span> <span class="n">anchor_chain_head</span><span class="p">,</span> <span class="n">verify_rekor_anchor</span>
+</span></code></pre></div>
 
 
 
