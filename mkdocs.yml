@@ -61,6 +61,7 @@ nav:
   - Operations:
       - Secret Rotation: operations/secret-rotation.md
       - Multi-Provider Setup: operations/multi-provider.md
+      - Chain Archival: operations/chain-archival.md
   - Changelog: changelog.md
 
 markdown_extensions:
