@@ -6,6 +6,7 @@ import argparse
 import sys
 
 from bijotel.cli.commands import (
+    archive_cmd,
     energy_cmd,
     export_cmd,
     inspect_cmd,
@@ -15,6 +16,7 @@ from bijotel.cli.commands import (
     serve_cmd,
     stats_cmd,
     verify_cmd,
+    verify_continuity_cmd,
     verify_export_cmd,
 )
 
@@ -37,6 +39,26 @@ def _build_parser() -> argparse.ArgumentParser:
     p_verify.add_argument(
         "--secret-hex",
         help="HMAC secret as hex string. Default: env BIJOTEL_HMAC_SECRET.",
+    )
+    p_verify.add_argument(
+        "--since",
+        help="Verify only entries on or after this date (YYYY-MM-DD UTC).",
+    )
+    p_verify.add_argument(
+        "--until",
+        help="Verify only entries on or before this date (YYYY-MM-DD UTC).",
+    )
+    p_verify.add_argument(
+        "--range",
+        help=(
+            "Verify only seq A:B (inclusive). Pass A: to mean 'A to end' "
+            "or :B to mean 'start to B'."
+        ),
+    )
+    p_verify.add_argument(
+        "--last",
+        type=int,
+        help="Verify only the last N entries by seq.",
     )
 
     # bijotel inspect
@@ -103,6 +125,23 @@ def _build_parser() -> argparse.ArgumentParser:
             "Generate a key with `bijotel keygen`."
         ),
     )
+    p_export.add_argument(
+        "--since",
+        help="Export only entries on or after this date (YYYY-MM-DD UTC).",
+    )
+    p_export.add_argument(
+        "--until",
+        help="Export only entries on or before this date (YYYY-MM-DD UTC).",
+    )
+    p_export.add_argument(
+        "--range",
+        help="Export only seq A:B (inclusive).",
+    )
+    p_export.add_argument(
+        "--last",
+        type=int,
+        help="Export only the last N entries by seq.",
+    )
 
     # bijotel keygen
     p_keygen = subparsers.add_parser(
@@ -120,6 +159,59 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Overwrite an existing private key file. Don't use this unless "
         "you understand that old signed exports will no longer match.",
+    )
+
+    # bijotel archive
+    p_arch = subparsers.add_parser(
+        "archive",
+        help="Peel oldest chain entries off into a separate archive DB.",
+    )
+    p_arch.add_argument("--db", required=True, help="Source chain DB.")
+    p_arch.add_argument(
+        "--output", "-o", required=True,
+        help="Destination archive SQLite DB path (must not exist).",
+    )
+    p_arch.add_argument(
+        "--secret-hex",
+        help="HMAC secret. Default: env BIJOTEL_HMAC_SECRET.",
+    )
+    p_arch.add_argument(
+        "--before",
+        help=(
+            "Archive entries with timestamp before this UTC date "
+            "(YYYY-MM-DD). Exclusive lower bound."
+        ),
+    )
+    p_arch.add_argument(
+        "--before-seq",
+        help="Archive entries with seq < this integer. Mutually exclusive with --before.",
+    )
+    p_arch.add_argument(
+        "--sign-key",
+        help=(
+            "Optional Ed25519 PEM private key. When supplied, a signed "
+            "JSON sidecar export of the archive slice is written next to "
+            "the archive DB (or to the explicit path)."
+        ),
+    )
+    p_arch.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Report what would be archived without writing anything.",
+    )
+
+    # bijotel verify-continuity
+    p_vcont = subparsers.add_parser(
+        "verify-continuity",
+        help="Verify hmac-hash continuity across a list of chain DBs.",
+    )
+    p_vcont.add_argument(
+        "dbs",
+        nargs="+",
+        help=(
+            "Two or more chain DB paths, in chronological order "
+            "(oldest archive first, live chain.db last)."
+        ),
     )
 
     # bijotel verify-export
@@ -260,6 +352,8 @@ def main(argv: list[str] | None = None) -> int:
         "list": list_cmd,
         "export": export_cmd,
         "keygen": keygen_cmd,
+        "archive": archive_cmd,
+        "verify-continuity": verify_continuity_cmd,
         "verify-export": verify_export_cmd,
         "regression": regression_cmd,
         "energy": energy_cmd,

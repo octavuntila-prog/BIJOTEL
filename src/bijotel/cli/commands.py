@@ -12,11 +12,14 @@ from pathlib import Path
 
 from bijotel.policy.prices import DEFAULT_PRICES
 from bijotel.processors import (
+    archive_chain,
     cas_lookup,
     cas_stats,
+    chain_range_summary,
     export_chain,
     inspect_export,
     verify_chain,
+    verify_continuity,
     verify_export,
 )
 from bijotel.regression import Anomaly, RegressionDetector
@@ -113,8 +116,50 @@ def _format_time(timestamp_ns: int) -> str:
 # ───────────────────────── verify ─────────────────────────
 
 
+def _parse_range_args(args: argparse.Namespace) -> dict:
+    """Translate --since/--until/--range/--last argparse output into the
+    keyword arguments verify_chain/export_chain/chain_range_summary accept.
+
+    Returns an empty dict if no range filters are passed (full-chain).
+    """
+    out: dict = {}
+    since = getattr(args, "since", None)
+    until = getattr(args, "until", None)
+    rng = getattr(args, "range", None)
+    last_n = getattr(args, "last", None)
+
+    if since:
+        try:
+            dt = datetime.datetime.strptime(since, "%Y-%m-%d").replace(
+                tzinfo=datetime.UTC
+            )
+        except ValueError as e:
+            raise SystemExit(f"ERROR: --since must be YYYY-MM-DD, got {since!r}") from e
+        out["since_ns"] = int(dt.timestamp() * 1e9)
+    if until:
+        try:
+            dt = datetime.datetime.strptime(until, "%Y-%m-%d").replace(
+                tzinfo=datetime.UTC
+            )
+            # Inclusive upper bound — end of that calendar day UTC.
+            dt = dt + datetime.timedelta(days=1, microseconds=-1)
+        except ValueError as e:
+            raise SystemExit(f"ERROR: --until must be YYYY-MM-DD, got {until!r}") from e
+        out["until_ns"] = int(dt.timestamp() * 1e9)
+    if rng:
+        try:
+            a, b = rng.split(":", 1)
+            out["seq_start"] = int(a) if a else None
+            out["seq_end"] = int(b) if b else None
+        except ValueError as e:
+            raise SystemExit(f"ERROR: --range must be A:B, got {rng!r}") from e
+    if last_n is not None:
+        out["last_n"] = int(last_n)
+    return out
+
+
 def verify_cmd(args: argparse.Namespace) -> int:
-    """Verify chain integrity."""
+    """Verify chain integrity (full chain or a range)."""
     db_path = Path(args.db)
     if not db_path.exists():
         print(f"ERROR: DB not found: {db_path}", file=sys.stderr)
@@ -129,12 +174,34 @@ def verify_cmd(args: argparse.Namespace) -> int:
         )
         return 2
 
-    valid, seq, reason = verify_chain(db_path, secret)
+    range_kwargs = _parse_range_args(args)
+    summary = chain_range_summary(db_path, **range_kwargs)
+    valid, seq, reason = verify_chain(db_path, secret, **range_kwargs)
     with sqlite3.connect(db_path) as conn:
         total = conn.execute("SELECT COUNT(*) FROM chain").fetchone()[0]
 
     if valid:
-        print(f"Chain VALID ({total} entries).")
+        if range_kwargs:
+            count = summary["count"]
+            first_seq = summary["first_seq"]
+            last_seq = summary["last_seq"]
+            print(
+                f"Chain segment VALID: seq {first_seq}-{last_seq} "
+                f"({count} entries of {total} total)."
+            )
+            if summary["first_prev_hash"] and first_seq and first_seq > 1:
+                anchor = (
+                    "matches predecessor in same DB"
+                    if summary["boundary_predecessor_in_db"]
+                    else "boundary — predecessor not in this DB "
+                    "(use verify-continuity to confirm cross-segment)"
+                )
+                print(
+                    f"Boundary: prev_hash at seq={first_seq} = "
+                    f"{summary['first_prev_hash'][:16]}... ({anchor})"
+                )
+        else:
+            print(f"Chain VALID ({total} entries).")
         return 0
     print(f"Chain BROKEN at seq={seq}: {reason}", file=sys.stderr)
     return 3
@@ -384,7 +451,17 @@ def export_cmd(args: argparse.Namespace) -> int:
         return 2
 
     try:
-        out = export_chain(db_path, args.output, secret, sign_key_path=sign_key_path)
+        range_kwargs = _parse_range_args(args)
+    except SystemExit as e:
+        print(str(e), file=sys.stderr)
+        return 2
+
+    try:
+        out = export_chain(
+            db_path, args.output, secret,
+            sign_key_path=sign_key_path,
+            **range_kwargs,
+        )
     except Exception as e:  # noqa: BLE001
         print(f"ERROR: export failed: {e}", file=sys.stderr)
         return 2
@@ -546,6 +623,155 @@ def verify_export_cmd(args: argparse.Namespace) -> int:
 
 # Imported here to avoid a top-of-file circular if processors changes.
 from bijotel.processors.export import FORMAT_ID_V2 as FORMAT_ID_V2_NAME  # noqa: E402
+
+# ───────────────────── bijotel archive ─────────────────────
+
+
+def archive_cmd(args: argparse.Namespace) -> int:
+    """Peel oldest entries off chain.db into a separate archive DB.
+
+    Builds the archive in a fresh SQLite file, verifies the slice
+    cleanly, then deletes the archived rows from the source DB in a
+    single transaction and VACUUMs to reclaim space.
+
+    Safety:
+      * --dry-run reports what would be archived without writing the
+        archive DB or deleting from source.
+      * The archive is built and verified BEFORE any DELETE runs. If
+        verify fails, the source DB is untouched.
+
+    Exit codes:
+        0  — archive (or dry-run) completed successfully.
+        1  — file errors (source missing, archive path exists, etc).
+        2  — argument errors.
+        3  — verify failed (source DB left untouched).
+    """
+    secret = _resolve_secret(args)
+    if secret is None:
+        print(
+            "ERROR: HMAC secret required (--secret-hex or BIJOTEL_HMAC_SECRET).",
+            file=sys.stderr,
+        )
+        return 2
+
+    db_path = Path(args.db)
+    if not db_path.exists():
+        print(f"ERROR: chain DB not found: {db_path}", file=sys.stderr)
+        return 1
+
+    before_seq: int | None = None
+    before_ns: int | None = None
+    if args.before_seq:
+        try:
+            before_seq = int(args.before_seq)
+        except ValueError:
+            print(f"ERROR: --before-seq must be an integer, got {args.before_seq!r}",
+                  file=sys.stderr)
+            return 2
+    if args.before:
+        try:
+            dt = datetime.datetime.strptime(args.before, "%Y-%m-%d").replace(
+                tzinfo=datetime.UTC
+            )
+        except ValueError:
+            print(f"ERROR: --before must be YYYY-MM-DD, got {args.before!r}",
+                  file=sys.stderr)
+            return 2
+        before_ns = int(dt.timestamp() * 1e9)
+    if (before_seq is None) == (before_ns is None):
+        print(
+            "ERROR: pass exactly one of --before <YYYY-MM-DD> or "
+            "--before-seq <int>.",
+            file=sys.stderr,
+        )
+        return 2
+
+    sign_key = getattr(args, "sign_key", None)
+    if sign_key and not Path(sign_key).exists():
+        print(f"ERROR: --sign-key path not found: {sign_key}", file=sys.stderr)
+        return 2
+
+    archive_path = Path(args.output)
+    try:
+        report = archive_chain(
+            db_path,
+            archive_path,
+            secret,
+            before_ns=before_ns,
+            before_seq=before_seq,
+            sign_key_path=sign_key,
+            dry_run=bool(args.dry_run),
+        )
+    except FileExistsError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 1
+    except ValueError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 2
+    except RuntimeError as e:
+        print(f"ERROR: verify failed during archive: {e}", file=sys.stderr)
+        return 3
+
+    if report["dry_run"]:
+        print("DRY RUN — no changes made.")
+    else:
+        print(f"Archived {report['archived_count']} entries to {report['archive_path']}")
+    print(f"  Window:        seq {report['first_seq']} → {report['last_seq']}")
+    print(f"  first prev:    {report['first_prev_hash'][:16]}...")
+    print(f"  last hmac:     {report['last_hmac_hash'][:16]}...")
+    if report["boundary_next_prev_hash"]:
+        print(
+            f"  Boundary OK:   next row's prev = "
+            f"{report['boundary_next_prev_hash'][:16]}... (matches last hmac of archive)"
+        )
+    print(f"  Source DB remaining: {report['main_remaining_count']} entries")
+    if report.get("segment_json_path"):
+        print(f"  Signed JSON sidecar: {report['segment_json_path']}")
+    return 0
+
+
+# ─────────────────── bijotel verify-continuity ───────────────────
+
+
+def verify_continuity_cmd(args: argparse.Namespace) -> int:
+    """Verify chain continuity across an ordered list of segment DBs.
+
+    For each adjacent pair ``(A, B)``::
+
+        A.last_hmac_hash == B's first row.prev_hash
+
+    The check is order-sensitive: pass DBs in chronological order
+    (oldest archive first, live chain.db last).
+    """
+    result = verify_continuity(args.dbs)
+    print("Segments:")
+    for s in result["segments"]:
+        ok = "VALID" if s["valid"] else f"INVALID ({s.get('reason', '?')})"
+        first = s.get("first_seq")
+        last = s.get("last_seq")
+        count = s.get("count")
+        print(
+            f"  {s['db_path']} — {count} entries, seq {first}-{last} — {ok}"
+        )
+    print()
+    print("Boundaries:")
+    for b in result["boundaries"]:
+        marker = "OK" if b["matches"] else "BREAK"
+        print(f"  {b['from_db']} → {b['to_db']}: {marker}")
+        if not b["matches"]:
+            print(f"    expected (prev segment's last hmac): {b['expected']}")
+            print(f"    actual   (next segment's first prev):  {b['actual']}")
+            if b.get("reason"):
+                print(f"    reason: {b['reason']}")
+    print()
+    if result["valid"]:
+        n_segs = len(result["segments"])
+        total = sum(s.get("count") or 0 for s in result["segments"])
+        print(f"Full chain: {total} entries across {n_segs} segments, CONTINUOUS.")
+        return 0
+    print("Continuity verification FAILED — at least one segment or boundary is invalid.",
+          file=sys.stderr)
+    return 1
 
 # ─────────────────── bijotel regression ────────────────────
 

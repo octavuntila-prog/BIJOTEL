@@ -128,6 +128,12 @@ def export_chain(
     output_path: str | Path,
     secret_key: bytes,
     sign_key_path: str | Path | None = None,
+    *,
+    seq_start: int | None = None,
+    seq_end: int | None = None,
+    since_ns: int | None = None,
+    until_ns: int | None = None,
+    last_n: int | None = None,
 ) -> Path:
     """Export the HMAC chain from SQLite to a portable signed JSON file.
 
@@ -143,6 +149,13 @@ def export_chain(
             includes an asymmetric signature an auditor can verify
             without the HMAC secret. When absent (default), the output
             uses ``bijotel-chain-v1`` (backward-compatible).
+        seq_start / seq_end / since_ns / until_ns / last_n: Optional
+            range filters (v2.2.0+). When any filter is applied the
+            exported file gains a ``segment`` block describing the
+            slice (first_seq, last_seq, total_in_full_chain,
+            boundary_prev_hash, is_complete_chain=false). Verifiers
+            check the slice internally and report the boundary so the
+            slice can be cross-checked against an archive.
 
     Returns:
         ``Path`` to the written file.
@@ -163,15 +176,57 @@ def export_chain(
 
     output_path = Path(output_path)
 
+    # Detect whether we're exporting a range (segment) or the whole chain.
+    range_active = any(
+        v is not None for v in (seq_start, seq_end, since_ns, until_ns, last_n)
+    )
+
     with sqlite3.connect(db_path) as conn:
         conn.row_factory = sqlite3.Row
+
+        # Resolve the row window.
+        if last_n is not None:
+            row = conn.execute(
+                "SELECT seq FROM chain ORDER BY seq DESC LIMIT 1 OFFSET ?",
+                (max(0, last_n - 1),),
+            ).fetchone()
+            if row is None:
+                row = conn.execute("SELECT MIN(seq) FROM chain").fetchone()
+                resolved_start = row[0] if row and row[0] is not None else 1
+            else:
+                resolved_start = row[0]
+            resolved_end: int | None = None
+        else:
+            resolved_start = seq_start if seq_start is not None else 1
+            resolved_end = seq_end
+
+        clauses = ["seq >= ?"]
+        params: list[int] = [resolved_start]
+        if resolved_end is not None:
+            clauses.append("seq <= ?")
+            params.append(resolved_end)
+        if since_ns is not None:
+            clauses.append("timestamp_ns >= ?")
+            params.append(since_ns)
+        if until_ns is not None:
+            clauses.append("timestamp_ns <= ?")
+            params.append(until_ns)
+        where_sql = " AND ".join(clauses)
+
         rows = conn.execute(
-            """SELECT seq, timestamp_ns, trace_id, span_id, span_name, span_kind,
+            f"""SELECT seq, timestamp_ns, trace_id, span_id, span_name, span_kind,
                       canonical_body, canonical_hash, prev_hash, hmac_hash,
                       semantic_body_hash
                FROM chain
-               ORDER BY seq"""
+               WHERE {where_sql}
+               ORDER BY seq""",
+            params,
         ).fetchall()
+
+        # Total in full chain — for segment metadata.
+        total_in_full = conn.execute(
+            "SELECT COUNT(*) FROM chain"
+        ).fetchone()[0]
 
     entries: list[dict[str, Any]] = []
     for row in rows:
@@ -209,6 +264,19 @@ def export_chain(
         "chain_signature": chain_signature,
         "entries": entries,
     }
+
+    # v2.2.0: segment metadata when a range filter was applied.
+    if range_active and entries:
+        payload["segment"] = {
+            "first_seq": entries[0]["seq"],
+            "last_seq": entries[-1]["seq"],
+            "total_in_segment": entries_count,
+            "total_in_full_chain": total_in_full,
+            "boundary_prev_hash": entries[0]["prev_hash"],
+            "is_complete_chain": (
+                entries[0]["seq"] == 1 and entries[-1]["seq"] == total_in_full
+            ),
+        }
 
     if sign_key_path is not None:
         # Lazy-import the crypto module so users without `cryptography`
@@ -257,6 +325,8 @@ def export_chain(
 def _verify_entries_structure(
     entries: list[dict[str, Any]],
     secret_key: bytes | None,
+    *,
+    expected_first_prev: str | None = None,
 ) -> tuple[bool, str | None]:
     """Walk entries, verifying body-hash, chain links, and (if secret
     given) per-entry HMAC. Returns ``(True, None)`` if all entries pass.
@@ -265,8 +335,13 @@ def _verify_entries_structure(
     chain-link checks run — the auditor cannot recompute HMACs without
     the secret. The Ed25519 signature over chain_signature still binds
     the rest of the file to the operator's attestation.
+
+    ``expected_first_prev`` (v2.2.0+): for segment exports the first
+    entry's ``prev_hash`` is the predecessor's hmac_hash, not genesis.
+    Callers pass the segment's ``boundary_prev_hash`` here; pass
+    ``None`` for full-chain exports and the genesis anchor is used.
     """
-    prev_hash = GENESIS_HASH
+    prev_hash = expected_first_prev if expected_first_prev is not None else GENESIS_HASH
     for i, entry in enumerate(entries):
         body_b64 = entry.get("canonical_body_b64")
         if body_b64 is None:
@@ -439,6 +514,13 @@ def verify_export(
     if entries and entries[-1].get("hmac_hash") != head_hash:
         return False, "head_hash does not match last entry hmac_hash"
 
+    # v2.2.0: segment exports anchor the first entry's prev_hash to
+    # the boundary recorded at export time, not to GENESIS.
+    segment_block = data.get("segment")
+    expected_first_prev: str | None = None
+    if segment_block:
+        expected_first_prev = segment_block.get("boundary_prev_hash")
+
     # Step 2: Ed25519 signature check (auditor / operator-with-key).
     if public_key_path is not None:
         if fmt != FORMAT_ID_V2:
@@ -451,7 +533,9 @@ def verify_export(
             return False, reason
 
     # Step 3: per-entry walk (body-hash + HMAC if secret + chain links).
-    return _verify_entries_structure(entries, secret_key)
+    return _verify_entries_structure(
+        entries, secret_key, expected_first_prev=expected_first_prev
+    )
 
 
 def inspect_export(path: str | Path) -> dict[str, Any]:
@@ -508,4 +592,15 @@ def inspect_export(path: str | Path) -> dict[str, Any]:
     else:
         info["signed"] = False
 
+    # v2.2.0: segment metadata for range exports.
+    segment_block = data.get("segment")
+    if segment_block:
+        info["segment"] = {
+            "first_seq": segment_block.get("first_seq"),
+            "last_seq": segment_block.get("last_seq"),
+            "total_in_segment": segment_block.get("total_in_segment"),
+            "total_in_full_chain": segment_block.get("total_in_full_chain"),
+            "boundary_prev_hash": segment_block.get("boundary_prev_hash"),
+            "is_complete_chain": segment_block.get("is_complete_chain"),
+        }
     return info

@@ -5,6 +5,84 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] — 2026-05-26 — Chain segmentation + archival (100K+ scale)
+
+Range-aware verify, range-aware export, an archive command that peels
+oldest entries into a separate SQLite DB, and a continuity-verify
+command that walks N segments and confirms their boundary hashes
+match. Designed for the operational reality past ~10k entries where
+full-chain verify and full-chain export start to cost real time and
+disk.
+
+### Added
+
+- **Range filters on verify and export.** New flags shared by both
+  commands::
+
+      bijotel verify --since 2026-05-20
+      bijotel verify --until 2026-05-25
+      bijotel verify --range 5000:6000
+      bijotel verify --last 1000
+
+      bijotel export --range 5000:6000 -o segment.json
+      bijotel export --last 100 -o tail.json
+
+  Range exports carry a new ``segment`` block in the JSON
+  (first_seq, last_seq, total_in_segment, total_in_full_chain,
+  boundary_prev_hash, is_complete_chain). ``verify_export`` uses the
+  block to anchor the segment to its boundary hash rather than
+  GENESIS, so segments roundtrip cleanly.
+
+- **`bijotel archive`** CLI. Peels the oldest rows off ``chain.db``
+  into a separate archive SQLite (same schema + an ``archive_meta``
+  table holding first_seq / last_seq / first_prev_hash /
+  last_hmac_hash / archived_at / source_db / boundary_next_prev_hash).
+  Verifies the archive in isolation BEFORE deleting from source.
+  ``--dry-run`` reports the operation without writing anything.
+  Optional ``--sign-key`` emits a signed JSON sidecar of the slice
+  for auditors who can verify with the public key alone.
+
+- **`bijotel verify-continuity`** CLI. Walks an ordered list of
+  chain DBs and confirms ``archive_N.last_hmac_hash ==
+  archive_N+1.first_prev_hash`` for each adjacent pair. Detects
+  gaps that ``verify`` of any single DB would not see.
+
+- **`bijotel.processors.archive_chain` / `verify_continuity` /
+  `chain_range_summary`** — public Python API for the same surface.
+
+### Changed
+
+- **Trim-aware `verify_chain` default.** Calling
+  ``verify_chain(db, secret)`` with no range kwargs on a trimmed
+  chain (one that has been through ``archive``) used to fail with
+  "prev_hash mismatch (chain broken)" at the new first row.
+  v2.2.0 auto-detects this case: when seq=1 is absent, the verifier
+  shifts its window to ``MIN(seq)`` and accepts the first row's
+  stored ``prev_hash`` as the boundary anchor. Explicit
+  ``seq_start=1`` still uses the GENESIS anchor — caller's intent
+  wins.
+
+- **`verify_export` segment-aware**. Files with a ``segment``
+  block use ``boundary_prev_hash`` as the first-row anchor rather
+  than GENESIS. Full-chain exports are unchanged.
+
+### Tests
+
+- `tests/test_chain_segmentation.py` — 25 end-to-end tests
+  covering: range verify (5 modes incl. tamper detection inside vs.
+  outside window), range export + segment block schema, archive
+  happy path, dry-run, boundary continuity invariant, archive with
+  Ed25519 sidecar, multi-segment continuity (3 DBs), gap detection.
+- Suite: **745 pass / 8 skip / 0 fail** (was 720/8/0). Ruff clean.
+
+### Migration
+
+No format break. Existing v1/v2 exports continue to verify under
+v2.2.0's reader. The archive operation is opt-in — chains that
+never run ``bijotel archive`` behave exactly as before. The
+trim-aware verify default is fully backward-compatible for chains
+that haven't been archived (they always start at seq=1).
+
 ## [2.1.0] — 2026-05-26 — Ed25519-signed exports (auditor-friendly attestation)
 
 Adds asymmetric signatures on chain exports. The HMAC chain stays

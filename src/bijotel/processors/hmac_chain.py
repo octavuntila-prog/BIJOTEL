@@ -257,24 +257,135 @@ class HmacChainSpanProcessor(SpanProcessor):
 def verify_chain(
     db_path: str | Path,
     secret_key: bytes,
+    *,
+    seq_start: int | None = None,
+    seq_end: int | None = None,
+    since_ns: int | None = None,
+    until_ns: int | None = None,
+    last_n: int | None = None,
 ) -> tuple[bool, int | None, str | None]:
-    """Verify chain integrity end-to-end.
+    """Verify chain integrity end-to-end (or over a range).
 
-    For fiecare row în chain (ordinea seq):
-        1. Re-compute SHA-256(canonical_body) -> expected canonical_hash
-        2. Re-compute HMAC(prev_hash || canonical_hash, secret) -> expected hmac_hash
-        3. Verify prev_hash[N] == hmac_hash[N-1] (sau GENESIS pentru N=1)
+    For each row in the selected window (ordered by ``seq``):
+        1. Re-compute SHA-256(canonical_body) -> expected canonical_hash.
+        2. Verify ``prev_hash[N] == hmac_hash[N-1]`` (or the resolved
+           "expected prev_hash" for the first row of the window — see
+           below).
+        3. Re-compute HMAC(prev_hash || canonical_hash, secret) ->
+           expected hmac_hash.
+
+    Args:
+        db_path: SQLite chain DB.
+        secret_key: HMAC secret.
+        seq_start: Inclusive lower bound on ``seq``. Defaults to 1
+            (chain genesis).
+        seq_end: Inclusive upper bound on ``seq``. Defaults to last
+            row.
+        since_ns: Inclusive lower bound on ``timestamp_ns``. Combines
+            with seq_start (both filters applied).
+        until_ns: Inclusive upper bound on ``timestamp_ns``.
+        last_n: Verify the last N entries by ``seq``. Mutually
+            exclusive with the above range filters — last_n wins if
+            both are passed.
+
+    Range boundary behaviour:
+        If the resolved first ``seq`` > 1, ``verify_chain`` looks up
+        ``seq - 1`` in the SAME DB to obtain the "expected prev_hash"
+        for the window's first row. If that predecessor is not in the
+        DB (e.g. archived elsewhere), the function trusts whatever
+        ``prev_hash`` is stored for the first window row and reports
+        it as the segment's boundary in the caller's logs — chain-link
+        consistency within the window is still enforced.
 
     Returns:
-        (True, None, None) dacă chain valid.
-        (False, seq, reason) dacă mutație detectată la rândul `seq`.
+        ``(True, None, None)`` if every checked row passes.
+        ``(False, seq, reason)`` on the first failure encountered.
+
+    Backward compatibility:
+        ``verify_chain(db, secret)`` with no kwargs behaves exactly
+        like v1.x — full-chain verify against genesis.
     """
-    expected_prev = GENESIS_HASH
     with sqlite3.connect(db_path) as conn:
-        cursor = conn.execute("""
+        # Resolve the actual seq window we will verify.
+        if last_n is not None:
+            row = conn.execute(
+                "SELECT seq FROM chain ORDER BY seq DESC LIMIT 1 OFFSET ?",
+                (max(0, last_n - 1),),
+            ).fetchone()
+            if row is None:
+                # Chain shorter than last_n — verify whatever we have.
+                row = conn.execute(
+                    "SELECT MIN(seq) FROM chain"
+                ).fetchone()
+                resolved_start = row[0] if row and row[0] is not None else 1
+            else:
+                resolved_start = row[0]
+            resolved_end: int | None = None
+        else:
+            resolved_start = seq_start if seq_start is not None else 1
+            resolved_end = seq_end
+
+        # Trim-aware default: when the caller asked for "the whole
+        # chain" (no explicit seq_start), but the chain has been
+        # archived and no longer contains seq=1, auto-shift the
+        # window to the actual MIN(seq) and use boundary-anchor
+        # semantics. This means `bijotel verify` continues to work
+        # on a trimmed chain.db without forcing the operator to pass
+        # range flags. Explicit seq_start=1 (or any explicit value)
+        # bypasses this — caller asked for that anchor specifically.
+        if seq_start is None and last_n is None:
+            min_seq_row = conn.execute(
+                "SELECT MIN(seq) FROM chain"
+            ).fetchone()
+            actual_min = min_seq_row[0] if min_seq_row else None
+            if actual_min is not None and actual_min > 1:
+                resolved_start = actual_min
+
+        # If the window doesn't start at chain genesis, look up the
+        # predecessor's hmac_hash so the first row's prev_hash check
+        # has the right anchor. If the predecessor is missing
+        # (archived elsewhere), accept whatever the first row claims —
+        # boundary verification across DBs is the job of
+        # verify_continuity().
+        if resolved_start <= 1:
+            expected_prev: str = GENESIS_HASH
+        else:
+            pred = conn.execute(
+                "SELECT hmac_hash FROM chain WHERE seq = ?",
+                (resolved_start - 1,),
+            ).fetchone()
+            if pred is None:
+                first_row = conn.execute(
+                    "SELECT prev_hash FROM chain WHERE seq = ?",
+                    (resolved_start,),
+                ).fetchone()
+                expected_prev = first_row[0] if first_row else GENESIS_HASH
+            else:
+                expected_prev = pred[0]
+
+        # Build the SELECT.
+        clauses = ["seq >= ?"]
+        params: list[int] = [resolved_start]
+        if resolved_end is not None:
+            clauses.append("seq <= ?")
+            params.append(resolved_end)
+        if since_ns is not None:
+            clauses.append("timestamp_ns >= ?")
+            params.append(since_ns)
+        if until_ns is not None:
+            clauses.append("timestamp_ns <= ?")
+            params.append(until_ns)
+        where_sql = " AND ".join(clauses)
+
+        cursor = conn.execute(
+            f"""
             SELECT seq, canonical_body, canonical_hash, prev_hash, hmac_hash
-            FROM chain ORDER BY seq ASC
-        """)
+            FROM chain
+            WHERE {where_sql}
+            ORDER BY seq ASC
+            """,
+            params,
+        )
         for seq, body, stored_canonical, stored_prev, stored_hmac in cursor:
             recomputed_canonical = hashlib.sha256(body).hexdigest()
             if recomputed_canonical != stored_canonical:
@@ -289,3 +400,86 @@ def verify_chain(
                 return (False, seq, "hmac_hash mismatch (secret wrong or hmac mutated)")
             expected_prev = stored_hmac
     return (True, None, None)
+
+
+def chain_range_summary(
+    db_path: str | Path,
+    *,
+    seq_start: int | None = None,
+    seq_end: int | None = None,
+    since_ns: int | None = None,
+    until_ns: int | None = None,
+    last_n: int | None = None,
+) -> dict:
+    """Lightweight read-only summary of a chain range.
+
+    Returns counts and boundary hashes for the resolved window so the
+    CLI can print a useful "verified seq X..Y, boundary prev=abc..."
+    message without re-running the full verify loop.
+
+    Returned keys:
+        first_seq, last_seq, count, first_prev_hash, last_hmac_hash,
+        boundary_predecessor_in_db (bool — was seq-1 found in same DB?)
+    """
+    with sqlite3.connect(db_path) as conn:
+        if last_n is not None:
+            row = conn.execute(
+                "SELECT seq FROM chain ORDER BY seq DESC LIMIT 1 OFFSET ?",
+                (max(0, last_n - 1),),
+            ).fetchone()
+            if row is None:
+                row = conn.execute(
+                    "SELECT MIN(seq) FROM chain"
+                ).fetchone()
+                resolved_start = row[0] if row and row[0] is not None else 1
+            else:
+                resolved_start = row[0]
+            resolved_end: int | None = None
+        else:
+            resolved_start = seq_start if seq_start is not None else 1
+            resolved_end = seq_end
+
+        clauses = ["seq >= ?"]
+        params: list[int] = [resolved_start]
+        if resolved_end is not None:
+            clauses.append("seq <= ?")
+            params.append(resolved_end)
+        if since_ns is not None:
+            clauses.append("timestamp_ns >= ?")
+            params.append(since_ns)
+        if until_ns is not None:
+            clauses.append("timestamp_ns <= ?")
+            params.append(until_ns)
+        where_sql = " AND ".join(clauses)
+
+        agg = conn.execute(
+            f"SELECT MIN(seq), MAX(seq), COUNT(*) FROM chain WHERE {where_sql}",
+            params,
+        ).fetchone()
+        if not agg or agg[2] == 0:
+            return {
+                "first_seq": None,
+                "last_seq": None,
+                "count": 0,
+                "first_prev_hash": None,
+                "last_hmac_hash": None,
+                "boundary_predecessor_in_db": False,
+            }
+        first_seq, last_seq, count = agg
+        first_prev = conn.execute(
+            "SELECT prev_hash FROM chain WHERE seq = ?", (first_seq,)
+        ).fetchone()[0]
+        last_hmac = conn.execute(
+            "SELECT hmac_hash FROM chain WHERE seq = ?", (last_seq,)
+        ).fetchone()[0]
+        pred = conn.execute(
+            "SELECT 1 FROM chain WHERE seq = ?", (first_seq - 1,)
+        ).fetchone()
+        return {
+            "first_seq": first_seq,
+            "last_seq": last_seq,
+            "count": count,
+            "first_prev_hash": first_prev,
+            "last_hmac_hash": last_hmac,
+            "boundary_predecessor_in_db": pred is not None,
+        }
