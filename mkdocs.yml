@@ -60,6 +60,7 @@ nav:
   - Threat Model: threat-model.md
   - Operations:
       - Secret Rotation: operations/secret-rotation.md
+      - Multi-Provider Setup: operations/multi-provider.md
   - Changelog: changelog.md
 
 markdown_extensions:
