@@ -85,6 +85,7 @@ dev = [
     "python-dotenv>=1.0.0",
     "build>=1.0",
     "twine>=5.0",
+    "coverage>=7.0",
 ]
 
 [project.urls]

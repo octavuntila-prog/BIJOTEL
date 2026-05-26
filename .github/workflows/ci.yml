@@ -29,5 +29,20 @@ jobs:
           pip install -e ".[anthropic,ast,api,dev]"
       - name: Lint with ruff
         run: ruff check .
-      - name: Run tests
-        run: pytest -q
+      - name: Run tests with coverage
+        # `coverage` is in the [dev] extra. We measure on src/bijotel only
+        # so test scaffolding doesn't dilute the number. --fail-under=80
+        # leaves slack below the current ~86% measurement so a transient
+        # 1-2-point dip doesn't break CI for unrelated reasons; raise the
+        # floor when the trend rises.
+        run: |
+          coverage run --source=src/bijotel -m pytest -q
+          coverage report --fail-under=80
+          coverage xml
+      - name: Coverage summary
+        if: matrix.python-version == '3.12'
+        run: |
+          PCT=$(coverage report | tail -1 | awk '{print $NF}' | tr -d '%')
+          echo "Coverage: ${PCT}%"
+          echo "coverage_pct=${PCT}" >> "$GITHUB_OUTPUT"
+        id: cov
