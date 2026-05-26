@@ -1,9 +1,9 @@
 {
   "name": "bijotel-dashboard",
   "private": true,
-  "version": "1.2.0",
+  "version": "2.5.0",
   "type": "module",
-  "description": "BIJOTEL dashboard — Chain Explorer, Policy, Regression Monitor.",
+  "description": "BIJOTEL dashboard — Chain Explorer, Policy, Regression, System, Keys, Archive.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

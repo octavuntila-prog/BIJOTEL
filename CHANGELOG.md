@@ -5,6 +5,67 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] — 2026-05-26 — Dashboard catches up: Keys + Archive pages, energy panel
+
+The React/Vite dashboard finally surfaces the v2.1.0 (Ed25519) +
+v2.2.0 (segmentation + archival) + v2.3.0 (REST endpoints) features.
+Until now those shipped CLI-only and via direct REST calls; v2.5.0
+makes them point-and-click for anyone running `bijotel serve --dashboard`.
+
+### Added
+
+- **`/keys` page** — Ed25519 keypair management.
+  - POST `/api/keygen` → display public PEM + 16-hex fingerprint.
+  - Rotation history persisted in browser `localStorage` (UX only;
+    server filesystem is source of truth).
+  - "Copy public key" button for handing to auditors.
+  - Force-rotation flow with explicit confirmation when a private
+    key already exists (rotating invalidates old signed exports).
+- **`/archive` page** — chain segmentation + continuity.
+  - Active-chain quick stats panel (entries, size, days, rate).
+  - Archive flow: filter by date or seq, dry-run preview, then
+    commit with full boundary report. Optional Ed25519 signing
+    embeds the signed JSON sidecar path in the result.
+  - Continuity-verify section: add segment paths in chronological
+    order, get per-segment status + per-pair boundary check with
+    BREAK reasons surfaced inline.
+- **Energy & Carbon panel on `/system`** — pulls `/api/energy/summary`,
+  renders total Wh / gCO₂ / phone-charge equivalent + per-model
+  breakdown. Honestly labels itself "directional, not ISO-14064."
+  Mentions v2.4.0 cache-aware costing when applicable.
+- **API client extensions** (`src/bijotel/dashboard/src/api/client.js`):
+  - `api.keygen({ output_dir, force })`
+  - `api.archive({ output_path, before_iso|before_seq, sign_key_path, dry_run })`
+  - `api.verifyContinuity(db_paths)`
+  - `api.chainVerifyRange({ seq_start, seq_end, since_ns, until_ns, last_n })`
+  - `api.energySummary(params)`
+
+### Changed
+
+- Sidebar nav gains two entries: "Signing Keys" (KeyRound icon),
+  "Archive & Segments" (Archive icon). Order: Chain → Policy →
+  Regression → System → Keys → Archive.
+- Sidebar footer was "BIJOTEL v1.1.0 · Forensic-grade LLM audit" —
+  bumped to "BIJOTEL v2.5.0 · Tamper-evident LLM audit" (M2 honesty
+  on the wording).
+
+### Bundle
+
+- Dashboard `dashboard/package.json` bumped 1.2.0 → 2.5.0.
+- Built sizes: Keys 8.31 KB (2.97 KB gzip), Archive 14.80 KB
+  (4.03 KB gzip). Total dashboard bundle still under 250 KB gzip
+  including recharts.
+- The pre-built `dashboard_dist/` is shipped inside the wheel
+  (no npm install required at deploy time — `pip install bijotel[api]`
+  + `bijotel serve --dashboard` is sufficient).
+
+### No backend change
+
+This release is dashboard-only. Pre-v2.5 backends serve the new
+dashboard fine — every endpoint the dashboard calls already shipped
+in v2.3.0 / v2.4.0. Hosts that don't run `bijotel serve --dashboard`
+see no change. Test suite remains **805 pass / 8 skip / 0 fail**.
+
 ## [2.4.0] — 2026-05-26 — OTel GenAI semconv v1.41 (cache + reasoning + streaming)
 
 Forward-compatible support for OTel GenAI semantic conventions v1.41

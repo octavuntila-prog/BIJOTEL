@@ -166,4 +166,65 @@ export const api = {
       headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
     })
   },
+
+  // ─────────────────── v2.3.0 — Ed25519 + archive surface ───────────────────
+
+  /**
+   * Generate an Ed25519 keypair server-side. Returns the public key inline
+   * (safe to share with auditors) and the on-disk path of the private key
+   * (which never leaves the server).
+   */
+  keygen: (payload = {}) =>
+    fetchAPI('/keygen', {
+      method: 'POST',
+      body: JSON.stringify({
+        output_dir: payload.output_dir || './keys',
+        force: !!payload.force,
+      }),
+    }),
+
+  /**
+   * Peel oldest chain entries into a separate archive DB. Pass
+   * `dry_run: true` for a preview; `false` to actually write.
+   */
+  archive: (payload) =>
+    fetchAPI('/archive', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  /**
+   * Walk an ordered list of chain DB paths and verify boundary linkage
+   * for each adjacent pair.
+   */
+  verifyContinuity: (db_paths) =>
+    fetchAPI('/verify-continuity', {
+      method: 'POST',
+      body: JSON.stringify({ db_paths }),
+    }),
+
+  // ─────────────────── v2.2.0 — range verify ───────────────────
+
+  /**
+   * Range-aware chain verify. `last_n`, `seq_start/seq_end`, and
+   * `since_ns/until_ns` are mutually compatible (filters AND together).
+   * When any is set, `full: true` is implied so per-row HMAC is recomputed
+   * over the slice.
+   */
+  chainVerifyRange: (params = {}) =>
+    fetchAPI('/chain/verify', {
+      method: 'POST',
+      body: JSON.stringify({ full: true, ...params }),
+    }),
+
+  // ─────────────────── v1.9.0 — energy surface ───────────────────
+
+  energySummary: (params = {}) => {
+    const q = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== ''),
+      ),
+    ).toString()
+    return fetchAPI(`/energy/summary${q ? `?${q}` : ''}`)
+  },
 }

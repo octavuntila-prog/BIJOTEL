@@ -12,6 +12,9 @@ const ChainExplorer = lazy(() => import('./pages/ChainExplorer.jsx'))
 const PolicyDashboard = lazy(() => import('./pages/PolicyDashboard.jsx'))
 const RegressionView = lazy(() => import('./pages/RegressionView.jsx'))
 const SystemStatus = lazy(() => import('./pages/SystemStatus.jsx'))
+// v2.5.0 — surface v2.1.0 + v2.2.0 + v2.3.0 features in the dashboard.
+const Keys = lazy(() => import('./pages/Keys.jsx'))
+const Archive = lazy(() => import('./pages/Archive.jsx'))
 
 function PageFallback() {
   return (
@@ -55,6 +58,22 @@ export default function App() {
           element={
             <Suspense fallback={<PageFallback />}>
               <SystemStatus />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/keys"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <Keys />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/archive"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <Archive />
             </Suspense>
           }
         />

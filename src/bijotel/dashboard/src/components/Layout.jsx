@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   KeyRound,
+  Archive as ArchiveIcon,
 } from 'lucide-react'
 import { api, getStoredApiKey, setStoredApiKey } from '../api/client.js'
 import StatusBadge from './StatusBadge.jsx'
@@ -23,6 +24,9 @@ const NAV = [
   { to: '/policy', label: 'Policy Decisions', Icon: Shield },
   { to: '/regression', label: 'Regression Monitor', Icon: TrendingUp },
   { to: '/system', label: 'System Status', Icon: Activity },
+  // v2.5.0 — surface v2.1.0 + v2.2.0 + v2.3.0 features.
+  { to: '/keys', label: 'Signing Keys', Icon: KeyRound },
+  { to: '/archive', label: 'Archive & Segments', Icon: ArchiveIcon },
 ]
 
 function Sidebar({ open, onClose }) {
@@ -79,7 +83,7 @@ function Sidebar({ open, onClose }) {
         </nav>
 
         <div className="absolute inset-x-0 bottom-0 p-4 text-xs text-white/40 border-t border-white/10">
-          BIJOTEL v1.1.0 · Forensic-grade LLM audit
+          BIJOTEL v2.5.0 · Tamper-evident LLM audit
         </div>
       </aside>
     </>
