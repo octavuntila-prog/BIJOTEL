@@ -44,12 +44,34 @@ pip install "bijotel[dev]"
 
 ## Docker
 
-A minimal Dockerfile ships in the repo:
+Pull a prebuilt image — no local build required:
 
 ```bash
-docker build -t bijotel .
-docker run -p 8080:8080 -v ./data:/data bijotel
+docker run -p 8080:8080 \
+  -e BIJOTEL_HMAC_SECRET=your-secret-min-16-chars \
+  -v bijotel-data:/data \
+  ghcr.io/octavuntila-prog/bijotel:latest
 ```
+
+The image bundles the `[api,fingerprint,ast]` extras and runs
+`bijotel serve --dashboard --host 0.0.0.0 --port 8080` by default.
+Browser users get the dashboard at `/`; integrations call `/api/*`.
+
+Tags: `:2.7.0`, `:latest` — host at
+[`ghcr.io/octavuntila-prog/bijotel`](https://github.com/octavuntila-prog/BIJOTEL/pkgs/container/bijotel).
+
+To build locally instead (e.g. to bundle Anthropic/OpenAI adapters
+yourself):
+
+```bash
+git clone https://github.com/octavuntila-prog/BIJOTEL.git
+cd BIJOTEL
+python -m build --wheel        # produces dist/bijotel-2.7.0-...whl
+docker build -t bijotel:local .
+```
+
+The Dockerfile copies whatever wheel sits in `dist/` so a version bump
+in `pyproject.toml` doesn't require a Dockerfile edit.
 
 ## Verify the install
 

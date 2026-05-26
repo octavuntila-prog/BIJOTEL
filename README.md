@@ -70,6 +70,24 @@ pip install "bijotel[ast]"           # tree-sitter (Bash AST code safety)
 pip install "bijotel[all]"           # everything above
 ```
 
+## Docker
+
+The published image bundles the `[api,fingerprint,ast]` extras and runs
+`bijotel serve --dashboard` by default — REST API at `/api/*`, dashboard
+at `/`:
+
+```bash
+docker run -p 8080:8080 \
+  -e BIJOTEL_HMAC_SECRET=your-secret-min-16-chars \
+  -v bijotel-data:/data \
+  ghcr.io/octavuntila-prog/bijotel:latest
+```
+
+Then open <http://localhost:8080/> for the dashboard and
+<http://localhost:8080/api/health> for the REST liveness probe. Versioned
+tags (`:2.7.0`, `:latest`) live at
+[ghcr.io/octavuntila-prog/bijotel](https://github.com/octavuntila-prog/BIJOTEL/pkgs/container/bijotel).
+
 ## Quickstart
 
 ```python
