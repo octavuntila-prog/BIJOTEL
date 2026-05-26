@@ -62,6 +62,8 @@ nav:
       - Secret Rotation: operations/secret-rotation.md
       - Multi-Provider Setup: operations/multi-provider.md
       - Chain Archival: operations/chain-archival.md
+  - Design:
+      - OTel Collector Exporter: design/otel-collector-exporter.md
   - Changelog: changelog.md
 
 markdown_extensions:
