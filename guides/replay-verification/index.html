@@ -12,13 +12,13 @@
         <meta name="author" content="Aisophical SRL">
       
       
-        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/operations/multi-provider/">
+        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/guides/replay-verification/">
       
       
-        <link rel="prev" href="../secret-rotation/">
+        <link rel="prev" href="../rag-provenance/">
       
       
-        <link rel="next" href="../chain-archival/">
+        <link rel="next" href="../../api/cli/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Multi-Provider Setup - BIJOTEL</title>
+        <title>Replay Verification - BIJOTEL</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#multi-provider-instrumentation" class="md-skip">
+        <a href="#replay-verification" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Multi-Provider Setup
+              Replay Verification
             
           </span>
         </div>
@@ -266,11 +266,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../guides/policy-engine/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../policy-engine/" class="md-tabs__link">
           
   
   
@@ -367,13 +369,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../secret-rotation/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../operations/secret-rotation/" class="md-tabs__link">
           
   
   
@@ -655,8 +655,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -678,19 +680,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -708,7 +713,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -726,7 +731,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/policy-engine/" class="md-nav__link">
+      <a href="../policy-engine/" class="md-nav__link">
         
   
   
@@ -754,7 +759,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/regression-detection/" class="md-nav__link">
+      <a href="../regression-detection/" class="md-nav__link">
         
   
   
@@ -782,7 +787,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/multi-provider/" class="md-nav__link">
+      <a href="../multi-provider/" class="md-nav__link">
         
   
   
@@ -810,7 +815,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/dashboard/" class="md-nav__link">
+      <a href="../dashboard/" class="md-nav__link">
         
   
   
@@ -838,7 +843,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/energy-tracking/" class="md-nav__link">
+      <a href="../energy-tracking/" class="md-nav__link">
         
   
   
@@ -866,7 +871,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/rag-provenance/" class="md-nav__link">
+      <a href="../rag-provenance/" class="md-nav__link">
         
   
   
@@ -891,10 +896,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../guides/replay-verification/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Replay Verification
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -910,6 +942,131 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-gets-recorded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What gets recorded
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recording-at-call-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recording at call time
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-a-replay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying a replay
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying a replay">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REST
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#honest-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Honest limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public API
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1158,10 +1315,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -1175,22 +1330,19 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -1208,7 +1360,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1226,7 +1378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../secret-rotation/" class="md-nav__link">
+      <a href="../../operations/secret-rotation/" class="md-nav__link">
         
   
   
@@ -1251,37 +1403,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Multi-Provider Setup
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../operations/multi-provider/" class="md-nav__link">
         
   
   
@@ -1297,120 +1422,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#tldr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        TL;DR
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sdk-to-instrumentor-coverage-matrix" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SDK-to-instrumentor coverage matrix
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#worked-example-ara-ai-research-agency" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Worked example: ARA (AI Research Agency)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Worked example: ARA (AI Research Agency)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#before-v20x-deploy-2026-05-25" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Before (v2.0.x deploy, 2026-05-25)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#after-v210-deploy-2026-05-26" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        After (v2.1.0 deploy, 2026-05-26)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#gap-workarounds-in-this-build" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Gap workarounds in this build
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-verify-in-your-own-deploy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How to verify in your own deploy
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rollback" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rollback
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1423,7 +1434,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../chain-archival/" class="md-nav__link">
+      <a href="../../operations/chain-archival/" class="md-nav__link">
         
   
   
@@ -1596,10 +1607,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#tldr" class="md-nav__link">
+  <a href="#what-gets-recorded" class="md-nav__link">
     <span class="md-ellipsis">
       
-        TL;DR
+        What gets recorded
       
     </span>
   </a>
@@ -1607,10 +1618,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sdk-to-instrumentor-coverage-matrix" class="md-nav__link">
+  <a href="#recording-at-call-time" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SDK-to-instrumentor coverage matrix
+        Recording at call time
       
     </span>
   </a>
@@ -1618,22 +1629,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#worked-example-ara-ai-research-agency" class="md-nav__link">
+  <a href="#verifying-a-replay" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Worked example: ARA (AI Research Agency)
+        Verifying a replay
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Worked example: ARA (AI Research Agency)">
+    <nav class="md-nav" aria-label="Verifying a replay">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#before-v20x-deploy-2026-05-25" class="md-nav__link">
+  <a href="#cli" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Before (v2.0.x deploy, 2026-05-25)
+        CLI
       
     </span>
   </a>
@@ -1641,10 +1652,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#after-v210-deploy-2026-05-26" class="md-nav__link">
+  <a href="#rest" class="md-nav__link">
     <span class="md-ellipsis">
       
-        After (v2.1.0 deploy, 2026-05-26)
+        REST
       
     </span>
   </a>
@@ -1652,10 +1663,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#gap-workarounds-in-this-build" class="md-nav__link">
+  <a href="#python-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gap workarounds in this build
+        Python API
       
     </span>
   </a>
@@ -1668,10 +1679,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-verify-in-your-own-deploy" class="md-nav__link">
+  <a href="#honest-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to verify in your own deploy
+        Honest limitations
       
     </span>
   </a>
@@ -1679,10 +1690,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rollback" class="md-nav__link">
+  <a href="#when-to-use" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rollback
+        When to use
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public API
       
     </span>
   </a>
@@ -1709,221 +1731,203 @@
   
 
 
-<h1 id="multi-provider-instrumentation">Multi-provider instrumentation<a class="headerlink" href="#multi-provider-instrumentation" title="Anchor link to this section">&para;</a></h1>
-<p>BIJOTEL is provider-agnostic: it seals every OpenTelemetry GenAI span
-that lands in its TracerProvider, regardless of which LLM SDK produced
-it. The shape of the integration depends on how many SDKs your
-application imports.</p>
-<p>This page documents the deployment pattern, with the ARA (AI Research
-Agency) production deploy as the worked example.</p>
-<hr />
-<h2 id="tldr">TL;DR<a class="headerlink" href="#tldr" title="Anchor link to this section">&para;</a></h2>
-<p>For every LLM SDK in use, wire its OTel instrumentor in your
-application's startup (FastAPI lifespan, Django <code>AppConfig.ready</code>,
-Flask <code>before_first_request</code>, etc.) <strong>before</strong> the first LLM call.
-The instrumentor patches the SDK at the import boundary; every call
-site downstream then emits spans automatically.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry</span><span class="w"> </span><span class="kn">import</span> <span class="n">trace</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.sdk.trace</span><span class="w"> </span><span class="kn">import</span> <span class="n">TracerProvider</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.instrumentation.anthropic</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnthropicInstrumentor</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.instrumentation.openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAIInstrumentor</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.processors</span><span class="w"> </span><span class="kn">import</span> <span class="n">HmacChainSpanProcessor</span><span class="p">,</span> <span class="n">CasSpanProcessor</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">provider</span> <span class="o">=</span> <span class="n">TracerProvider</span><span class="p">()</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">provider</span><span class="o">.</span><span class="n">add_span_processor</span><span class="p">(</span><span class="n">HmacChainSpanProcessor</span><span class="p">(</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;chain.db&quot;</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">secret_key</span><span class="o">=</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;BIJOTEL_HMAC_SECRET&quot;</span><span class="p">]),</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">))</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">provider</span><span class="o">.</span><span class="n">add_span_processor</span><span class="p">(</span><span class="n">CasSpanProcessor</span><span class="p">(</span><span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;chain.db&quot;</span><span class="p">))</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">trace</span><span class="o">.</span><span class="n">set_tracer_provider</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">AnthropicInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">OpenAIInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># add more instrumentors per SDK you import</span>
-</span></code></pre></div>
-<p>After this, every <code>client.messages.create()</code> (Anthropic) and
-<code>client.chat.completions.create()</code> (OpenAI, including OpenAI-compatible
-backends like xAI / DeepSeek / Together) is sealed into the chain.</p>
-<hr />
-<h2 id="sdk-to-instrumentor-coverage-matrix">SDK-to-instrumentor coverage matrix<a class="headerlink" href="#sdk-to-instrumentor-coverage-matrix" title="Anchor link to this section">&para;</a></h2>
+<h1 id="replay-verification">Replay Verification<a class="headerlink" href="#replay-verification" title="Anchor link to this section">&para;</a></h1>
+<p><strong>Available from v2.7.0.</strong></p>
+<p>Until v2.6.0, BIJOTEL answered one question:
+<strong>"Has this chain entry been tampered with?"</strong> v2.7.0 adds a second one:
+<strong>"If I rerun the same call with the same model and seed, do I get the
+same output?"</strong></p>
+<p>If the answer is no, <em>either</em> the model changed, <em>or</em> the seed/parameter
+recording is wrong, <em>or</em> the chain was tampered with after sealing. Replay
+verification turns "tamper-evident" into "tamper-evident plus
+reproducibility-evident" — without bringing in zkLLM machinery.</p>
+<h2 id="what-gets-recorded">What gets recorded<a class="headerlink" href="#what-gets-recorded" title="Anchor link to this section">&para;</a></h2>
+<p>When you call <code>record_replay_context(...)</code>, BIJOTEL writes these attributes
+into the span before the LLM call returns:</p>
 <table>
 <thead>
 <tr>
-<th>Provider</th>
-<th>Python SDK</th>
-<th>OTel instrumentor</th>
-<th>One-instrumentor coverage</th>
+<th>Attribute</th>
+<th>Type</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Anthropic</td>
-<td><code>anthropic</code></td>
-<td><code>opentelemetry-instrumentation-anthropic</code></td>
-<td>—</td>
+<td><code>bijotel.replay.prompt_hash</code></td>
+<td>str</td>
+<td>SHA-256 of the full prompt</td>
 </tr>
 <tr>
-<td>OpenAI</td>
-<td><code>openai</code></td>
-<td><code>opentelemetry-instrumentation-openai</code></td>
-<td>OpenAI + xAI + DeepSeek + Together + Fireworks + Groq + any other OpenAI-compatible service that uses <code>openai.OpenAI(base_url=…)</code></td>
+<td><code>bijotel.replay.output_hash</code></td>
+<td>str</td>
+<td>SHA-256 of the LLM response</td>
 </tr>
 <tr>
-<td>Google Gemini (<code>google-genai</code> SDK)</td>
-<td><code>google-genai</code></td>
-<td><strong>No OTel instrumentor on PyPI as of 2026-05-26.</strong> The older <code>opentelemetry-instrumentation-vertexai</code> is for the legacy <code>vertexai</code> SDK, not <code>google-genai</code>.</td>
-<td>Track upstream or wrap manually (see "Gap workarounds" below).</td>
+<td><code>bijotel.replay.seed</code></td>
+<td>int</td>
+<td>Random seed used (only present when set)</td>
 </tr>
 <tr>
-<td>Mistral</td>
-<td><code>mistralai</code></td>
-<td><code>opentelemetry-instrumentation-mistral</code> (third-party, not officially supported)</td>
-<td>Same install pattern; not exercised in this matrix.</td>
+<td><code>bijotel.replay.temperature</code></td>
+<td>float</td>
+<td>Sampling temperature</td>
 </tr>
 <tr>
-<td>AWS Bedrock</td>
-<td><code>boto3</code></td>
-<td><code>opentelemetry-instrumentation-botocore</code></td>
-<td>Captures Bedrock calls inside the broader botocore span.</td>
+<td><code>bijotel.replay.top_p</code></td>
+<td>float</td>
+<td>Nucleus-sampling cutoff</td>
 </tr>
 <tr>
-<td>Cohere</td>
-<td><code>cohere</code></td>
-<td><code>opentelemetry-instrumentation-cohere</code></td>
-<td>—</td>
+<td><code>bijotel.replay.model_version</code></td>
+<td>str</td>
+<td>Exact model identifier / checkpoint</td>
+</tr>
+<tr>
+<td><code>bijotel.replay.deterministic</code></td>
+<td>bool</td>
+<td>True iff a seed was passed</td>
 </tr>
 </tbody>
 </table>
-<p>The big leverage point: <strong>OpenAIInstrumentor patches the <code>openai</code>
-SDK once, and every consumer of <code>openai.OpenAI</code> / <code>openai.AsyncOpenAI</code>
-gets spans automatically — regardless of <code>base_url</code></strong>. That covers the
-majority of "OpenAI-compatible" providers in the wild without extra
-config.</p>
-<hr />
-<h2 id="worked-example-ara-ai-research-agency">Worked example: ARA (AI Research Agency)<a class="headerlink" href="#worked-example-ara-ai-research-agency" title="Anchor link to this section">&para;</a></h2>
-<p>ARA is a 7-provider research platform with one LLM call site
-(<code>backend/llm/client.py::LLMClient.complete()</code>) and five active
-provider methods (<code>_call_anthropic</code>, <code>_call_openai_compat</code>,
-<code>_call_google</code>, <code>_call_mistral</code>, plus the shared dispatch).
-<code>_call_openai_compat</code> handles OpenAI, xAI, DeepSeek, and Together via
-one <code>openai.AsyncOpenAI</code> client with different <code>base_url</code> overrides.</p>
-<h3 id="before-v20x-deploy-2026-05-25">Before (v2.0.x deploy, 2026-05-25)<a class="headerlink" href="#before-v20x-deploy-2026-05-25" title="Anchor link to this section">&para;</a></h3>
-<p>ARA wired only <code>AnthropicInstrumentor</code> in the FastAPI lifespan. Result:
-153 sealed chain entries over 24 hours, 100% anthropic. Other 5
-providers were running ungated outside the chain.</p>
-<h3 id="after-v210-deploy-2026-05-26">After (v2.1.0 deploy, 2026-05-26)<a class="headerlink" href="#after-v210-deploy-2026-05-26" title="Anchor link to this section">&para;</a></h3>
-<p>Added one block to the lifespan after the anthropic init:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">try</span><span class="p">:</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.instrumentation.openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAIInstrumentor</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">OpenAIInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">providers_wired</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;openai&quot;</span><span class="p">,</span> <span class="s2">&quot;xai&quot;</span><span class="p">,</span> <span class="s2">&quot;deepseek&quot;</span><span class="p">,</span> <span class="s2">&quot;together&quot;</span><span class="p">])</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;opentelemetry-instrumentation-openai not installed&quot;</span><span class="p">)</span>
+<p>Note: <strong>prompt and output bytes never enter the chain.</strong> Only their hashes
+do. That keeps PII out of the audit trail and keeps row sizes small. The
+trade-off is that replay requires the original prompt from a separate
+store (Langfuse, application logs, ...). See <em>Honest limitations</em> below.</p>
+<h2 id="recording-at-call-time">Recording at call time<a class="headerlink" href="#recording-at-call-time" title="Anchor link to this section">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.replay</span><span class="w"> </span><span class="kn">import</span> <span class="n">record_replay_context</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;claude-haiku-4-5-20251001&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}],</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">extra_body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">},</span>  <span class="c1"># SDK-specific seed field</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">output_text</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Inside your active span:</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">attrs</span> <span class="o">=</span> <span class="n">record_replay_context</span><span class="p">(</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">output</span><span class="o">=</span><span class="n">output_text</span><span class="p">,</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;claude-haiku-4-5-20251001&quot;</span><span class="p">,</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">)</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">span</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Added one line to <code>requirements.txt</code>:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>opentelemetry-instrumentation-openai==0.60.0
+<p>Calls without a seed are still recordable — pass <code>seed=None</code> (or just omit
+it). The attribute set then has <code>deterministic=False</code>, and downstream
+verifiers know replay drift is <em>expected</em>. That honesty matters more
+than pretending every call is reproducible.</p>
+<h2 id="verifying-a-replay">Verifying a replay<a class="headerlink" href="#verifying-a-replay" title="Anchor link to this section">&para;</a></h2>
+<p>You re-execute the call (same model, same seed, same temperature) in some
+other context — your replay harness, a forensic notebook, an auditor's
+sandbox. You hand the resulting text to BIJOTEL; BIJOTEL compares hashes.</p>
+<h3 id="cli">CLI<a class="headerlink" href="#cli" title="Anchor link to this section">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ bijotel replay --db chain.db --seq 6373 --output &quot;the replayed answer&quot;
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>=== Replay MATCH (seq=6373) ===
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  original_hash:  3f2a...
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  replay_hash:    3f2a...
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  deterministic:  True
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  model_version:  claude-haiku-4-5-20251001
 </span></code></pre></div>
-<p>After restart, the lifespan log reads:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>BIJOTEL: chain=/app/data/bijotel_chain.db,
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  providers instrumented=anthropic,openai,xai,deepseek,together
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  (google/mistral: see comments in main.py lifespan)
+<p>Or from a file (for multi-line outputs):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$ bijotel replay --db chain.db --seq 6373 --output-file replay.txt
 </span></code></pre></div>
-<p>End-to-end test from inside the container: real OpenAI + xAI calls
-sealed correctly, producing chain entries with the expected
-<code>gen_ai.request.model</code> and token counts. <code>bijotel verify</code> reported
-<code>Chain VALID (155 entries)</code> post-deploy.</p>
-<h3 id="gap-workarounds-in-this-build">Gap workarounds in this build<a class="headerlink" href="#gap-workarounds-in-this-build" title="Anchor link to this section">&para;</a></h3>
+<p>Exit codes:</p>
 <ul>
-<li><strong>Google Gemini (<code>google-genai</code>)</strong> — no PyPI instrumentor. ARA's
-  <code>_call_google()</code> calls remain outside the chain in this deploy.
-  Options:</li>
-<li>Wait for an upstream <code>opentelemetry-instrumentation-google-genai</code>
-    package.</li>
-<li>Wrap the <code>_call_google</code> method body with <code>tracer.start_as_current_span("google.chat", ...)</code> and set the standard <code>gen_ai.*</code> attributes
-    manually — BIJOTEL's HmacChainSpanProcessor will pick it up.</li>
-<li>Use <code>bijotel.wrap()</code> on the SDK call site for a quick manual
-    bridge.</li>
-<li><strong>Mistral (<code>mistralai</code>)</strong> — the SDK is currently absent from the
-  build (PyPI quarantine). ARA's <code>MISTRAL_SDK_AVAILABLE</code> guard
-  short-circuits <code>_call_mistral</code>; no calls flow through it. Nothing to
-  instrument until the SDK returns.</li>
+<li><code>0</code> — match</li>
+<li><code>1</code> — DB/file/seq missing</li>
+<li><code>2</code> — argument errors (e.g. neither <code>--output</code> nor <code>--output-file</code>)</li>
+<li><code>3</code> — mismatch</li>
 </ul>
-<hr />
-<h2 id="how-to-verify-in-your-own-deploy">How to verify in your own deploy<a class="headerlink" href="#how-to-verify-in-your-own-deploy" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 1. Snapshot chain count</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sqlite3<span class="w"> </span>chain.db<span class="w"> </span><span class="s2">&quot;SELECT COUNT(*) FROM chain&quot;</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># 2. Make a real call through each instrumented SDK</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># 3. Re-count + check provider distribution</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>sqlite3<span class="w"> </span>chain.db<span class="w"> </span><span class="s2">&quot;</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="s2">  SELECT json_extract(canonical_body,</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="s2">                      &#39;</span>$<span class="s2">.attributes.\&quot;gen_ai.provider.name\&quot;&#39;) AS provider,</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="s2">         COUNT(*) AS calls</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="s2">  FROM chain</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="s2">  GROUP BY provider</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="s2">  ORDER BY calls DESC</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="s2">&quot;</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="c1"># 4. Confirm chain integrity</span>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db
+<h3 id="rest">REST<a class="headerlink" href="#rest" title="Anchor link to this section">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$ curl -X POST http://localhost:8080/replay/verify \
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>       -H &#39;Content-Type: application/json&#39; \
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>       -d &#39;{&quot;seq&quot;: 6373, &quot;replayed_output&quot;: &quot;the replayed answer&quot;}&#39;
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>{
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  &quot;match&quot;: true,
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  &quot;original_hash&quot;: &quot;3f2a...&quot;,
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  &quot;replay_hash&quot;: &quot;3f2a...&quot;,
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  &quot;deterministic&quot;: true,
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>  &quot;model_version&quot;: &quot;claude-haiku-4-5-20251001&quot;,
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  &quot;reason&quot;: null
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>}
 </span></code></pre></div>
-<p>Provider names you'll see in <code>gen_ai.provider.name</code>:</p>
-<table>
-<thead>
-<tr>
-<th>Actual API call</th>
-<th>Reported provider</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Anthropic</td>
-<td><code>anthropic</code></td>
-</tr>
-<tr>
-<td>OpenAI (<code>api.openai.com</code>)</td>
-<td><code>openai</code></td>
-</tr>
-<tr>
-<td>xAI (<code>api.x.ai</code>, OpenAI SDK + base_url)</td>
-<td><code>openai</code> (SDK-reported)</td>
-</tr>
-<tr>
-<td>DeepSeek (OpenAI SDK + base_url)</td>
-<td><code>openai</code></td>
-</tr>
-<tr>
-<td>Together (OpenAI SDK + base_url)</td>
-<td><code>openai</code></td>
-</tr>
-</tbody>
-</table>
-<p><code>gen_ai.provider.name</code> reflects the <strong>SDK</strong> that emitted the span, not
-the actual upstream API. To distinguish OpenAI-proper from xAI, look at
-<code>gen_ai.request.model</code> — model names disambiguate (<code>gpt-4o-mini</code> vs
-<code>grok-3-mini</code> vs <code>deepseek-chat</code> vs <code>meta-llama/Llama-3-…</code>).</p>
-<p>This is a documented behaviour of <code>opentelemetry-instrumentation-openai</code>,
-not a BIJOTEL quirk. If you need to log the "logical" provider for
-billing or routing analytics, set a span attribute yourself in your
-client wrapper before the SDK call.</p>
-<hr />
-<h2 id="rollback">Rollback<a class="headerlink" href="#rollback" title="Anchor link to this section">&para;</a></h2>
-<p>If a multi-provider rollout breaks the lifespan and the backend won't
-start:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Restore previous main.py and requirements.txt:</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>cp<span class="w"> </span>/path/to/main.py.pre-multi-provider.bak<span class="w"> </span>/path/to/main.py
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>cp<span class="w"> </span>/path/to/requirements.txt.pre-multi-provider.bak<span class="w"> </span>/path/to/requirements.txt
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1"># Restart:</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>backend
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># or for a full rebuild:</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>backend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>backend
+<p>A mismatch still returns HTTP 200 — the comparison itself succeeded; the
+<em>answer</em> is "no match". The body carries <code>match: false</code> plus a <code>reason</code>
+field that explains what was different:</p>
+<ul>
+<li><strong>deterministic=true mismatch</strong>: <code>output hash mismatch — re-execute
+  against the SAME model version that produced the original (...)</code>.</li>
+<li><strong>deterministic=false mismatch</strong>: <code>output hash mismatch — original call
+  did not record a seed (deterministic=False); replay drift is expected</code>.</li>
+<li><strong>no original hash present</strong>: <code>chain entry has no
+  bijotel.replay.output_hash (logged before v2.7.0 or replay metadata
+  not attached)</code>.</li>
+</ul>
+<p>HTTP 4xx is reserved for "the comparison itself couldn't run" (e.g. 404
+when the requested seq isn't in the chain).</p>
+<h3 id="python-api">Python API<a class="headerlink" href="#python-api" title="Anchor link to this section">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.replay</span><span class="w"> </span><span class="kn">import</span> <span class="n">verify_replay</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;chain.db&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">body</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="s2">&quot;SELECT canonical_body FROM chain WHERE seq = 6373&quot;</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="n">entry</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="n">result</span> <span class="o">=</span> <span class="n">verify_replay</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">replayed_output</span><span class="o">=</span><span class="s2">&quot;the replayed answer&quot;</span><span class="p">)</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">match</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">reason</span><span class="p">)</span>
 </span></code></pre></div>
-<p>BIJOTEL's lifespan block is wrapped in a <code>try/except</code> that logs the
-error and continues — so a broken instrumentor import won't crash the
-host application, just produce a degraded chain (missing one
-provider). The fail-soft posture is intentional.</p>
+<p><code>verify_replay</code> always returns a <code>ReplayResult</code>; it never raises. Use the
+dataclass's fields directly, or <code>result.to_dict()</code> for serialization.</p>
+<h2 id="honest-limitations">Honest limitations<a class="headerlink" href="#honest-limitations" title="Anchor link to this section">&para;</a></h2>
+<ol>
+<li><strong>BIJOTEL stores hashes, not content.</strong> The chain never sees the
+   prompt or output. To replay, you need the original prompt from a
+   separate store. BIJOTEL proves the <em>output hash</em> matches what it
+   sealed; the rest of the loop (re-execute against the model) is on
+   the caller's pipeline.</li>
+<li><strong>Model versions matter.</strong> When a provider updates a model
+   silently, a clean prompt + seed + temperature replay can drift. The
+   <code>bijotel.replay.model_version</code> field is recorded so an investigator
+   can see this — the model that runs today may not be the model that
+   produced the sealed hash.</li>
+<li><strong>Seed support is provider-specific.</strong> Anthropic and OpenAI both
+   document a seed field; in practice, near-identical outputs are
+   common but not guaranteed. Treat replay match as a strong signal,
+   replay mismatch as a <em>useful</em> signal that wants triage, not as
+   proof of tampering.</li>
+<li><strong>No live LLM call from BIJOTEL.</strong> <code>bijotel replay</code> never calls
+   any model. It is pure SHA-256 comparison. If you want a re-execution
+   harness, build it next to BIJOTEL, not inside it.</li>
+</ol>
+<h2 id="when-to-use">When to use<a class="headerlink" href="#when-to-use" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li><strong>CI on prompt changes.</strong> Stash a known-good chain entry, edit your
+  prompt template, replay against the same seed/model — drift surfaces
+  the moment behavior changes.</li>
+<li><strong>Incident response.</strong> A model output is disputed; replay against the
+  sealed entry to show the system did or did not produce that text.</li>
+<li><strong>Audit support.</strong> Regulators asking "are you sure this is the output
+  you logged?" can rerun and check the hash themselves, on their own
+  hardware.</li>
+</ul>
+<h2 id="public-api">Public API<a class="headerlink" href="#public-api" title="Anchor link to this section">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.replay</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">record_replay_context</span><span class="p">,</span>   <span class="c1"># build span attrs</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">verify_replay</span><span class="p">,</span>           <span class="c1"># compare against a replay</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">ReplayResult</span><span class="p">,</span>            <span class="c1"># verdict dataclass</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>Each is re-exported from <code>bijotel</code> directly:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel</span><span class="w"> </span><span class="kn">import</span> <span class="n">record_replay_context</span><span class="p">,</span> <span class="n">verify_replay</span><span class="p">,</span> <span class="n">ReplayResult</span>
+</span></code></pre></div>
 
 
 
