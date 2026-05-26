@@ -5,6 +5,91 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0] — 2026-05-26 — TEE attestation (software backend + hardware stubs)
+
+Closes the fourth trust gap. Where the HMAC chain proves entries
+weren't tampered, Ed25519 proves a specific key signed them, and Rekor
+(v2.9.0) proves they existed publicly at time T, **attestation proves
+the software that produced them was in a known state**. The day a host
+has TPM 2.0, AWS Nitro, GCP Confidential VM, or Azure SGX, the same
+flag (`--attest <backend>`) yields a hardware-rooted quote.
+
+### Added
+
+- **`bijotel.attestation` module**:
+  - `AttestationBackend` (Protocol) — the contract every backend
+    implements: `attest(data) -> AttestationQuote` plus
+    `verify(quote, data) -> bool`.
+  - `AttestationQuote` — frozen dataclass with seven fields
+    (`backend`, `quote_b64`, `code_measurement`, `platform_info`,
+    `timestamp`, `data_hash`, `verified`), `to_dict()`/`to_json()`
+    for sidecar JSON.
+  - `SoftwareAttestation` — **functional today**. Ed25519 signature
+    over a canonical payload binding SHA-256 of the package source,
+    OS + arch + Python + hostname + bijotel version, ISO timestamp,
+    and SHA-256 of the input data.
+  - `TPM2Attestation`, `AWSNitroAttestation`,
+    `GCPConfidentialAttestation`, `AzureSGXAttestation` — stubs that
+    raise `NotImplementedError` at construction with explicit
+    deployment hints. Locks the protocol; activates when hardware
+    arrives.
+- **`bijotel archive --attest {software,tpm2,nitro,gcp,sgx}`** CLI
+  flag. Writes `<archive>.attestation.json` next to the archive DB,
+  binding to the archive's terminal `hmac_hash` (the boundary the
+  next live chain row links onto). Requires `--sign-key`.
+- **Docs**:
+  - `docs/design/tee-anchored-chains.md` — full design (problem,
+    interface, backends, integration, trust hierarchy, open
+    questions, honest scope §10).
+  - `docs/guides/attestation.md` — CLI/Python recipes, what software
+    does + doesn't prove, upgrade path to hardware backends.
+
+### Trust hierarchy (after v2.10)
+
+| Layer | Proves | Trust root |
+|---|---|---|
+| HMAC chain | entries not tampered post-seal | operator's HMAC secret |
+| Ed25519 | signed by a specific key | operator's Ed25519 key |
+| Rekor (v2.9) | existed at time T, publicly witnessed | Sigstore Rekor log |
+| **Attestation (v2.10)** | **produced by trusted code on verified hardware** | **TPM/Nitro/SEV-SNP/SGX or software-key** |
+
+### Honest scope (M2: reality > docs)
+
+Software attestation is software, not hardware. The label is literal:
+`backend="software-key"` in every quote. What it proves:
+
+- ✓ Package source bytes hashed to a specific SHA-256 at quote time
+  (catches install-vs-run tampering of `.py` files)
+- ✓ Platform was as described (OS/arch/Python/hostname/version)
+- ✓ A specific Ed25519 key signed the bundle (operator identity)
+
+What it does NOT prove (needs real TEE):
+
+- ✗ CPU wasn't compromised
+- ✗ Memory wasn't read by a malicious hypervisor
+- ✗ Ed25519 private key was generated in a secure enclave
+
+The CHANGELOG, the docs guide, and the `backend` field itself all say
+this. No magic claims.
+
+### Backward compatibility
+
+- Fully backward-compatible. No chain.db or archive schema changes.
+- `bijotel archive` without `--attest` behaves identically to v2.9.
+- Old archives keep verifying; new ones produced with `--attest` get
+  the extra sidecar.
+
+### Tests
+
+**911 total** (892 baseline + 19 new attestation), 0 fail, 8 skipped.
+Attestation tests cover: AttestationQuote dataclass + JSON round-trip;
+software attest+verify happy path; deterministic code measurement;
+verify rejects different data / tampered signature / wrong backend /
+wrong public key; all four hardware stubs refuse to construct; backend
+`name` constants; CLI archive --attest software produces sidecar; CLI
+--attest tpm2 stub errors cleanly with exit 2; --attest without
+--sign-key errors at arg-validation.
+
 ## [2.9.0] — 2026-05-26 — Rekor anchoring (library + CLI)
 
 Adds public transparency-log anchoring for chain heads via the

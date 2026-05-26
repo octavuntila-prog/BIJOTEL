@@ -111,4 +111,89 @@ def archive_cmd(args: argparse.Namespace) -> int:
     print(f"  Source DB remaining: {report['main_remaining_count']} entries")
     if report.get("segment_json_path"):
         print(f"  Signed JSON sidecar: {report['segment_json_path']}")
+
+    # v2.10.0: optional TEE attestation sidecar.
+    attest_backend = getattr(args, "attest", None)
+    if attest_backend and not report["dry_run"]:
+        if not sign_key:
+            print(
+                "ERROR: --attest requires --sign-key (Ed25519 PEM).",
+                file=sys.stderr,
+            )
+            return 2
+        try:
+            att_path = _write_attestation_sidecar(
+                archive_path=archive_path,
+                sign_key_path=Path(sign_key),
+                backend_name=attest_backend,
+                last_hmac_hash=report["last_hmac_hash"],
+            )
+        except NotImplementedError as e:
+            # Hardware-stub backends print the upgrade hint and exit 2.
+            print(f"ERROR: --attest {attest_backend}: {e}", file=sys.stderr)
+            return 2
+        except (FileNotFoundError, ValueError) as e:
+            print(f"ERROR: attestation failed: {e}", file=sys.stderr)
+            return 1
+        print(f"  Attestation sidecar: {att_path}  (backend={attest_backend})")
     return 0
+
+
+def _write_attestation_sidecar(
+    *,
+    archive_path: Path,
+    sign_key_path: Path,
+    backend_name: str,
+    last_hmac_hash: str,
+) -> Path:
+    """Produce ``<archive>.attestation.json`` next to the archive DB.
+
+    Anchors the archive's last hmac_hash (the boundary the next live
+    chain row will link onto) so the attestation binds operator
+    identity + segment terminal state in one quote.
+
+    Raises:
+        NotImplementedError: hardware backend stubs (tpm2/nitro/gcp/sgx).
+        FileNotFoundError: sign_key_path missing.
+        ValueError: backend_name not recognised.
+    """
+    # Local import — keep the attestation module out of cli/_init_ at
+    # CLI startup time for callers who never use --attest.
+    import json
+
+    from bijotel.attestation import (
+        AWSNitroAttestation,
+        AzureSGXAttestation,
+        GCPConfidentialAttestation,
+        SoftwareAttestation,
+        TPM2Attestation,
+    )
+
+    backend_map = {
+        "software": SoftwareAttestation,
+        "tpm2": TPM2Attestation,
+        "nitro": AWSNitroAttestation,
+        "gcp": GCPConfidentialAttestation,
+        "sgx": AzureSGXAttestation,
+    }
+    backend_cls = backend_map.get(backend_name)
+    if backend_cls is None:
+        raise ValueError(f"unknown attestation backend: {backend_name!r}")
+
+    if backend_name == "software":
+        backend = SoftwareAttestation(sign_key_path.read_bytes())
+    else:
+        # Stub backends raise on construction — propagate.
+        backend = backend_cls()
+
+    # Bind the attestation to the segment's terminal hmac (the same
+    # hash that the next live chain row's prev_hash will point at).
+    data = bytes.fromhex(last_hmac_hash)
+    quote = backend.attest(data)
+
+    out_path = archive_path.with_suffix(archive_path.suffix + ".attestation.json")
+    out_path.write_text(
+        json.dumps(quote.to_dict(), indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    return out_path

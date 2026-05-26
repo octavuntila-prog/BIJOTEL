@@ -199,6 +199,17 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     p_arch.add_argument(
+        "--attest",
+        choices=["software", "tpm2", "nitro", "gcp", "sgx"],
+        help=(
+            "Produce a TEE attestation quote alongside the archive (v2.10.0). "
+            "Writes <output>.attestation.json next to the archive DB. "
+            "Only `software` is functional today (Ed25519 + code measurement "
+            "+ platform info); tpm2/nitro/gcp/sgx are stubs that raise with "
+            "deployment hints. Requires --sign-key."
+        ),
+    )
+    p_arch.add_argument(
         "--dry-run",
         action="store_true",
         help="Report what would be archived without writing anything.",

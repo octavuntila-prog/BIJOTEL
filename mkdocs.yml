@@ -55,6 +55,7 @@ nav:
       - Replay Verification: guides/replay-verification.md
       - Chain Integrity Monitor: guides/chain-integrity.md
       - Rekor Anchoring: guides/rekor-anchoring.md
+      - Attestation: guides/attestation.md
   - API Reference:
       - CLI: api/cli.md
       - REST API: api/rest.md
@@ -68,6 +69,7 @@ nav:
       - Chain Archival: operations/chain-archival.md
   - Design:
       - OTel Collector Exporter: design/otel-collector-exporter.md
+      - TEE-Anchored Chains: design/tee-anchored-chains.md
   - Changelog: changelog.md
 
 markdown_extensions:

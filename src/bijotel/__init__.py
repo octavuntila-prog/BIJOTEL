@@ -13,6 +13,10 @@ from bijotel.anchoring import (
     anchor_chain_head,
     verify_rekor_anchor,
 )
+from bijotel.attestation import (
+    AttestationQuote,
+    SoftwareAttestation,
+)
 from bijotel.core.init import init, shutdown
 from bijotel.crypto.ed25519 import (
     generate_keypair,
@@ -104,7 +108,7 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.9.0"
+__version__ = "2.10.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -113,6 +117,7 @@ __all__ = [
     "AnomalyMethod",
     "AnchorVerifyResult",
     "AnthropicAdapter",
+    "AttestationQuote",
     "Budget",
     "CarbonCalculator",
     "ChainIntegrityMonitor",
@@ -148,6 +153,7 @@ __all__ = [
     "RekorAnchor",
     "ReplayResult",
     "SemanticFingerprinter",
+    "SoftwareAttestation",
     "StakesClassifier",
     "TaskClassifier",
     "__version__",
