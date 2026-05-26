@@ -1689,13 +1689,29 @@ seal spans and run <code>bijotel verify</code>.</p>
 <li>Works on x86_64 and aarch64 (cross-arch portability validated)</li>
 </ul>
 <h2 id="docker">Docker<a class="headerlink" href="#docker" title="Anchor link to this section">&para;</a></h2>
-<p>A minimal Dockerfile ships in the repo:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bijotel<span class="w"> </span>.
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-v<span class="w"> </span>./data:/data<span class="w"> </span>bijotel
+<p>Pull a prebuilt image — no local build required:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">BIJOTEL_HMAC_SECRET</span><span class="o">=</span>your-secret-min-16-chars<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>-v<span class="w"> </span>bijotel-data:/data<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>ghcr.io/octavuntila-prog/bijotel:latest
 </span></code></pre></div>
+<p>The image bundles the <code>[api,fingerprint,ast]</code> extras and runs
+<code>bijotel serve --dashboard --host 0.0.0.0 --port 8080</code> by default.
+Browser users get the dashboard at <code>/</code>; integrations call <code>/api/*</code>.</p>
+<p>Tags: <code>:2.7.0</code>, <code>:latest</code> — host at
+<a href="https://github.com/octavuntila-prog/BIJOTEL/pkgs/container/bijotel"><code>ghcr.io/octavuntila-prog/bijotel</code></a>.</p>
+<p>To build locally instead (e.g. to bundle Anthropic/OpenAI adapters
+yourself):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/octavuntila-prog/BIJOTEL.git
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">cd</span><span class="w"> </span>BIJOTEL
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </span>--wheel<span class="w">        </span><span class="c1"># produces dist/bijotel-2.7.0-...whl</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bijotel:local<span class="w"> </span>.
+</span></code></pre></div>
+<p>The Dockerfile copies whatever wheel sits in <code>dist/</code> so a version bump
+in <code>pyproject.toml</code> doesn't require a Dockerfile edit.</p>
 <h2 id="verify-the-install">Verify the install<a class="headerlink" href="#verify-the-install" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>bijotel<span class="w"> </span>--help
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bijotel; print(bijotel.__version__)&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>bijotel<span class="w"> </span>--help
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bijotel; print(bijotel.__version__)&quot;</span>
 </span></code></pre></div>
 <p>You should see <code>2.0.5</code> (or newer) and the CLI subcommand list:
 <code>verify</code>, <code>inspect</code>, <code>stats</code>, <code>list</code>, <code>export</code>, <code>verify-export</code>,
