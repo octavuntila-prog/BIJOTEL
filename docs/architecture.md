@@ -200,12 +200,9 @@ graph TB
 
     subgraph ANALYZE["Analysis layer"]
         L16["#16 Regression Detection<br/>z-score + IQR"]
+        L3["#3 Energy Accounting<br/>Wh + gCO₂ per call"]
+        L9["#9 Consensus Voting<br/>N-model agreement"]
         D["Combo D<br/>Containment Guard"]
-    end
-
-    subgraph PLANNED["Planned (v1.3+)"]
-        L3["#3 Energy Accounting"]
-        L9["#9 Consensus Voting"]
     end
 
     UA --> L10
@@ -219,6 +216,8 @@ graph TB
     L19 --> L7F
     L19 --> L5
     L11 --> L16
+    L11 --> L3
+    L11 --> L9
     L11 --> D
     L10 --> D
 
@@ -234,13 +233,14 @@ graph TB
     style L15 fill:#dbeafe,stroke:#2563eb
     style L18 fill:#dbeafe,stroke:#2563eb
     style D fill:#dbeafe,stroke:#2563eb
-    style L3 fill:#f3f4f6,stroke:#9ca3af
-    style L9 fill:#f3f4f6,stroke:#9ca3af
+    style L3 fill:#dcfce7,stroke:#16a34a
+    style L9 fill:#dcfce7,stroke:#16a34a
 ```
 
-Green = active (runtime evidence present in this build). Blue =
-available (code ships, host opts in). Grey = planned (catalog entry,
-no code yet).
+Green = active (runtime evidence present in this build, including the
+GENA dual-observer deploy). Blue = available (code ships in the wheel,
+host opts in via configuration). All 14 catalogued layers are now
+shipped; no layer remains in the planned column.
 
 ## Deploy topologies
 
