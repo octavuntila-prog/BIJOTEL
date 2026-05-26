@@ -12,13 +12,13 @@
         <meta name="author" content="Aisophical SRL">
       
       
-        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/operations/multi-provider/">
+        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/operations/chain-archival/">
       
       
-        <link rel="prev" href="../secret-rotation/">
+        <link rel="prev" href="../multi-provider/">
       
       
-        <link rel="next" href="../chain-archival/">
+        <link rel="next" href="../../changelog/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Multi-Provider Setup - BIJOTEL</title>
+        <title>Chain Archival - BIJOTEL</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#multi-provider-instrumentation" class="md-skip">
+        <a href="#chain-segmentation-and-archival" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Multi-Provider Setup
+              Chain Archival
             
           </span>
         </div>
@@ -1169,6 +1169,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Provider Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1188,7 +1216,7 @@
   <span class="md-ellipsis">
     
   
-    Multi-Provider Setup
+    Chain Archival
   
 
     
@@ -1206,7 +1234,7 @@
   <span class="md-ellipsis">
     
   
-    Multi-Provider Setup
+    Chain Archival
   
 
     
@@ -1232,10 +1260,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#tldr" class="md-nav__link">
+  <a href="#range-verify-and-export" class="md-nav__link">
     <span class="md-ellipsis">
       
-        TL;DR
+        Range verify and export
       
     </span>
   </a>
@@ -1243,33 +1271,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sdk-to-instrumentor-coverage-matrix" class="md-nav__link">
+  <a href="#archive" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SDK-to-instrumentor coverage matrix
+        Archive
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#worked-example-ara-ai-research-agency" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Worked example: ARA (AI Research Agency)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Worked example: ARA (AI Research Agency)">
+    <nav class="md-nav" aria-label="Archive">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#before-v20x-deploy-2026-05-25" class="md-nav__link">
+  <a href="#-dry-run-first-always" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Before (v2.0.x deploy, 2026-05-25)
+        --dry-run first, always
       
     </span>
   </a>
@@ -1277,10 +1294,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#after-v210-deploy-2026-05-26" class="md-nav__link">
+  <a href="#real-archive-after-dry-run-looks-right" class="md-nav__link">
     <span class="md-ellipsis">
       
-        After (v2.1.0 deploy, 2026-05-26)
+        Real archive (after dry-run looks right)
       
     </span>
   </a>
@@ -1288,10 +1305,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#gap-workarounds-in-this-build" class="md-nav__link">
+  <a href="#filter-modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gap workarounds in this build
+        Filter modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trim-aware-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trim-aware verify
       
     </span>
   </a>
@@ -1304,10 +1332,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-verify-in-your-own-deploy" class="md-nav__link">
+  <a href="#continuity-across-segments" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to verify in your own deploy
+        Continuity across segments
       
     </span>
   </a>
@@ -1315,10 +1343,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rollback" class="md-nav__link">
+  <a href="#recommended-cadence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rollback
+        Recommended cadence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pitfalls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pitfalls
       
     </span>
   </a>
@@ -1329,34 +1368,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../chain-archival/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Chain Archival
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1423,10 +1434,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#tldr" class="md-nav__link">
+  <a href="#range-verify-and-export" class="md-nav__link">
     <span class="md-ellipsis">
       
-        TL;DR
+        Range verify and export
       
     </span>
   </a>
@@ -1434,33 +1445,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sdk-to-instrumentor-coverage-matrix" class="md-nav__link">
+  <a href="#archive" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SDK-to-instrumentor coverage matrix
+        Archive
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#worked-example-ara-ai-research-agency" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Worked example: ARA (AI Research Agency)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Worked example: ARA (AI Research Agency)">
+    <nav class="md-nav" aria-label="Archive">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#before-v20x-deploy-2026-05-25" class="md-nav__link">
+  <a href="#-dry-run-first-always" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Before (v2.0.x deploy, 2026-05-25)
+        --dry-run first, always
       
     </span>
   </a>
@@ -1468,10 +1468,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#after-v210-deploy-2026-05-26" class="md-nav__link">
+  <a href="#real-archive-after-dry-run-looks-right" class="md-nav__link">
     <span class="md-ellipsis">
       
-        After (v2.1.0 deploy, 2026-05-26)
+        Real archive (after dry-run looks right)
       
     </span>
   </a>
@@ -1479,10 +1479,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#gap-workarounds-in-this-build" class="md-nav__link">
+  <a href="#filter-modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gap workarounds in this build
+        Filter modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trim-aware-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trim-aware verify
       
     </span>
   </a>
@@ -1495,10 +1506,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-verify-in-your-own-deploy" class="md-nav__link">
+  <a href="#continuity-across-segments" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to verify in your own deploy
+        Continuity across segments
       
     </span>
   </a>
@@ -1506,10 +1517,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rollback" class="md-nav__link">
+  <a href="#recommended-cadence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rollback
+        Recommended cadence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pitfalls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pitfalls
       
     </span>
   </a>
@@ -1536,221 +1558,234 @@
   
 
 
-<h1 id="multi-provider-instrumentation">Multi-provider instrumentation<a class="headerlink" href="#multi-provider-instrumentation" title="Anchor link to this section">&para;</a></h1>
-<p>BIJOTEL is provider-agnostic: it seals every OpenTelemetry GenAI span
-that lands in its TracerProvider, regardless of which LLM SDK produced
-it. The shape of the integration depends on how many SDKs your
-application imports.</p>
-<p>This page documents the deployment pattern, with the ARA (AI Research
-Agency) production deploy as the worked example.</p>
+<h1 id="chain-segmentation-and-archival">Chain segmentation and archival<a class="headerlink" href="#chain-segmentation-and-archival" title="Anchor link to this section">&para;</a></h1>
+<p>The HMAC chain is append-only. Without intervention, <code>chain.db</code> grows
+linearly with traffic — GENA's production chain reached 82 MB at
+~6,300 entries (16 days), with full verify around 0.3s. Projected
+to 100k entries the DB would be ~1.3 GB; at 500k entries full export
+exceeds 6 GB and verify time crosses 20s.</p>
+<p>v2.2.0 ships range-aware verify/export and an <code>archive</code> operation
+that peels the oldest entries off into a separate SQLite DB. The main
+chain stays small; old segments remain independently verifiable; the
+boundary invariant <code>archive.last_hmac_hash == main.first_prev_hash</code>
+guarantees no entries can quietly disappear between segments.</p>
 <hr />
-<h2 id="tldr">TL;DR<a class="headerlink" href="#tldr" title="Anchor link to this section">&para;</a></h2>
-<p>For every LLM SDK in use, wire its OTel instrumentor in your
-application's startup (FastAPI lifespan, Django <code>AppConfig.ready</code>,
-Flask <code>before_first_request</code>, etc.) <strong>before</strong> the first LLM call.
-The instrumentor patches the SDK at the import boundary; every call
-site downstream then emits spans automatically.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry</span><span class="w"> </span><span class="kn">import</span> <span class="n">trace</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.sdk.trace</span><span class="w"> </span><span class="kn">import</span> <span class="n">TracerProvider</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.instrumentation.anthropic</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnthropicInstrumentor</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.instrumentation.openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAIInstrumentor</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.processors</span><span class="w"> </span><span class="kn">import</span> <span class="n">HmacChainSpanProcessor</span><span class="p">,</span> <span class="n">CasSpanProcessor</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">provider</span> <span class="o">=</span> <span class="n">TracerProvider</span><span class="p">()</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">provider</span><span class="o">.</span><span class="n">add_span_processor</span><span class="p">(</span><span class="n">HmacChainSpanProcessor</span><span class="p">(</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;chain.db&quot;</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">secret_key</span><span class="o">=</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;BIJOTEL_HMAC_SECRET&quot;</span><span class="p">]),</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">))</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">provider</span><span class="o">.</span><span class="n">add_span_processor</span><span class="p">(</span><span class="n">CasSpanProcessor</span><span class="p">(</span><span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;chain.db&quot;</span><span class="p">))</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">trace</span><span class="o">.</span><span class="n">set_tracer_provider</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">AnthropicInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">OpenAIInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># add more instrumentors per SDK you import</span>
+<h2 id="range-verify-and-export">Range verify and export<a class="headerlink" href="#range-verify-and-export" title="Anchor link to this section">&para;</a></h2>
+<p>All four range filters work on both <code>verify</code> and <code>export</code> and
+can be combined::</p>
+<div class="language-text highlight"><pre><span></span><code>bijotel verify --since 2026-05-20
+bijotel verify --until 2026-05-25
+bijotel verify --range 5000:6000
+bijotel verify --last 1000
+
+bijotel export --range 5000:6000 -o segment.json
+bijotel export --last 100 -o tail.json
+bijotel export --since 2026-05-20 -o week.json --sign-key keys/private.pem
+</code></pre></div>
+<p>Range exports carry a new <code>segment</code> block in the JSON. The
+verifier uses <code>segment.boundary_prev_hash</code> as the first-row anchor
+instead of GENESIS, so segments roundtrip cleanly:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bijotel-chain-v1&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;chain_signature&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;segment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&quot;first_seq&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nt">&quot;last_seq&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6000</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nt">&quot;total_in_segment&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1001</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nt">&quot;total_in_full_chain&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6332</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">&quot;boundary_prev_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;468871d42e2d76bb...&quot;</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">&quot;is_complete_chain&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="nt">&quot;entries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">]</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>After this, every <code>client.messages.create()</code> (Anthropic) and
-<code>client.chat.completions.create()</code> (OpenAI, including OpenAI-compatible
-backends like xAI / DeepSeek / Together) is sealed into the chain.</p>
-<hr />
-<h2 id="sdk-to-instrumentor-coverage-matrix">SDK-to-instrumentor coverage matrix<a class="headerlink" href="#sdk-to-instrumentor-coverage-matrix" title="Anchor link to this section">&para;</a></h2>
+<p>Live numbers on GENA (6,352 entries, 82 MB <code>chain.db</code>):</p>
 <table>
 <thead>
 <tr>
-<th>Provider</th>
-<th>Python SDK</th>
-<th>OTel instrumentor</th>
-<th>One-instrumentor coverage</th>
+<th>Command</th>
+<th>Wall time</th>
+<th>Result</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Anthropic</td>
-<td><code>anthropic</code></td>
-<td><code>opentelemetry-instrumentation-anthropic</code></td>
-<td>—</td>
+<td><code>bijotel verify</code> (full chain)</td>
+<td>~314 ms</td>
+<td><code>Chain VALID (6352 entries).</code></td>
 </tr>
 <tr>
-<td>OpenAI</td>
-<td><code>openai</code></td>
-<td><code>opentelemetry-instrumentation-openai</code></td>
-<td>OpenAI + xAI + DeepSeek + Together + Fireworks + Groq + any other OpenAI-compatible service that uses <code>openai.OpenAI(base_url=…)</code></td>
+<td><code>bijotel verify --last 1000</code></td>
+<td>~216 ms</td>
+<td><code>Boundary: prev_hash at seq=5353 = 22dc3f73...</code></td>
 </tr>
 <tr>
-<td>Google Gemini (<code>google-genai</code> SDK)</td>
-<td><code>google-genai</code></td>
-<td><strong>No OTel instrumentor on PyPI as of 2026-05-26.</strong> The older <code>opentelemetry-instrumentation-vertexai</code> is for the legacy <code>vertexai</code> SDK, not <code>google-genai</code>.</td>
-<td>Track upstream or wrap manually (see "Gap workarounds" below).</td>
+<td><code>bijotel verify --range 5000:6000</code></td>
+<td>~210 ms</td>
+<td><code>Chain segment VALID: seq 5000-6000 (1001 entries of 6352 total).</code></td>
 </tr>
 <tr>
-<td>Mistral</td>
-<td><code>mistralai</code></td>
-<td><code>opentelemetry-instrumentation-mistral</code> (third-party, not officially supported)</td>
-<td>Same install pattern; not exercised in this matrix.</td>
-</tr>
-<tr>
-<td>AWS Bedrock</td>
-<td><code>boto3</code></td>
-<td><code>opentelemetry-instrumentation-botocore</code></td>
-<td>Captures Bedrock calls inside the broader botocore span.</td>
-</tr>
-<tr>
-<td>Cohere</td>
-<td><code>cohere</code></td>
-<td><code>opentelemetry-instrumentation-cohere</code></td>
-<td>—</td>
+<td><code>bijotel export --last 100 -o tail.json</code></td>
+<td>~80 ms</td>
+<td>1.3 MB output (vs 64 MB full export)</td>
 </tr>
 </tbody>
 </table>
-<p>The big leverage point: <strong>OpenAIInstrumentor patches the <code>openai</code>
-SDK once, and every consumer of <code>openai.OpenAI</code> / <code>openai.AsyncOpenAI</code>
-gets spans automatically — regardless of <code>base_url</code></strong>. That covers the
-majority of "OpenAI-compatible" providers in the wild without extra
-config.</p>
 <hr />
-<h2 id="worked-example-ara-ai-research-agency">Worked example: ARA (AI Research Agency)<a class="headerlink" href="#worked-example-ara-ai-research-agency" title="Anchor link to this section">&para;</a></h2>
-<p>ARA is a 7-provider research platform with one LLM call site
-(<code>backend/llm/client.py::LLMClient.complete()</code>) and five active
-provider methods (<code>_call_anthropic</code>, <code>_call_openai_compat</code>,
-<code>_call_google</code>, <code>_call_mistral</code>, plus the shared dispatch).
-<code>_call_openai_compat</code> handles OpenAI, xAI, DeepSeek, and Together via
-one <code>openai.AsyncOpenAI</code> client with different <code>base_url</code> overrides.</p>
-<h3 id="before-v20x-deploy-2026-05-25">Before (v2.0.x deploy, 2026-05-25)<a class="headerlink" href="#before-v20x-deploy-2026-05-25" title="Anchor link to this section">&para;</a></h3>
-<p>ARA wired only <code>AnthropicInstrumentor</code> in the FastAPI lifespan. Result:
-153 sealed chain entries over 24 hours, 100% anthropic. Other 5
-providers were running ungated outside the chain.</p>
-<h3 id="after-v210-deploy-2026-05-26">After (v2.1.0 deploy, 2026-05-26)<a class="headerlink" href="#after-v210-deploy-2026-05-26" title="Anchor link to this section">&para;</a></h3>
-<p>Added one block to the lifespan after the anthropic init:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">try</span><span class="p">:</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">opentelemetry.instrumentation.openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAIInstrumentor</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">OpenAIInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">providers_wired</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;openai&quot;</span><span class="p">,</span> <span class="s2">&quot;xai&quot;</span><span class="p">,</span> <span class="s2">&quot;deepseek&quot;</span><span class="p">,</span> <span class="s2">&quot;together&quot;</span><span class="p">])</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;opentelemetry-instrumentation-openai not installed&quot;</span><span class="p">)</span>
+<h2 id="archive">Archive<a class="headerlink" href="#archive" title="Anchor link to this section">&para;</a></h2>
+<p><code>bijotel archive</code> peels the oldest rows into a new SQLite file with
+the same schema plus an <code>archive_meta</code> table holding boundary
+metadata::</p>
+<div class="language-text highlight"><pre><span></span><code>bijotel archive \
+  --db /data/bijotel_chain.db \
+  --output /backup/archive_2026-05.db \
+  --before 2026-05-20 \
+  --sign-key keys/bijotel_private.pem \
+  --dry-run
+</code></pre></div>
+<h3 id="-dry-run-first-always"><code>--dry-run</code> first, always<a class="headerlink" href="#-dry-run-first-always" title="Anchor link to this section">&para;</a></h3>
+<p>The dry-run reports exactly what would happen without touching the
+source DB:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>DRY RUN — no changes made.
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  Window:        seq 1 → 3783
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  first prev:    0000000000000000...
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  last hmac:     8649d3be9f145ae7...
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  Boundary OK:   next row&#39;s prev = 8649d3be9f145ae7... (matches last hmac of archive)
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  Source DB remaining: 2569 entries
 </span></code></pre></div>
-<p>Added one line to <code>requirements.txt</code>:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>opentelemetry-instrumentation-openai==0.60.0
-</span></code></pre></div>
-<p>After restart, the lifespan log reads:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>BIJOTEL: chain=/app/data/bijotel_chain.db,
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  providers instrumented=anthropic,openai,xai,deepseek,together
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  (google/mistral: see comments in main.py lifespan)
-</span></code></pre></div>
-<p>End-to-end test from inside the container: real OpenAI + xAI calls
-sealed correctly, producing chain entries with the expected
-<code>gen_ai.request.model</code> and token counts. <code>bijotel verify</code> reported
-<code>Chain VALID (155 entries)</code> post-deploy.</p>
-<h3 id="gap-workarounds-in-this-build">Gap workarounds in this build<a class="headerlink" href="#gap-workarounds-in-this-build" title="Anchor link to this section">&para;</a></h3>
+<p>The "Boundary OK" line is the most important — it confirms the
+archive's last hmac matches what the row immediately after the
+window expects as its <code>prev_hash</code>. If that line is missing or the
+hashes diverge, do not proceed.</p>
+<h3 id="real-archive-after-dry-run-looks-right">Real archive (after dry-run looks right)<a class="headerlink" href="#real-archive-after-dry-run-looks-right" title="Anchor link to this section">&para;</a></h3>
+<p>Drop <code>--dry-run</code> and the operation actually runs::</p>
+<ol>
+<li>Build the archive DB and copy the matching rows.</li>
+<li>Write <code>archive_meta</code> with first_seq / last_seq / first_prev_hash /
+   last_hmac_hash / archived_at / source_db / boundary_next_prev_hash.</li>
+<li><code>verify_chain</code> against the freshly built archive — must return
+   <code>VALID</code> before anything is deleted from the source.</li>
+<li>Optional: produce the signed JSON sidecar
+   (<code>archive.json</code> next to <code>archive.db</code> when <code>--sign-key</code> is
+   supplied).</li>
+<li>In a single transaction on the source DB:
+   <code>DELETE FROM chain WHERE timestamp_ns &lt; before_ns</code> (or
+   <code>seq &lt; before_seq</code>).</li>
+<li><code>VACUUM</code> the source DB to reclaim disk space.</li>
+<li>Re-verify the source DB with the trim-aware default (auto-anchors
+   to the new MIN(seq)). Must return <code>VALID</code>.</li>
+</ol>
+<p>If any verify step fails the operation aborts and the source DB is
+left exactly as it was — archives are built fully before any DELETE
+runs.</p>
+<h3 id="filter-modes">Filter modes<a class="headerlink" href="#filter-modes" title="Anchor link to this section">&para;</a></h3>
 <ul>
-<li><strong>Google Gemini (<code>google-genai</code>)</strong> — no PyPI instrumentor. ARA's
-  <code>_call_google()</code> calls remain outside the chain in this deploy.
-  Options:</li>
-<li>Wait for an upstream <code>opentelemetry-instrumentation-google-genai</code>
-    package.</li>
-<li>Wrap the <code>_call_google</code> method body with <code>tracer.start_as_current_span("google.chat", ...)</code> and set the standard <code>gen_ai.*</code> attributes
-    manually — BIJOTEL's HmacChainSpanProcessor will pick it up.</li>
-<li>Use <code>bijotel.wrap()</code> on the SDK call site for a quick manual
-    bridge.</li>
-<li><strong>Mistral (<code>mistralai</code>)</strong> — the SDK is currently absent from the
-  build (PyPI quarantine). ARA's <code>MISTRAL_SDK_AVAILABLE</code> guard
-  short-circuits <code>_call_mistral</code>; no calls flow through it. Nothing to
-  instrument until the SDK returns.</li>
+<li><code>--before YYYY-MM-DD</code> — archive entries with
+  <code>timestamp_ns &lt; midnight(date) UTC</code>. Most operational use case.</li>
+<li><code>--before-seq N</code> — archive entries with <code>seq &lt; N</code>. Useful when
+  you want a clean cut at a known boundary (e.g. exactly after a
+  secret rotation).</li>
 </ul>
+<p>Exactly one of the two is required.</p>
+<h3 id="trim-aware-verify">Trim-aware verify<a class="headerlink" href="#trim-aware-verify" title="Anchor link to this section">&para;</a></h3>
+<p>After an archive, the main chain no longer starts at <code>seq=1</code>.
+v2.2.0's <code>verify_chain</code> handles this transparently: when called
+with no range kwargs and <code>seq=1</code> is absent from the DB, it shifts
+the window to <code>MIN(seq)</code> and uses that row's stored <code>prev_hash</code>
+as the boundary anchor. So <code>bijotel verify --db chain.db</code> keeps
+working through any number of archive operations without forcing the
+operator to pass <code>--range</code> flags.</p>
+<p>Passing an explicit <code>--range 1:...</code> or otherwise specifying
+<code>seq_start=1</code> keeps the GENESIS anchor — the caller's explicit
+intent always wins.</p>
 <hr />
-<h2 id="how-to-verify-in-your-own-deploy">How to verify in your own deploy<a class="headerlink" href="#how-to-verify-in-your-own-deploy" title="Anchor link to this section">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 1. Snapshot chain count</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sqlite3<span class="w"> </span>chain.db<span class="w"> </span><span class="s2">&quot;SELECT COUNT(*) FROM chain&quot;</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># 2. Make a real call through each instrumented SDK</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># 3. Re-count + check provider distribution</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>sqlite3<span class="w"> </span>chain.db<span class="w"> </span><span class="s2">&quot;</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="s2">  SELECT json_extract(canonical_body,</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="s2">                      &#39;</span>$<span class="s2">.attributes.\&quot;gen_ai.provider.name\&quot;&#39;) AS provider,</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="s2">         COUNT(*) AS calls</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="s2">  FROM chain</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="s2">  GROUP BY provider</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="s2">  ORDER BY calls DESC</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="s2">&quot;</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="c1"># 4. Confirm chain integrity</span>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db
+<h2 id="continuity-across-segments">Continuity across segments<a class="headerlink" href="#continuity-across-segments" title="Anchor link to this section">&para;</a></h2>
+<p>After archiving, you typically have a chain like::</p>
+<div class="language-text highlight"><pre><span></span><code>archives/chain_2026-may10_to_may15.db   # seq    1 — 1500
+archives/chain_2026-may15_to_may20.db   # seq 1501 — 3000
+archives/chain_2026-may20_to_may25.db   # seq 3001 — 4800
+chain.db                                 # seq 4801 — present
+</code></pre></div>
+<p><code>bijotel verify</code> on each file confirms internal integrity. To prove
+the segments fit together — that no entries were dropped between
+files — use <code>verify-continuity</code>::</p>
+<div class="language-text highlight"><pre><span></span><code>bijotel verify-continuity \
+  archives/chain_2026-may10_to_may15.db \
+  archives/chain_2026-may15_to_may20.db \
+  archives/chain_2026-may20_to_may25.db \
+  chain.db
+</code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Segments:
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  archives/chain_2026-may10_to_may15.db — 1500 entries, seq 1-1500 — VALID
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  archives/chain_2026-may15_to_may20.db — 1500 entries, seq 1501-3000 — VALID
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  archives/chain_2026-may20_to_may25.db — 1800 entries, seq 3001-4800 — VALID
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  chain.db                              — 1532 entries, seq 4801-6332 — VALID
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>Boundaries:
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  archives/chain_2026-may10_to_may15.db → archives/chain_2026-may15_to_may20.db: OK
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>  archives/chain_2026-may15_to_may20.db → archives/chain_2026-may20_to_may25.db: OK
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  archives/chain_2026-may20_to_may25.db → chain.db: OK
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>Full chain: 6332 entries across 4 segments, CONTINUOUS.
 </span></code></pre></div>
-<p>Provider names you'll see in <code>gen_ai.provider.name</code>:</p>
-<table>
-<thead>
-<tr>
-<th>Actual API call</th>
-<th>Reported provider</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Anthropic</td>
-<td><code>anthropic</code></td>
-</tr>
-<tr>
-<td>OpenAI (<code>api.openai.com</code>)</td>
-<td><code>openai</code></td>
-</tr>
-<tr>
-<td>xAI (<code>api.x.ai</code>, OpenAI SDK + base_url)</td>
-<td><code>openai</code> (SDK-reported)</td>
-</tr>
-<tr>
-<td>DeepSeek (OpenAI SDK + base_url)</td>
-<td><code>openai</code></td>
-</tr>
-<tr>
-<td>Together (OpenAI SDK + base_url)</td>
-<td><code>openai</code></td>
-</tr>
-</tbody>
-</table>
-<p><code>gen_ai.provider.name</code> reflects the <strong>SDK</strong> that emitted the span, not
-the actual upstream API. To distinguish OpenAI-proper from xAI, look at
-<code>gen_ai.request.model</code> — model names disambiguate (<code>gpt-4o-mini</code> vs
-<code>grok-3-mini</code> vs <code>deepseek-chat</code> vs <code>meta-llama/Llama-3-…</code>).</p>
-<p>This is a documented behaviour of <code>opentelemetry-instrumentation-openai</code>,
-not a BIJOTEL quirk. If you need to log the "logical" provider for
-billing or routing analytics, set a span attribute yourself in your
-client wrapper before the SDK call.</p>
+<p>Each boundary check compares the previous segment's
+<code>last_hmac_hash</code> to the next segment's first row's <code>prev_hash</code>.
+The check uses <code>archive_meta</code> when available (faster, survives
+schema migrations) and falls back to reading the chain rows
+directly.</p>
+<p>If continuity fails, the output identifies the exact pair::</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Boundaries:
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  archives/seg_A.db → archives/seg_B.db: BREAK
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    expected (prev segment&#39;s last hmac): 22dc3f73fcb5805522dc3f73fcb58055...
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    actual   (next segment&#39;s first prev): ff000000000000000000000000000000...
+</span></code></pre></div>
+<p>This is the strongest cross-segment invariant the tool offers. An
+auditor receiving the full set of segment DBs + their archive_meta
+can confirm "no entries between segments" without holding the HMAC
+secret, by comparing hashes alone.</p>
 <hr />
-<h2 id="rollback">Rollback<a class="headerlink" href="#rollback" title="Anchor link to this section">&para;</a></h2>
-<p>If a multi-provider rollout breaks the lifespan and the backend won't
-start:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Restore previous main.py and requirements.txt:</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>cp<span class="w"> </span>/path/to/main.py.pre-multi-provider.bak<span class="w"> </span>/path/to/main.py
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>cp<span class="w"> </span>/path/to/requirements.txt.pre-multi-provider.bak<span class="w"> </span>/path/to/requirements.txt
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1"># Restart:</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>backend
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># or for a full rebuild:</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>backend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>backend
-</span></code></pre></div>
-<p>BIJOTEL's lifespan block is wrapped in a <code>try/except</code> that logs the
-error and continues — so a broken instrumentor import won't crash the
-host application, just produce a degraded chain (missing one
-provider). The fail-soft posture is intentional.</p>
+<h2 id="recommended-cadence">Recommended cadence<a class="headerlink" href="#recommended-cadence" title="Anchor link to this section">&para;</a></h2>
+<p>For typical production deployments (~200–500 sealed spans/day),
+archive monthly. Keep the last 30 days in the active <code>chain.db</code>,
+archive everything older. With Ed25519 signing on each archive, you
+build a tamper-evident timeline an auditor can verify segment by
+segment with only the public key.</p>
+<p>For high-volume deployments (&gt;5,000 spans/day), archive weekly.
+SQLite handles this fine — there's no ceiling we've hit on
+multi-thousand-entry archives — but verify time grows linearly and
+keeping the active window short is worth the cron job.</p>
+<p>For research/lab chains where retention requirements are minimal,
+the archive operation is also a clean way to publish <em>just</em> the
+interesting time window (e.g. a paper's experiment) as a signed
+artifact, while the operational chain continues to grow elsewhere.</p>
+<hr />
+<h2 id="pitfalls">Pitfalls<a class="headerlink" href="#pitfalls" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li>
+<p><strong>Archive ordering matters for continuity.</strong> Pass DBs to
+  <code>verify-continuity</code> in chronological order (oldest first).
+  Out-of-order arguments will report BREAK at the first pair even
+  though the data itself is fine.</p>
+</li>
+<li>
+<p><strong>Don't archive into a path that already exists.</strong> The command
+  refuses with <code>FileExistsError</code> rather than overwriting. Delete or
+  rename the old file first if you really mean to reuse the name.</p>
+</li>
+<li>
+<p><strong>Archived rows are deleted from source by design.</strong> This is the
+  point of the operation. If you want to keep a full copy AND a
+  trimmed source, run <code>bijotel export</code> (range mode) first, then
+  archive.</p>
+</li>
+<li>
+<p><strong>HMAC secret rotation doesn't interact with archives.</strong> Archives
+  preserve the historical secret context — the rows inside still
+  verify under the secret they were sealed with. Continuity check
+  is hash-based and doesn't need the secret at all.</p>
+</li>
+</ul>
 
 
 
