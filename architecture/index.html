@@ -392,6 +392,28 @@
   
   
   
+    
+    
+      <li class="md-tabs__item">
+        <a href="../design/otel-collector-exporter/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
     <li class="md-tabs__item">
       <a href="../changelog/" class="md-tabs__link">
         
@@ -648,6 +670,8 @@
       
         
       
+        
+      
     
     
     
@@ -820,6 +844,34 @@
     
   
     Energy Tracking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/rag-provenance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RAG Source Provenance
   
 
     
@@ -1147,10 +1199,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#forensic-export-to-auditor" class="md-nav__link">
+  <a href="#forensic-export-to-auditor-symmetric-v1-default" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Forensic export to auditor
+        Forensic export to auditor — symmetric (v1, default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forensic-export-with-ed25519-attestation-v210" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forensic export with Ed25519 attestation (v2.1.0+)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chain-segmentation-and-archival-v220" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chain segmentation and archival (v2.2.0+)
       
     </span>
   </a>
@@ -1392,6 +1466,97 @@
   
   
   
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/otel-collector-exporter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OTel Collector Exporter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../changelog/" class="md-nav__link">
         
@@ -1529,10 +1694,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#forensic-export-to-auditor" class="md-nav__link">
+  <a href="#forensic-export-to-auditor-symmetric-v1-default" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Forensic export to auditor
+        Forensic export to auditor — symmetric (v1, default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forensic-export-with-ed25519-attestation-v210" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forensic export with Ed25519 attestation (v2.1.0+)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chain-segmentation-and-archival-v220" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chain segmentation and archival (v2.2.0+)
       
     </span>
   </a>
@@ -1815,7 +2002,7 @@ because every writer holds RESERVED via <code>BEGIN IMMEDIATE</code> for the
 critical SELECT-prev/INSERT section. WAL mode lets readers
 (<code>bijotel serve</code>, <code>bijotel verify</code>) coexist without blocking the
 writers.</p>
-<h3 id="forensic-export-to-auditor">Forensic export to auditor<a class="headerlink" href="#forensic-export-to-auditor" title="Anchor link to this section">&para;</a></h3>
+<h3 id="forensic-export-to-auditor-symmetric-v1-default">Forensic export to auditor — symmetric (v1, default)<a class="headerlink" href="#forensic-export-to-auditor-symmetric-v1-default" title="Anchor link to this section">&para;</a></h3>
 <pre class="mermaid"><code>sequenceDiagram
     participant Ops as Operator
     participant API as bijotel serve
@@ -1833,8 +2020,67 @@ writers.</p>
     Aud-&gt;&gt;Aud: per-entry HMAC recompute
     Aud-&gt;&gt;Aud: chain_signature match check
     Note over Aud: valid=true, entries_count=4950</code></pre>
-<p>The auditor does <strong>not</strong> need SQLite access. The same HMAC secret
-(out-of-band) is sufficient to verify the entire chain offline.</p>
+<p>The auditor verifies with the <strong>shared HMAC secret</strong>. That secret has
+to be transmitted out-of-band, and the auditor who holds it can also
+<em>forge</em> valid chains. This is the trust limitation v2.1.0 was built
+to close.</p>
+<h3 id="forensic-export-with-ed25519-attestation-v210">Forensic export with Ed25519 attestation (v2.1.0+)<a class="headerlink" href="#forensic-export-with-ed25519-attestation-v210" title="Anchor link to this section">&para;</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Ops as Operator
+    participant API as bijotel export --sign-key
+    participant DB as chain.db
+    participant File as audit_TS.json (v2)
+    participant Aud as Auditor (public key only)
+
+    Ops-&gt;&gt;API: bijotel keygen → priv.pem + pub.pem
+    Note over Ops: priv.pem stays operator-side&lt;br/&gt;pub.pem distributed to auditor
+    Ops-&gt;&gt;API: export --sign-key priv.pem
+    API-&gt;&gt;DB: SELECT * FROM chain
+    API-&gt;&gt;API: chain_signature = HMAC(secret, ...)
+    API-&gt;&gt;API: ed25519_sig = sign(chain_signature, priv.pem)
+    API-&gt;&gt;File: bijotel-chain-v2 envelope
+    File-&gt;&gt;Aud: (out-of-band: export.json + pub.pem)
+    Aud-&gt;&gt;Aud: verify-export --public-key pub.pem
+    Aud-&gt;&gt;Aud: Ed25519 verify(chain_signature, sig, pub)
+    Aud-&gt;&gt;Aud: per-entry body_hash + chain_link checks
+    Note over Aud: VALID — auditor never held the HMAC secret</code></pre>
+<p>Auditor mode requirements (v2.1.0+):</p>
+<ul>
+<li>Operator holds the HMAC secret AND the Ed25519 <em>private</em> key.</li>
+<li>Auditor receives the export JSON AND the Ed25519 <em>public</em> key.</li>
+<li>Auditor cannot forge entries — they hold only verification material.</li>
+<li>Cross-architecture portability: a v2 export signed on x86_64
+  verifies bit-identically on aarch64. Empirically confirmed
+  2026-05-26 (GENA Nuremberg → ARA Helsinki, 6,341 entries).</li>
+</ul>
+<h3 id="chain-segmentation-and-archival-v220">Chain segmentation and archival (v2.2.0+)<a class="headerlink" href="#chain-segmentation-and-archival-v220" title="Anchor link to this section">&para;</a></h3>
+<p>At scale the active <code>chain.db</code> is peeled into archive segments while
+the boundary invariant <code>archive.last_hmac_hash ==
+next_segment.first.prev_hash</code> proves no entries went missing.</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph T0["Day 0 — single chain"]
+        C0["chain.db&lt;br/&gt;seq 1..6332&lt;br/&gt;82 MB"]
+    end
+    subgraph T1["After bijotel archive --before 2026-05-20"]
+        A1["archive_may10-may20.db&lt;br/&gt;seq 1..3783&lt;br/&gt;42 MB"]
+        C1["chain.db&lt;br/&gt;seq 3784..6332&lt;br/&gt;40 MB"]
+        A1 -. "last_hmac_hash == first.prev_hash" .-&gt; C1
+    end
+    subgraph T2["Verify continuity"]
+        VC["bijotel verify-continuity&lt;br/&gt;archive.db chain.db"]
+        VC --&gt; R["VALID, CONTINUOUS&lt;br/&gt;6332 entries / 2 segments"]
+    end
+    C0 ==&gt; A1
+    C0 ==&gt; C1</code></pre>
+<p>Range-aware verify and export also live in v2.2.0:</p>
+<ul>
+<li><code>bijotel verify --range 5000:6000</code> / <code>--since 2026-05-20</code> /
+  <code>--until 2026-05-25</code> / <code>--last 1000</code></li>
+<li><code>bijotel export ... --range A:B</code> produces a <code>segment</code> block with
+  <code>boundary_prev_hash</code> that the auditor anchors against, instead of
+  GENESIS, when the slice doesn't start at seq=1.</li>
+</ul>
+<p>See <code>docs/operations/chain-archival.md</code> for the operational playbook.</p>
 <h2 id="compatibility-notes">Compatibility notes<a class="headerlink" href="#compatibility-notes" title="Anchor link to this section">&para;</a></h2>
 <ul>
 <li>Python 3.11+ (uses <code>|</code> for union types, <code>tomllib</code>, etc.).</li>
@@ -1846,10 +2092,9 @@ writers.</p>
 </ul>
 <hr />
 <p>For schema changes, see migration notes in
-<a href="../changelog/">Changelog</a>. Production integration tests are
-summarized in the v2.0.x changelog entries (Round 1 / 2 / 3
-production tests, 46 scenarios across security, chaos, performance,
-and data-integrity).</p>
+<a href="CHANGELOG.md">CHANGELOG.md</a>. For the production integration test
+that exercises all this, see
+<a href="INTEGRATION_TEST_20260523.md">INTEGRATION_TEST_20260523.md</a>.</p>
 
 
 

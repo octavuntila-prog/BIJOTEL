@@ -12,13 +12,13 @@
         <meta name="author" content="Aisophical SRL">
       
       
-        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/operations/secret-rotation/">
+        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/guides/rag-provenance/">
       
       
-        <link rel="prev" href="../../threat-model/">
+        <link rel="prev" href="../energy-tracking/">
       
       
-        <link rel="next" href="../multi-provider/">
+        <link rel="next" href="../../api/cli/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Secret Rotation - BIJOTEL</title>
+        <title>RAG Source Provenance - BIJOTEL</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#secret-rotation-playbook" class="md-skip">
+        <a href="#rag-source-provenance" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Secret Rotation
+              RAG Source Provenance
             
           </span>
         </div>
@@ -266,11 +266,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../guides/policy-engine/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../policy-engine/" class="md-tabs__link">
           
   
   
@@ -367,13 +369,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../operations/secret-rotation/" class="md-tabs__link">
           
   
   
@@ -655,8 +655,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -676,19 +678,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -706,7 +711,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -724,7 +729,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/policy-engine/" class="md-nav__link">
+      <a href="../policy-engine/" class="md-nav__link">
         
   
   
@@ -752,7 +757,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/regression-detection/" class="md-nav__link">
+      <a href="../regression-detection/" class="md-nav__link">
         
   
   
@@ -780,7 +785,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/multi-provider/" class="md-nav__link">
+      <a href="../multi-provider/" class="md-nav__link">
         
   
   
@@ -808,7 +813,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/dashboard/" class="md-nav__link">
+      <a href="../dashboard/" class="md-nav__link">
         
   
   
@@ -836,7 +841,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/energy-tracking/" class="md-nav__link">
+      <a href="../energy-tracking/" class="md-nav__link">
         
   
   
@@ -861,10 +866,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../guides/rag-provenance/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RAG Source Provenance
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -880,6 +912,153 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this matters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-gets-captured" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What gets captured
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#wiring-it-into-your-rag-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wiring it into your RAG pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Wiring it into your RAG pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-form" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual form
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decorator-form" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decorator form
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#empty-retrieval-is-still-recorded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty retrieval is still recorded
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viewing-the-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing the sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regression-on-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regression on retrieval
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interaction-with-semantic-dedup-cas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction with semantic dedup (CAS)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#honest-caveat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Honest caveat
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1128,10 +1307,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -1145,22 +1322,19 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -1178,7 +1352,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1193,37 +1367,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Secret Rotation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../operations/secret-rotation/" class="md-nav__link">
         
   
   
@@ -1239,197 +1386,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-rotate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to rotate
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-rotation-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How rotation works
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#procedure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Procedure
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Procedure">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-generate-a-fresh-secret" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Generate a fresh secret
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-record-the-rotation-boundary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Record the rotation boundary
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-switch-the-secret" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Switch the secret
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-restart-the-sealing-processes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Restart the sealing process(es)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-verify-both-halves-of-the-chain" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. Verify both halves of the chain
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-document-the-rotation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. Document the rotation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verifying-a-chain-that-has-rotated" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verifying a chain that has rotated
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#exporting-across-a-rotation-boundary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Exporting across a rotation boundary
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Security considerations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#empirical-evidence" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Empirical evidence
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ed25519-signed-exports-v210" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ed25519 signed exports (v2.1.0+)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#roadmap" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Roadmap
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1442,7 +1398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../multi-provider/" class="md-nav__link">
+      <a href="../../operations/multi-provider/" class="md-nav__link">
         
   
   
@@ -1470,7 +1426,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../chain-archival/" class="md-nav__link">
+      <a href="../../operations/chain-archival/" class="md-nav__link">
         
   
   
@@ -1643,10 +1599,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#when-to-rotate" class="md-nav__link">
+  <a href="#why-this-matters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to rotate
+        Why this matters
       
     </span>
   </a>
@@ -1654,10 +1610,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-rotation-works" class="md-nav__link">
+  <a href="#what-gets-captured" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How rotation works
+        What gets captured
       
     </span>
   </a>
@@ -1665,22 +1621,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#procedure" class="md-nav__link">
+  <a href="#wiring-it-into-your-rag-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Procedure
+        Wiring it into your RAG pipeline
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Procedure">
+    <nav class="md-nav" aria-label="Wiring it into your RAG pipeline">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-generate-a-fresh-secret" class="md-nav__link">
+  <a href="#manual-form" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Generate a fresh secret
+        Manual form
       
     </span>
   </a>
@@ -1688,10 +1644,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-record-the-rotation-boundary" class="md-nav__link">
+  <a href="#decorator-form" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Record the rotation boundary
+        Decorator form
       
     </span>
   </a>
@@ -1699,43 +1655,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-switch-the-secret" class="md-nav__link">
+  <a href="#empty-retrieval-is-still-recorded" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Switch the secret
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-restart-the-sealing-processes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Restart the sealing process(es)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-verify-both-halves-of-the-chain" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. Verify both halves of the chain
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-document-the-rotation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. Document the rotation
+        Empty retrieval is still recorded
       
     </span>
   </a>
@@ -1748,10 +1671,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verifying-a-chain-that-has-rotated" class="md-nav__link">
+  <a href="#viewing-the-sources" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verifying a chain that has rotated
+        Viewing the sources
       
     </span>
   </a>
@@ -1759,10 +1682,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#exporting-across-a-rotation-boundary" class="md-nav__link">
+  <a href="#regression-on-retrieval" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Exporting across a rotation boundary
+        Regression on retrieval
       
     </span>
   </a>
@@ -1770,10 +1693,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#security-considerations" class="md-nav__link">
+  <a href="#interaction-with-semantic-dedup-cas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security considerations
+        Interaction with semantic dedup (CAS)
       
     </span>
   </a>
@@ -1781,10 +1704,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#empirical-evidence" class="md-nav__link">
+  <a href="#public-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Empirical evidence
+        Public API
       
     </span>
   </a>
@@ -1792,21 +1715,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#ed25519-signed-exports-v210" class="md-nav__link">
+  <a href="#honest-caveat" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ed25519 signed exports (v2.1.0+)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#roadmap" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Roadmap
+        Honest caveat
       
     </span>
   </a>
@@ -1833,226 +1745,225 @@
   
 
 
-<h1 id="secret-rotation-playbook">Secret Rotation Playbook<a class="headerlink" href="#secret-rotation-playbook" title="Anchor link to this section">&para;</a></h1>
-<p>BIJOTEL seals every span with HMAC-SHA256. The secret is the trust
-root: anyone who holds it can append valid entries; nobody else can.
-Rotating that secret is therefore an operational task you should
-expect to do — periodically, and immediately when something feels
-wrong.</p>
-<p>This page is the procedure. It assumes you've already read the
-<a href="../../threat-model/">Threat Model</a> and understand BIJOTEL's
-symmetric-HMAC scope.</p>
-<hr />
-<h2 id="when-to-rotate">When to rotate<a class="headerlink" href="#when-to-rotate" title="Anchor link to this section">&para;</a></h2>
+<h1 id="rag-source-provenance">RAG Source Provenance<a class="headerlink" href="#rag-source-provenance" title="Anchor link to this section">&para;</a></h1>
+<p><strong>Available from v2.6.0.</strong></p>
+<p>When your application uses retrieval-augmented generation, the BIJOTEL
+chain entry should record <em>which documents informed the answer</em>, not
+only the final prompt and response. This page explains the surface that
+captures that evidence.</p>
+<h2 id="why-this-matters">Why this matters<a class="headerlink" href="#why-this-matters" title="Anchor link to this section">&para;</a></h2>
+<p>Regulatory frameworks for high-risk AI systems treat retrieved context
+as part of the input that drove a decision:</p>
 <ul>
-<li>Personnel with secret access leave the team.</li>
-<li>The secret may have been exposed (a leaked log, a misconfigured
-  <code>.env</code> checked into git, an environment file shared in chat).</li>
-<li>Your compliance policy mandates periodic rotation (e.g. every 90
-  days).</li>
-<li>Incident response calls for it.</li>
+<li><strong>EU AI Act Article 12</strong> requires records sufficient to reconstruct
+  the decision a high-risk system made — which includes the data the
+  model saw, not just the final tokens.</li>
+<li><strong>ISO/IEC 42001 §9</strong> asks for operational data lineage end-to-end.</li>
+<li><strong>NIST AI RMF GV-1.3</strong> describes provenance as a control over input
+  integrity.</li>
 </ul>
-<p>If none of those apply, you do not need to rotate on a schedule.
-BIJOTEL doesn't impose one.</p>
-<hr />
-<h2 id="how-rotation-works">How rotation works<a class="headerlink" href="#how-rotation-works" title="Anchor link to this section">&para;</a></h2>
-<p>BIJOTEL's chain is append-only. When you change the secret:</p>
-<ol>
-<li><strong>New entries</strong> seal under the new secret.</li>
-<li><strong>Existing entries</strong> stay sealed under the old secret. They are
-   <em>not</em> re-signed — re-signing would defeat the purpose of
-   tamper-evidence.</li>
-<li><code>bijotel verify</code> walks the chain and reports the exact <code>seq</code> where
-   verification under a given secret stops working. That's the
-   rotation boundary.</li>
-</ol>
-<p>The boundary is the operationally important number. Write it down.</p>
-<hr />
-<h2 id="procedure">Procedure<a class="headerlink" href="#procedure" title="Anchor link to this section">&para;</a></h2>
-<h3 id="1-generate-a-fresh-secret">1. Generate a fresh secret<a class="headerlink" href="#1-generate-a-fresh-secret" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import secrets; print(secrets.token_hex(32))&quot;</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># Example: a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5061728394a5b6c7d8e9f0</span>
+<p>Without RAG provenance, an audit can only answer "what did the model
+say?" — not "what did it know when it said it?" That gap is where most
+real-world LLM incidents live.</p>
+<h2 id="what-gets-captured">What gets captured<a class="headerlink" href="#what-gets-captured" title="Anchor link to this section">&para;</a></h2>
+<p>Five span attributes under the <code>bijotel.rag.*</code> namespace:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bijotel.rag.source_count</code></td>
+<td>int</td>
+<td>Number of retrieved chunks that fed the call</td>
+</tr>
+<tr>
+<td><code>bijotel.rag.sources</code></td>
+<td>JSON</td>
+<td>Per-chunk descriptors (see below)</td>
+</tr>
+<tr>
+<td><code>bijotel.rag.retriever_id</code></td>
+<td>str</td>
+<td>Primary retriever name (qdrant, pinecone, ...)</td>
+</tr>
+<tr>
+<td><code>bijotel.rag.embedding_model</code></td>
+<td>str</td>
+<td>Primary embedding model identifier</td>
+</tr>
+<tr>
+<td><code>bijotel.rag.total_context_tokens</code></td>
+<td>int</td>
+<td>Optional — tokens of retrieved context in prompt</td>
+</tr>
+</tbody>
+</table>
+<p>Each entry in <code>bijotel.rag.sources</code> is the JSON form of a <code>RAGSource</code>:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:abc123...&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;chunk_index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;source_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3://corpus/eu-ai-act.pdf&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nt">&quot;retriever&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qdrant&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">&quot;embedding_model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text-embedding-3-small&quot;</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">&quot;similarity_score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.89</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-05-26T10:00:00Z&quot;</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>64 hex characters = 32 bytes. The verifier rejects anything shorter
-than 16 bytes at construction time, so this length is comfortably
-above the floor.</p>
-<h3 id="2-record-the-rotation-boundary">2. Record the rotation boundary<a class="headerlink" href="#2-record-the-rotation-boundary" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>bijotel<span class="w"> </span>stats<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># → reports total entries and the seq of the last entry</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># → this seq is your &quot;last entry under the old secret&quot;</span>
+<p>These attributes flow into the canonical body automatically — there is
+no separate sealing step. Once the span ends, the HMAC chain hashes them
+together with everything else, so tampering with the source list
+invalidates the chain.</p>
+<h2 id="wiring-it-into-your-rag-pipeline">Wiring it into your RAG pipeline<a class="headerlink" href="#wiring-it-into-your-rag-pipeline" title="Anchor link to this section">&para;</a></h2>
+<p>Three lines, between retrieval and the LLM call.</p>
+<h3 id="manual-form">Manual form<a class="headerlink" href="#manual-form" title="Anchor link to this section">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">RAGSource</span><span class="p">,</span> <span class="n">rag_context</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># After your retriever returns hits:</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">sources</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">RAGSource</span><span class="p">(</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="n">document_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;sha256:</span><span class="si">{</span><span class="n">hit</span><span class="o">.</span><span class="n">doc_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">chunk_index</span><span class="o">=</span><span class="n">hit</span><span class="o">.</span><span class="n">chunk_idx</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">source_uri</span><span class="o">=</span><span class="n">hit</span><span class="o">.</span><span class="n">uri</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">retriever</span><span class="o">=</span><span class="s2">&quot;qdrant&quot;</span><span class="p">,</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;text-embedding-3-small&quot;</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="n">similarity_score</span><span class="o">=</span><span class="n">hit</span><span class="o">.</span><span class="n">score</span><span class="p">,</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="n">retrieved_at</span><span class="o">=</span><span class="n">now_iso</span><span class="p">(),</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="p">)</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">retriever_hits</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">]</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="c1"># Inside an active span (your existing one from start_as_current_span):</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">rag_context</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="n">total_context_tokens</span><span class="o">=</span><span class="n">ctx_tokens</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">span</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="c1"># Then call the LLM as usual.</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Write that number into your operations log right now. It's the only
-piece of state that distinguishes a clean rotation from a confusing
-one six months later.</p>
-<h3 id="3-switch-the-secret">3. Switch the secret<a class="headerlink" href="#3-switch-the-secret" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Environment variable (preferred):</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">BIJOTEL_HMAC_SECRET</span><span class="o">=</span><span class="s2">&quot;&lt;new-64-hex-secret&gt;&quot;</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Or update the .env file the sealing process loads:</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1">#   BIJOTEL_HMAC_SECRET=a1b2c3d4...</span>
+<h3 id="decorator-form">Decorator form<a class="headerlink" href="#decorator-form" title="Anchor link to this section">&para;</a></h3>
+<p>For functions whose only job is to call the LLM with retrieved context:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">with_rag_provenance</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nd">@with_rag_provenance</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="n">total_context_tokens</span><span class="o">=</span><span class="n">ctx_tokens</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">answer</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">return</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;claude-haiku-4-5&quot;</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">}],</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="p">)</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
 </span></code></pre></div>
-<p>If you use a secrets manager (Vault, AWS Secrets Manager, GCP Secret
-Manager), update the entry there and let your normal sync mechanism
-push it out. <strong>Do not</strong> commit the secret to git, and do not write it
-to logs.</p>
-<h3 id="4-restart-the-sealing-processes">4. Restart the sealing process(es)<a class="headerlink" href="#4-restart-the-sealing-processes" title="Anchor link to this section">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Docker:</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>backend
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Or for a multi-container deploy (e.g. GENA):</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">for</span><span class="w"> </span>c<span class="w"> </span><span class="k">in</span><span class="w"> </span>v3-atelier<span class="w"> </span>v4-piata<span class="w"> </span>v9-oracle<span class="w"> </span>v8-ambasador<span class="p">;</span><span class="w"> </span><span class="k">do</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>docker<span class="w"> </span>restart<span class="w"> </span>gena-<span class="si">${</span><span class="nv">c</span><span class="si">}</span>-1
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="k">done</span>
+<p>The decorator attaches the attributes to the currently active span
+before running the wrapped function. There must be an open span around
+the call site — <code>trace.get_current_span()</code> is what the decorator reads.</p>
+<h3 id="empty-retrieval-is-still-recorded">Empty retrieval is still recorded<a class="headerlink" href="#empty-retrieval-is-still-recorded" title="Anchor link to this section">&para;</a></h3>
+<p>Pass <code>sources=[]</code> and you get <code>bijotel.rag.source_count = 0</code>. That is
+deliberately <em>different</em> from a non-RAG call (which has no
+<code>bijotel.rag.*</code> attributes at all). The distinction matters for audits:
+"tried RAG and got zero hits" is a different incident class from "did
+not use RAG."</p>
+<h2 id="viewing-the-sources">Viewing the sources<a class="headerlink" href="#viewing-the-sources" title="Anchor link to this section">&para;</a></h2>
+<p><code>bijotel inspect</code> surfaces RAG provenance whenever the chain entry
+carries it:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$ bijotel inspect --db chain.db 6373
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>=== Span Metadata ===
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>seq:                 6373
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>...
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>=== Status: ALLOWED ===
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>Cost (real): $0.0023
 </span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># Systemd:</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>your-app
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>=== RAG Provenance ===
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>source_count:   3
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>retriever:      qdrant
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>embedding:      text-embedding-3-small
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>context_tokens: 720
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>  source 1: doc=sha256:abc1...  chunk=0  retriever=qdrant  sim=0.890
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>  source 2: doc=sha256:def4...  chunk=3  retriever=qdrant  sim=0.760
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>  source 3: doc=sha256:ee52...  chunk=1  retriever=qdrant  sim=0.713
 </span></code></pre></div>
-<p>The next LLM call seals under the new secret. There is no warm-up
-period; the change is immediate.</p>
-<h3 id="5-verify-both-halves-of-the-chain">5. Verify both halves of the chain<a class="headerlink" href="#5-verify-both-halves-of-the-chain" title="Anchor link to this section">&para;</a></h3>
-<p>Verify the <strong>new half</strong> with the new secret:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># → Chain VALID (N entries).</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># (where N is the total — but the verifier only checked new entries</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">#  if you ran it after the rotation; older entries fail under this</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1">#  secret)</span>
+<p>Above ~5 sources, only the first 5 print; the rest collapse into
+<code>... and N more</code>. The full set remains in the canonical-body dump that
+follows.</p>
+<h2 id="regression-on-retrieval">Regression on retrieval<a class="headerlink" href="#regression-on-retrieval" title="Anchor link to this section">&para;</a></h2>
+<p>The F12 regression detector knows a new dimension in v2.6.0:
+<code>rag_source_count</code>. Drift in retrieved-chunk counts is a real
+operational signal:</p>
+<ul>
+<li>A retriever index that has silently shrunk (replicas lost) returns
+  fewer hits per call.</li>
+<li>A new filter accidentally added to the query path narrows results.</li>
+<li>A model's context window changes and the pipeline trims more
+  aggressively.</li>
+</ul>
+<p>Run it like any other dimension:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$ bijotel regression --db chain.db --dimension rag_source_count
 </span></code></pre></div>
-<p>Verify the <strong>old half</strong> with the old secret in a separate shell:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">BIJOTEL_HMAC_SECRET</span><span class="o">=</span><span class="s2">&quot;&lt;old-secret&gt;&quot;</span><span class="w"> </span>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># → Chain INVALID at seq=N+1   ← this is expected, it&#39;s the boundary</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># → entries 1..N verify cleanly under the old secret</span>
+<p>Non-RAG entries return <code>None</code> for this dimension, so the detector
+silently ignores them. Mixed chains (some RAG, some not) work fine.</p>
+<h2 id="interaction-with-semantic-dedup-cas">Interaction with semantic dedup (CAS)<a class="headerlink" href="#interaction-with-semantic-dedup-cas" title="Anchor link to this section">&para;</a></h2>
+<p>The chain stores <code>bijotel.rag.sources</code> as a JSON blob that includes
+per-call data (timestamps, similarity scores). Two retrievals against
+the same corpus rarely produce byte-identical JSON, so we exclude that
+single field from the semantic-dedup key.</p>
+<p>The <em>stable</em> RAG fields stay in the dedup key:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>In dedup?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bijotel.rag.source_count</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>bijotel.rag.retriever_id</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>bijotel.rag.embedding_model</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>bijotel.rag.total_context_tokens</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>bijotel.rag.sources</code></td>
+<td><strong>no</strong></td>
+</tr>
+</tbody>
+</table>
+<p>This means identical-prompt + identical-retriever calls still match on
+dedup, even when the per-call timestamps differ. Switching retrievers
+or embedding models breaks the match — which is correct: a different
+retriever is a different call.</p>
+<h2 id="public-api">Public API<a class="headerlink" href="#public-api" title="Anchor link to this section">&para;</a></h2>
+<p>The full surface lives under <code>bijotel.rag</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bijotel.rag</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">RAGSource</span><span class="p">,</span>             <span class="c1"># frozen dataclass</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">rag_context</span><span class="p">,</span>           <span class="c1"># build attribute dict</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">with_rag_provenance</span><span class="p">,</span>   <span class="c1"># decorator form</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">)</span>
 </span></code></pre></div>
-<p>The boundary <code>seq</code> returned by the verifier must match the number
-you recorded in step 2. If it doesn't, stop and investigate before
-proceeding.</p>
-<h3 id="6-document-the-rotation">6. Document the rotation<a class="headerlink" href="#6-document-the-rotation" title="Anchor link to this section">&para;</a></h3>
-<p>In your operations log, record:</p>
-<ul>
-<li>Date and time (UTC).</li>
-<li>Boundary <code>seq</code> (the last entry sealed under the old secret).</li>
-<li>Reason for rotation (incident, personnel change, scheduled).</li>
-<li>Who performed it.</li>
-<li>Where the old secret is now stored — kept in escrow, or destroyed.</li>
-</ul>
-<p>Keep the old secret somewhere recoverable if you may need to verify
-historical exports. Destroy it only if your policy explicitly allows
-discarding old-half verifiability.</p>
-<hr />
-<h2 id="verifying-a-chain-that-has-rotated">Verifying a chain that has rotated<a class="headerlink" href="#verifying-a-chain-that-has-rotated" title="Anchor link to this section">&para;</a></h2>
-<p>BIJOTEL today accepts <strong>one</strong> secret at a time. To verify a chain
-that has been through one or more rotations, run <code>verify</code> once per
-segment with the corresponding secret:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Segment 1 (entries 1..500, sealed under secret A)</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">BIJOTEL_HMAC_SECRET</span><span class="o">=</span><span class="s2">&quot;&lt;secret-A&gt;&quot;</span><span class="w"> </span>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># → reports valid up to seq 500, invalid at 501 (boundary)</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="c1"># Segment 2 (entries 501..6332, sealed under secret B)</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="nv">BIJOTEL_HMAC_SECRET</span><span class="o">=</span><span class="s2">&quot;&lt;secret-B&gt;&quot;</span><span class="w"> </span>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># → reports invalid at 1 (wrong key for segment 1), valid 501..6332</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="c1"># Segment 3 (entries 6333+, sealed under secret C)</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="nv">BIJOTEL_HMAC_SECRET</span><span class="o">=</span><span class="s2">&quot;&lt;secret-C&gt;&quot;</span><span class="w"> </span>bijotel<span class="w"> </span>verify<span class="w"> </span>--db<span class="w"> </span>chain.db
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="c1"># → reports invalid up to 6332, valid 6333+</span>
-</span></code></pre></div>
-<p>Each segment is independently verifiable. A future BIJOTEL release
-may add a <code>verify --secrets secretA:0-500,secretB:501-6332,...</code>
-shorthand; until then, the manual sweep above is the procedure.</p>
-<hr />
-<h2 id="exporting-across-a-rotation-boundary">Exporting across a rotation boundary<a class="headerlink" href="#exporting-across-a-rotation-boundary" title="Anchor link to this section">&para;</a></h2>
-<p><code>bijotel export</code> writes the whole chain to a portable JSON file
-regardless of how many secrets sealed it. The auditor then needs the
-corresponding secret to re-verify each segment:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Producer side:</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>bijotel<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>-o<span class="w"> </span>full_export.json
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># → produces a bijotel-chain-v1 file containing every entry</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># Auditor side, segment by segment:</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>bijotel<span class="w"> </span>verify-export<span class="w"> </span>full_export.json<span class="w"> </span>--secret-hex<span class="w"> </span>&lt;secret-A&gt;
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># → boundary reported at the rotation seq</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>bijotel<span class="w"> </span>verify-export<span class="w"> </span>full_export.json<span class="w"> </span>--secret-hex<span class="w"> </span>&lt;secret-B&gt;
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># → next segment verifies, prior segment reported invalid (expected)</span>
-</span></code></pre></div>
-<p>When handing a rotated chain to an auditor, supply:</p>
-<ul>
-<li>The export file.</li>
-<li>One secret per segment, with the <code>seq</code> ranges they correspond to.</li>
-<li>The rotation log entries from step 6 above, so the auditor can
-  reconcile boundaries against your records.</li>
-</ul>
-<p>Alternatively, export the chain in segments before rotation, each
-with its own secret — then each segment is a single-secret object the
-auditor can verify in one shot. That's cleaner for compliance
-reviews, more work for you.</p>
-<hr />
-<h2 id="security-considerations">Security considerations<a class="headerlink" href="#security-considerations" title="Anchor link to this section">&para;</a></h2>
-<ul>
-<li><strong>Never log the secret.</strong> Treat it like a database credential.
-  Environment variables and secrets managers only.</li>
-<li><strong>Rotation does not invalidate old entries.</strong> They remain
-  verifiable with the old secret. This is intentional — re-signing
-  old entries would erase the tamper-evidence property the chain
-  exists to provide.</li>
-<li><strong>An attacker who learns the old secret</strong> can forge entries that
-  pass <code>verify</code> for the old segment, but cannot affect the segment
-  sealed under the new secret. Rotate as soon as exposure is
-  suspected to limit the forgeable surface.</li>
-<li><strong>Verify boundary detection</strong> after every rotation. Don't trust
-  that the boundary <code>seq</code> is what you think it is — confirm it with
-  <code>bijotel verify</code> runs against both secrets.</li>
-</ul>
-<hr />
-<h2 id="empirical-evidence">Empirical evidence<a class="headerlink" href="#empirical-evidence" title="Anchor link to this section">&para;</a></h2>
-<p>This procedure was exercised in BIJOTEL Round 2, Test E3 (Hetzner
-CPX52 host, controlled lab chain):</p>
-<ul>
-<li>50 entries sealed with secret A, 50 with secret B in a single
-  <code>chain.db</code>.</li>
-<li><code>bijotel verify</code> reported the boundary at exactly <code>seq=51</code> under
-  each secret (i.e. the verifier flipped at the right entry, in both
-  directions).</li>
-<li>Zero false positives on either half — entries 1–50 verified
-  cleanly under secret A only, entries 51–100 under secret B only.</li>
-</ul>
-<p>The exact same boundary-detection mechanism backs the procedure on
-this page. There is no separate "rotation mode" — the verifier
-simply tells you where the secret stops working, and you treat that
-as the rotation point.</p>
-<hr />
-<h2 id="ed25519-signed-exports-v210">Ed25519 signed exports (v2.1.0+)<a class="headerlink" href="#ed25519-signed-exports-v210" title="Anchor link to this section">&para;</a></h2>
-<p>As of v2.1.0, BIJOTEL ships <strong><code>bijotel keygen</code></strong> for Ed25519 keypair
-generation and <strong><code>--sign-key</code> / <code>--public-key</code></strong> flags on export /
-verify. This is independent of HMAC rotation — but it changes who needs
-which secret:</p>
-<ul>
-<li>The <strong>HMAC secret</strong> rotates as documented above. It's used by the
-  sealing process and by the operator when verifying with <code>bijotel
-  verify</code>.</li>
-<li>The <strong>Ed25519 keypair</strong> stays stable across HMAC rotations. The
-  private key signs exports; the public key the auditor holds verifies
-  signed exports without ever needing the HMAC secret.</li>
-</ul>
-<p>So a chain with rotated HMAC secrets is still verifiable end-to-end by
-an auditor: each segment of the chain is signed under the same Ed25519
-key at export time, and the auditor's public-key verification proves
-the operator attested to the full chain. The HMAC rotation boundary is
-internal forensic detail the auditor doesn't need to handle directly.</p>
-<p>If you rotate the <strong>Ed25519</strong> key (e.g. on key compromise), redistribute
-the new public key to auditors. Old signed exports still verify under
-the old public key.</p>
-<h2 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Anchor link to this section">&para;</a></h2>
-<ul>
-<li><strong>Multi-secret verify in one pass.</strong> A <code>--secrets</code> argument that
-  takes <code>secret:from-to</code> triples and verifies the whole chain in one
-  invocation. Planned, not yet shipped.</li>
-<li><strong>Automated rotation reminder.</strong> Optional cron that warns when the
-  current secret has been in use longer than a configurable
-  threshold. Not built; would live in <code>bijotel ops</code> if/when added.</li>
-</ul>
-<p>If any of these would unblock something concrete for you, file an
-issue on
-<a href="https://github.com/octavuntila-prog/BIJOTEL/issues">GitHub</a> with the
-use case.</p>
+<p>Each is also re-exported from <code>bijotel</code> directly for the short form
+<code>from bijotel import RAGSource</code>.</p>
+<h2 id="honest-caveat">Honest caveat<a class="headerlink" href="#honest-caveat" title="Anchor link to this section">&para;</a></h2>
+<p>BIJOTEL stores hashes (<code>document_id</code>) and identifiers (<code>source_uri</code>),
+not the document bytes themselves. To prove later that the document the
+chain references is the same as what you serve today, you need a
+separate corpus-versioning system that can resolve
+<code>sha256:abc123...</code> back to the original bytes — typically your object
+store with content-addressed paths, or a Git-LFS / IPFS layer.</p>
+<p>The chain proves "this call referenced document X at time T". Whether
+your storage still has document X bit-for-bit at audit time is a
+question of how you store, not how you log.</p>
 
 
 
