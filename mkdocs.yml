@@ -58,6 +58,8 @@ nav:
   - Architecture: architecture.md
   - Security: security.md
   - Threat Model: threat-model.md
+  - Operations:
+      - Secret Rotation: operations/secret-rotation.md
   - Changelog: changelog.md
 
 markdown_extensions:

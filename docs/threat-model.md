@@ -190,18 +190,17 @@ the exact `seq` where the old secret stops verifying and the new
 secret takes over. Round 2 Test E3 confirmed boundary detection at
 `seq=51` with zero false positives on either half of the chain.
 
-A dedicated rotation playbook (`docs/operations/secret-rotation.md`)
-is on the near-term roadmap. Until that page lands, the short version
-is:
+The full procedure — when to rotate, how to record the boundary, how
+to verify both halves of the chain, how to hand a rotated chain to an
+auditor — lives in the dedicated
+[Secret Rotation Playbook](operations/secret-rotation.md).
 
-1. Generate the new secret (`python -c "import secrets;
-   print(secrets.token_hex(32))"`).
-2. Update `BIJOTEL_HMAC_SECRET` in the secrets manager / environment.
-3. Restart the sealing process(es). New spans seal under the new
-   secret immediately.
-4. The old half of the chain still verifies under the old secret. The
-   new half verifies under the new secret. `bijotel verify` reports
-   the boundary explicitly when both secrets are supplied.
+In one paragraph: generate a fresh 64-hex secret, write down the
+current chain length (that's the boundary), swap
+`BIJOTEL_HMAC_SECRET`, restart the sealing process, then verify each
+half of the chain with its corresponding secret. The old half stays
+verifiable under the old key; the new half under the new key. There
+is no re-signing.
 
 ---
 
