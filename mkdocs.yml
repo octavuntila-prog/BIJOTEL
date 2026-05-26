@@ -70,6 +70,7 @@ nav:
   - Design:
       - OTel Collector Exporter: design/otel-collector-exporter.md
       - TEE-Anchored Chains: design/tee-anchored-chains.md
+      - Cross-Org Federation: design/cross-org-federation.md
   - Changelog: changelog.md
 
 markdown_extensions:
