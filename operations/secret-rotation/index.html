@@ -1349,6 +1349,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ed25519-signed-exports-v210" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ed25519 signed exports (v2.1.0+)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#roadmap" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1578,6 +1589,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ed25519-signed-exports-v210" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ed25519 signed exports (v2.1.0+)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#roadmap" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1794,14 +1816,32 @@ this page. There is no separate "rotation mode" — the verifier
 simply tells you where the secret stops working, and you treat that
 as the rotation point.</p>
 <hr />
+<h2 id="ed25519-signed-exports-v210">Ed25519 signed exports (v2.1.0+)<a class="headerlink" href="#ed25519-signed-exports-v210" title="Anchor link to this section">&para;</a></h2>
+<p>As of v2.1.0, BIJOTEL ships <strong><code>bijotel keygen</code></strong> for Ed25519 keypair
+generation and <strong><code>--sign-key</code> / <code>--public-key</code></strong> flags on export /
+verify. This is independent of HMAC rotation — but it changes who needs
+which secret:</p>
+<ul>
+<li>The <strong>HMAC secret</strong> rotates as documented above. It's used by the
+  sealing process and by the operator when verifying with <code>bijotel
+  verify</code>.</li>
+<li>The <strong>Ed25519 keypair</strong> stays stable across HMAC rotations. The
+  private key signs exports; the public key the auditor holds verifies
+  signed exports without ever needing the HMAC secret.</li>
+</ul>
+<p>So a chain with rotated HMAC secrets is still verifiable end-to-end by
+an auditor: each segment of the chain is signed under the same Ed25519
+key at export time, and the auditor's public-key verification proves
+the operator attested to the full chain. The HMAC rotation boundary is
+internal forensic detail the auditor doesn't need to handle directly.</p>
+<p>If you rotate the <strong>Ed25519</strong> key (e.g. on key compromise), redistribute
+the new public key to auditors. Old signed exports still verify under
+the old public key.</p>
 <h2 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Anchor link to this section">&para;</a></h2>
 <ul>
 <li><strong>Multi-secret verify in one pass.</strong> A <code>--secrets</code> argument that
   takes <code>secret:from-to</code> triples and verifies the whole chain in one
   invocation. Planned, not yet shipped.</li>
-<li><strong>Ed25519 signatures on exports.</strong> Asymmetric attestation so an
-  auditor never needs the seal-time secret, only the operator's
-  public key. Planned (P2 on the roadmap).</li>
 <li><strong>Automated rotation reminder.</strong> Optional cron that warns when the
   current secret has been in use longer than a configurable
   threshold. Not built; would live in <code>bijotel ops</code> if/when added.</li>
