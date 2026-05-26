@@ -1582,12 +1582,9 @@ chain.db + secret.</p>
 
     subgraph ANALYZE["Analysis layer"]
         L16["#16 Regression Detection&lt;br/&gt;z-score + IQR"]
+        L3["#3 Energy Accounting&lt;br/&gt;Wh + gCO₂ per call"]
+        L9["#9 Consensus Voting&lt;br/&gt;N-model agreement"]
         D["Combo D&lt;br/&gt;Containment Guard"]
-    end
-
-    subgraph PLANNED["Planned (v1.3+)"]
-        L3["#3 Energy Accounting"]
-        L9["#9 Consensus Voting"]
     end
 
     UA --&gt; L10
@@ -1601,6 +1598,8 @@ chain.db + secret.</p>
     L19 --&gt; L7F
     L19 --&gt; L5
     L11 --&gt; L16
+    L11 --&gt; L3
+    L11 --&gt; L9
     L11 --&gt; D
     L10 --&gt; D
 
@@ -1616,11 +1615,12 @@ chain.db + secret.</p>
     style L15 fill:#dbeafe,stroke:#2563eb
     style L18 fill:#dbeafe,stroke:#2563eb
     style D fill:#dbeafe,stroke:#2563eb
-    style L3 fill:#f3f4f6,stroke:#9ca3af
-    style L9 fill:#f3f4f6,stroke:#9ca3af</code></pre>
-<p>Green = active (runtime evidence present in this build). Blue =
-available (code ships, host opts in). Grey = planned (catalog entry,
-no code yet).</p>
+    style L3 fill:#dcfce7,stroke:#16a34a
+    style L9 fill:#dcfce7,stroke:#16a34a</code></pre>
+<p>Green = active (runtime evidence present in this build, including the
+GENA dual-observer deploy). Blue = available (code ships in the wheel,
+host opts in via configuration). All 14 catalogued layers are now
+shipped; no layer remains in the planned column.</p>
 <h2 id="deploy-topologies">Deploy topologies<a class="headerlink" href="#deploy-topologies" title="Anchor link to this section">&para;</a></h2>
 <h3 id="single-process">Single-process<a class="headerlink" href="#single-process" title="Anchor link to this section">&para;</a></h3>
 <p>The simplest deploy: one Python process owns the chain.db. All
