@@ -18,7 +18,7 @@
         <link rel="prev" href="../security/">
       
       
-        <link rel="next" href="../changelog/">
+        <link rel="next" href="../operations/secret-rotation/">
       
       
         
@@ -362,6 +362,28 @@
 
       </a>
     </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../operations/secret-rotation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Operations
+
+        </a>
+      </li>
+    
   
 
       
@@ -1269,6 +1291,97 @@
   
   
   
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/secret-rotation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Secret Rotation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../changelog/" class="md-nav__link">
         
@@ -1692,19 +1805,16 @@ so that scope distinction is visible from the docs site too.</p>
 the exact <code>seq</code> where the old secret stops verifying and the new
 secret takes over. Round 2 Test E3 confirmed boundary detection at
 <code>seq=51</code> with zero false positives on either half of the chain.</p>
-<p>A dedicated rotation playbook (<code>docs/operations/secret-rotation.md</code>)
-is on the near-term roadmap. Until that page lands, the short version
-is:</p>
-<ol>
-<li>Generate the new secret (<code>python -c "import secrets;
-   print(secrets.token_hex(32))"</code>).</li>
-<li>Update <code>BIJOTEL_HMAC_SECRET</code> in the secrets manager / environment.</li>
-<li>Restart the sealing process(es). New spans seal under the new
-   secret immediately.</li>
-<li>The old half of the chain still verifies under the old secret. The
-   new half verifies under the new secret. <code>bijotel verify</code> reports
-   the boundary explicitly when both secrets are supplied.</li>
-</ol>
+<p>The full procedure — when to rotate, how to record the boundary, how
+to verify both halves of the chain, how to hand a rotated chain to an
+auditor — lives in the dedicated
+<a href="../operations/secret-rotation/">Secret Rotation Playbook</a>.</p>
+<p>In one paragraph: generate a fresh 64-hex secret, write down the
+current chain length (that's the boundary), swap
+<code>BIJOTEL_HMAC_SECRET</code>, restart the sealing process, then verify each
+half of the chain with its corresponding secret. The old half stays
+verifiable under the old key; the new half under the new key. There
+is no re-signing.</p>
 <hr />
 <h2 id="reporting-a-finding">Reporting a finding<a class="headerlink" href="#reporting-a-finding" title="Anchor link to this section">&para;</a></h2>
 <p>Security issues should go to <code>contact@aisophical.com</code> rather than the
