@@ -266,7 +266,12 @@ def test_detect_all_dimensions_returns_dict(tmp_path: Path) -> None:
     detector = RegressionDetector(db)
     results = detector.detect_all_dimensions()
 
-    assert set(results.keys()) == {"input_tokens", "output_tokens", "cost"}
+    # v2.4.0 — VALID_DIMENSIONS grew to include cache_ratio /
+    # reasoning_ratio / ttfc_ms. The 3 legacy dimensions must still
+    # be present; the 3 new ones return [] for v2.3-shape spans
+    # (no v1.41 attributes recorded).
+    assert {"input_tokens", "output_tokens", "cost"}.issubset(results.keys())
+    assert {"cache_ratio", "reasoning_ratio", "ttfc_ms"}.issubset(results.keys())
     for v in results.values():
         assert isinstance(v, list)
 

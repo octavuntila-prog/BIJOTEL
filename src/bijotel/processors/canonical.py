@@ -34,12 +34,15 @@ SEMANTIC_EXCLUDE_ATTRS = frozenset({
     "gen_ai.response.id",
     "gen_ai.response.model",
     "gen_ai.response.finish_reasons",
+    "gen_ai.response.finish_reason",        # v1.41 singular form
+    "gen_ai.response.time_to_first_chunk",  # v1.41 streaming TTFC
     # Usage (depinde de output)
     "gen_ai.usage.input_tokens",
     "gen_ai.usage.output_tokens",
     "gen_ai.usage.total_tokens",
     "gen_ai.usage.cache_read.input_tokens",
     "gen_ai.usage.cache_creation.input_tokens",
+    "gen_ai.usage.reasoning.output_tokens",  # v1.41 reasoning/thinking tokens
 })
 
 

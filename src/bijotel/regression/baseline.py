@@ -23,7 +23,19 @@ from pathlib import Path
 
 from bijotel.policy.prices import DEFAULT_PRICES
 
-VALID_DIMENSIONS = ("input_tokens", "output_tokens", "cost")
+# v2.4.0 adds three optional dimensions backed by OTel GenAI semconv
+# v1.41 attributes. Existing chains that don't carry these attributes
+# return None per span — the detector treats None as "no datapoint"
+# (compute_baseline returns None on insufficient samples), so old
+# chains run regression on the same three legacy dimensions.
+VALID_DIMENSIONS = (
+    "input_tokens",
+    "output_tokens",
+    "cost",
+    "cache_ratio",        # v2.4.0: cache_read / (cache_read + input)
+    "reasoning_ratio",    # v2.4.0: reasoning_output / (reasoning + output)
+    "ttfc_ms",            # v2.4.0: time_to_first_chunk in ms
+)
 MIN_SAMPLES = 5
 
 
@@ -83,6 +95,36 @@ def _extract_dimension_value(
             return None
         prices = DEFAULT_PRICES[model]
         return (in_tok * prices["input"] + out_tok * prices["output"]) / 1000
+
+    # v2.4.0 — OTel GenAI semconv v1.41 dimensions.
+    # All three return None when the attribute is absent, so old
+    # chains (no cache / reasoning / streaming attrs) simply yield no
+    # datapoints and compute_baseline returns None — graceful
+    # backward-compat without a try/except wrapper at the caller.
+
+    if dimension == "cache_ratio":
+        in_tok = attrs.get("gen_ai.usage.input_tokens")
+        cache_read = attrs.get("gen_ai.usage.cache_read.input_tokens")
+        if in_tok is None or cache_read is None:
+            return None
+        denom = float(in_tok) + float(cache_read)
+        if denom <= 0:
+            return None
+        return float(cache_read) / denom
+
+    if dimension == "reasoning_ratio":
+        out_tok = attrs.get("gen_ai.usage.output_tokens")
+        reasoning = attrs.get("gen_ai.usage.reasoning.output_tokens")
+        if out_tok is None or reasoning is None:
+            return None
+        denom = float(out_tok) + float(reasoning)
+        if denom <= 0:
+            return None
+        return float(reasoning) / denom
+
+    if dimension == "ttfc_ms":
+        ttfc = attrs.get("gen_ai.response.time_to_first_chunk")
+        return float(ttfc) if ttfc is not None else None
 
     return None
 

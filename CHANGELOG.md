@@ -5,6 +5,95 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] — 2026-05-26 — OTel GenAI semconv v1.41 (cache + reasoning + streaming)
+
+Forward-compatible support for OTel GenAI semantic conventions v1.41
+attributes. Capture was already wildcard (`dict(span.attributes)`) so
+new attributes flow into chain entries automatically as instrumentors
+emit them — v2.4.0 specifically updates the **downstream consumers**:
+semantic-dedup exclude list, energy estimator (cache-aware costing),
+F12 regression (three new dimensions).
+
+### Added
+
+- **OTel GenAI v1.41 attribute downstream support**:
+  - `gen_ai.usage.cache_read.input_tokens` — cached input tokens
+    (billed near-zero by Anthropic/OpenAI).
+  - `gen_ai.usage.cache_creation.input_tokens` — tokens used to
+    populate the prompt cache (billed full input rate).
+  - `gen_ai.usage.reasoning.output_tokens` — o3 / Claude extended
+    thinking tokens.
+  - `gen_ai.response.time_to_first_chunk` — streaming TTFC (ms).
+  - `gen_ai.agent.version`, `gen_ai.agent.name` — agent metadata.
+  - `gen_ai.request.seed`, `gen_ai.response.finish_reason` —
+    determinism + completion-cause signals.
+- **Cache-aware `EnergyEstimator.estimate_wh()`** — new keyword-only
+  kwargs `cache_read_tokens` / `cache_creation_tokens` /
+  `reasoning_output_tokens`. Cached reads billed at 0.1x; cache
+  creation at 1.0x; reasoning at 1.0x (same as regular output).
+  The 3-arg legacy signature `estimate_wh(model, tokens_in,
+  tokens_out)` is unchanged — new kwargs default to 0 so every
+  pre-v2.4 caller returns the exact same Wh as before.
+- **`EnergyTracker.record()` accepts v1.41 kwargs** and forwards
+  them to the estimator. `EnergySpanProcessor.on_end()` harvests
+  the new attributes from spans automatically.
+- **Three new F12 regression dimensions**:
+  - `cache_ratio` = cache_read / (input + cache_read), 0..1
+  - `reasoning_ratio` = reasoning_output / (output + reasoning), 0..1
+  - `ttfc_ms` = time_to_first_chunk (float, ms)
+  All three return `None` for spans without the source attribute,
+  so old chains contribute no datapoints and `compute_baseline`
+  returns `None` per `MIN_SAMPLES` — graceful backward-compat,
+  no try/except needed at callers.
+
+### Changed
+
+- **`SEMANTIC_EXCLUDE_ATTRS`** (CAS dedup) now also excludes
+  `gen_ai.usage.reasoning.output_tokens`,
+  `gen_ai.response.time_to_first_chunk`, and the v1.41 singular
+  `gen_ai.response.finish_reason`. They're per-call outputs that
+  vary across runs of the same input.
+- `VALID_DIMENSIONS` extended from 3 (input_tokens, output_tokens,
+  cost) to 6 (+ cache_ratio, reasoning_ratio, ttfc_ms). API
+  `/regression/run` response now reports six dimensions; the three
+  v1.41 ones show insufficient_data on pre-v2.4 chains.
+
+### Tests
+
+- `tests/test_otel_v141.py` — 22 new tests:
+  - Canonical capture is wildcard (forward-compat already).
+  - Semantic exclude correctly drops new per-call attrs.
+  - Energy estimator: 3-arg call unchanged; cache_read reduces cost;
+    cache_creation at normal rate; reasoning at output rate;
+    negative values clamped; tracker.record forwards kwargs.
+  - Regression: all six dimensions valid; extractor returns None
+    when attributes absent; mixed v2.3-shape + v2.4-shape chain
+    verifies end-to-end and exports cleanly.
+  - **The critical backward-compat tests**: a chain with 3 pre-v2.4
+    entries + 3 v2.4-shape entries verifies as one continuous chain
+    (no breakage), and `compute_baseline` on `cache_ratio` returns
+    `None` (insufficient datapoints) rather than raising.
+- Two pre-existing tests updated for the dimension-count growth
+  (3 → 6): `test_regression.py::test_detect_all_dimensions_returns_dict`
+  and `test_api_regression.py::test_regression_run_persists_by_default`
+  now assert "legacy 3 + v1.41 3 are subsets" instead of equality.
+- Suite: **805 pass / 8 skip / 0 fail** (was 783/8/0 in v2.3.0).
+  +22 new + 2 updated. Ruff clean.
+
+### Migration / forward-compatibility
+
+- **No chain-format change.** Pre-v2.4 entries verify identically;
+  exports remain readable. The HMAC chain itself is untouched.
+- **Instrumentor lag is fine.** `opentelemetry-instrumentation-anthropic`
+  and `opentelemetry-instrumentation-openai` may not yet emit every
+  v1.41 attribute. BIJOTEL captures what they emit; when they catch
+  up, the new attributes flow into chain entries automatically and
+  the new dimensions / cache-aware energy turn on without code change.
+- **Energy numbers on pre-v2.4 chains unchanged.** With cache_read
+  defaulting to 0, the `estimate_wh()` math collapses to the v2.3
+  formula. Backfills against historical chains continue to produce
+  the same Wh/CO₂ values they did before.
+
 ## [2.3.0] — 2026-05-26 — Internal-audit drift closure: REST API for v2.1/v2.2 features
 
 Surfaces the v2.1.0 (Ed25519) and v2.2.0 (chain segmentation +

@@ -52,8 +52,11 @@ def test_regression_run_persists_by_default(client: TestClient) -> None:
     assert body["run_id"] is not None  # persisted
     assert body["window"] == 10
     assert body["status"] in ("clean", "anomaly", "insufficient_data")
-    # All 3 dimensions present
-    assert set(body["dimensions"].keys()) == {"input_tokens", "output_tokens", "cost"}
+    # v2.4.0 — 3 legacy + 3 v1.41 dimensions. Legacy must still appear;
+    # v1.41 dimensions are reported with no datapoints when spans don't
+    # carry the new attrs (graceful backward compat).
+    assert {"input_tokens", "output_tokens", "cost"}.issubset(body["dimensions"].keys())
+    assert {"cache_ratio", "reasoning_ratio", "ttfc_ms"}.issubset(body["dimensions"].keys())
 
 
 def test_regression_run_no_persist(client: TestClient) -> None:

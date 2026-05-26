@@ -129,13 +129,44 @@ class EnergyEstimator:
         self._rates = dict(DEFAULT_ENERGY_RATES) if rates is None else dict(rates)
         self._fallback = fallback
 
-    def estimate_wh(self, model: str, tokens_in: int, tokens_out: int) -> float:
+    def estimate_wh(
+        self,
+        model: str,
+        tokens_in: int,
+        tokens_out: int,
+        *,
+        cache_read_tokens: int = 0,
+        cache_creation_tokens: int = 0,
+        reasoning_output_tokens: int = 0,
+    ) -> float:
         """Return estimated Wh for one call.
 
-        Math: ``(tokens_in + tokens_out) / 1000 × rate[model]``.
-        Both halves use the same rate — input + output processing on
-        modern transformer inference are amortized similarly enough
-        that the simplification isn't material at directional precision.
+        Base math (v1.9.0 +): ``(tokens_in + tokens_out) / 1000 × rate[model]``.
+
+        v2.4.0 extension — keyword-only kwargs default to 0 so every
+        pre-v2.4 caller (``estimate_wh(model, in, out)``) gets the same
+        answer as before. When the new fields are set, the formula
+        becomes::
+
+            billable = tokens_in
+                     + cache_creation_tokens            (1.0x — same as input)
+                     + 0.1 * cache_read_tokens          (cached reads ≈ near-zero)
+                     + tokens_out
+                     + reasoning_output_tokens          (1.0x — same as output)
+
+        - ``cache_read``: tokens served from prompt cache. Anthropic
+          documents cache reads at ~10% of standard input pricing;
+          we apply the same 0.1x multiplier to energy on the
+          assumption that the GPU does substantially less work for
+          a cache lookup than for full attention.
+        - ``cache_creation``: tokens used to populate the cache the
+          first time. Billed and energy-costed at full input rate
+          (the model still processes them to compute the cached KV
+          tensors).
+        - ``reasoning_output_tokens``: o3-style reasoning / Claude
+          extended-thinking tokens. Billed separately by providers,
+          but the GPU work is comparable to regular output token
+          generation — same rate.
 
         Negative inputs are treated as 0 (defensive: surfaces of
         instrumentation glitches as "zero energy" rather than as
@@ -143,9 +174,13 @@ class EnergyEstimator:
         """
         ti = max(0, int(tokens_in))
         to = max(0, int(tokens_out))
-        total = ti + to
+        cr = max(0, int(cache_read_tokens))
+        cc = max(0, int(cache_creation_tokens))
+        rsn = max(0, int(reasoning_output_tokens))
+        # Cached reads bill at ~0.1x; everything else at 1.0x.
+        billable = ti + cc + (0.1 * cr) + to + rsn
         rate = self._rates.get(model, self._fallback)
-        return (total / 1000.0) * rate
+        return (billable / 1000.0) * rate
 
     @property
     def rates(self) -> dict[str, float]:
@@ -355,14 +390,33 @@ class EnergyTracker:
         timestamp_ns: int | None = None,
         agent_id: str = "default",
         span_seq: int | None = None,
+        cache_read_tokens: int = 0,
+        cache_creation_tokens: int = 0,
+        reasoning_output_tokens: int = 0,
     ) -> tuple[float, float]:
         """Record one call. Returns ``(wh, co2_grams)`` for the host's convenience.
 
         Idempotent on ``span_seq``: passing the same seq twice INSERTs
         once. Useful for backfill from chain.db (chain.seq is unique).
         ``span_seq=None`` always inserts (live recording).
+
+        v2.4.0 — keyword-only ``cache_read_tokens`` /
+        ``cache_creation_tokens`` / ``reasoning_output_tokens`` are
+        forwarded to :meth:`EnergyEstimator.estimate_wh`. Defaults
+        of 0 preserve every pre-v2.4 call site. The SQL row format
+        is unchanged (``tokens_in`` + ``tokens_out`` only) — the
+        cache/reasoning split influences the *wh* value but not the
+        on-disk shape. A future schema bump can split them out
+        without breaking this record() signature.
         """
-        wh = self._estimator.estimate_wh(model, tokens_in, tokens_out)
+        wh = self._estimator.estimate_wh(
+            model,
+            tokens_in,
+            tokens_out,
+            cache_read_tokens=cache_read_tokens,
+            cache_creation_tokens=cache_creation_tokens,
+            reasoning_output_tokens=reasoning_output_tokens,
+        )
         co2 = self._calculator.wh_to_co2_grams(wh)
         ts = int(timestamp_ns) if timestamp_ns is not None else (
             int(datetime.datetime.now(datetime.UTC).timestamp() * 1e9)
@@ -569,7 +623,20 @@ class EnergySpanProcessor:
         pass
 
     def on_end(self, span: ReadableSpan) -> None:
-        """Extract model + tokens from span attrs, record one row."""
+        """Extract model + tokens from span attrs, record one row.
+
+        v2.4.0 — also harvests the OTel GenAI semconv v1.41 cache and
+        reasoning attributes when present:
+
+        - ``gen_ai.usage.cache_read.input_tokens``
+        - ``gen_ai.usage.cache_creation.input_tokens``
+        - ``gen_ai.usage.reasoning.output_tokens``
+
+        Absent → defaults to 0 (no behavioural change for pre-v1.41
+        instrumentors). When present, the Wh estimate becomes
+        cache-aware (cached reads ≈ 10% energy, reasoning tokens at
+        regular output rate).
+        """
         try:
             attrs = span.attributes or {}
             model = (
@@ -581,8 +648,13 @@ class EnergySpanProcessor:
                 return  # not a GenAI span; ignore silently
             ti = int(attrs.get("gen_ai.usage.input_tokens", 0) or 0)
             to = int(attrs.get("gen_ai.usage.output_tokens", 0) or 0)
-            if ti == 0 and to == 0:
-                return  # no usage data
+            # v1.41 attributes — silently 0 when the instrumentor
+            # doesn't emit them yet (forward-compat).
+            cr = int(attrs.get("gen_ai.usage.cache_read.input_tokens", 0) or 0)
+            cc = int(attrs.get("gen_ai.usage.cache_creation.input_tokens", 0) or 0)
+            rsn = int(attrs.get("gen_ai.usage.reasoning.output_tokens", 0) or 0)
+            if ti == 0 and to == 0 and cr == 0 and cc == 0 and rsn == 0:
+                return  # no usage data at all
             agent_id = str(attrs.get(self._agent_attr, "default"))
             self._tracker.record(
                 model=str(model),
@@ -590,6 +662,9 @@ class EnergySpanProcessor:
                 tokens_out=to,
                 timestamp_ns=span.end_time,
                 agent_id=agent_id,
+                cache_read_tokens=cr,
+                cache_creation_tokens=cc,
+                reasoning_output_tokens=rsn,
             )
         except Exception as e:
             _LOG.warning(
