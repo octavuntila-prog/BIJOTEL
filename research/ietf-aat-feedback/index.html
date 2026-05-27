@@ -12,31 +12,27 @@
         <meta name="author" content="Aisophical SRL">
       
       
-        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/threat-model/">
+        <link rel="canonical" href="https://bijotel.whiteandpoint.com/docs/research/ietf-aat-feedback/">
       
       
-        <link rel="prev" href="../security/">
-      
-      
-        <link rel="next" href="../operations/secret-rotation/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Threat Model - BIJOTEL</title>
+        <title>BIJOTEL implementation notes on draft-sharif-agent-audit-trail-00 - BIJOTEL</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,7 +51,7 @@
       
     
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#threat-model" class="md-skip">
+        <a href="#bijotel-implementation-notes-on-draft-sharif-agent-audit-trail-00" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +90,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="BIJOTEL" class="md-header__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
+    <a href="../.." title="BIJOTEL" class="md-header__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -114,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Threat Model
+              BIJOTEL implementation notes on draft-sharif-agent-audit-trail-00
             
           </span>
         </div>
@@ -227,7 +223,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -248,7 +244,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../getting-started/installation/" class="md-tabs__link">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
           
   
   
@@ -270,7 +266,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../guides/policy-engine/" class="md-tabs__link">
+        <a href="../../guides/policy-engine/" class="md-tabs__link">
           
   
   
@@ -292,7 +288,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../api/cli/" class="md-tabs__link">
+        <a href="../../api/cli/" class="md-tabs__link">
           
   
   
@@ -312,7 +308,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../architecture/" class="md-tabs__link">
+      <a href="../../architecture/" class="md-tabs__link">
         
   
   
@@ -331,7 +327,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../security/" class="md-tabs__link">
+      <a href="../../security/" class="md-tabs__link">
         
   
   
@@ -348,11 +344,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../../threat-model/" class="md-tabs__link">
         
   
   
@@ -373,7 +367,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../operations/secret-rotation/" class="md-tabs__link">
+        <a href="../../operations/secret-rotation/" class="md-tabs__link">
           
   
   
@@ -395,7 +389,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../design/otel-collector-exporter/" class="md-tabs__link">
+        <a href="../../design/otel-collector-exporter/" class="md-tabs__link">
           
   
   
@@ -415,7 +409,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../changelog/" class="md-tabs__link">
+      <a href="../../changelog/" class="md-tabs__link">
         
   
   
@@ -450,7 +444,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="BIJOTEL" class="md-nav__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
+    <a href="../.." title="BIJOTEL" class="md-nav__button md-logo" aria-label="BIJOTEL" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -480,7 +474,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -567,7 +561,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/installation/" class="md-nav__link">
+      <a href="../../getting-started/installation/" class="md-nav__link">
         
   
   
@@ -595,7 +589,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/quickstart/" class="md-nav__link">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
         
   
   
@@ -623,7 +617,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/first-verification/" class="md-nav__link">
+      <a href="../../getting-started/first-verification/" class="md-nav__link">
         
   
   
@@ -736,7 +730,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/policy-engine/" class="md-nav__link">
+      <a href="../../guides/policy-engine/" class="md-nav__link">
         
   
   
@@ -764,7 +758,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/regression-detection/" class="md-nav__link">
+      <a href="../../guides/regression-detection/" class="md-nav__link">
         
   
   
@@ -792,7 +786,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/multi-provider/" class="md-nav__link">
+      <a href="../../guides/multi-provider/" class="md-nav__link">
         
   
   
@@ -820,7 +814,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/dashboard/" class="md-nav__link">
+      <a href="../../guides/dashboard/" class="md-nav__link">
         
   
   
@@ -848,7 +842,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/energy-tracking/" class="md-nav__link">
+      <a href="../../guides/energy-tracking/" class="md-nav__link">
         
   
   
@@ -876,7 +870,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/rag-provenance/" class="md-nav__link">
+      <a href="../../guides/rag-provenance/" class="md-nav__link">
         
   
   
@@ -904,7 +898,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/replay-verification/" class="md-nav__link">
+      <a href="../../guides/replay-verification/" class="md-nav__link">
         
   
   
@@ -932,7 +926,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/chain-integrity/" class="md-nav__link">
+      <a href="../../guides/chain-integrity/" class="md-nav__link">
         
   
   
@@ -960,7 +954,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/rekor-anchoring/" class="md-nav__link">
+      <a href="../../guides/rekor-anchoring/" class="md-nav__link">
         
   
   
@@ -988,7 +982,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/attestation/" class="md-nav__link">
+      <a href="../../guides/attestation/" class="md-nav__link">
         
   
   
@@ -1016,7 +1010,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/federation/" class="md-nav__link">
+      <a href="../../guides/federation/" class="md-nav__link">
         
   
   
@@ -1044,7 +1038,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/mcp-invocations/" class="md-nav__link">
+      <a href="../../guides/mcp-invocations/" class="md-nav__link">
         
   
   
@@ -1139,7 +1133,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/cli/" class="md-nav__link">
+      <a href="../../api/cli/" class="md-nav__link">
         
   
   
@@ -1167,7 +1161,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/rest/" class="md-nav__link">
+      <a href="../../api/rest/" class="md-nav__link">
         
   
   
@@ -1195,7 +1189,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/python/" class="md-nav__link">
+      <a href="../../api/python/" class="md-nav__link">
         
   
   
@@ -1230,7 +1224,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../architecture/" class="md-nav__link">
+      <a href="../../architecture/" class="md-nav__link">
         
   
   
@@ -1257,7 +1251,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../security/" class="md-nav__link">
+      <a href="../../security/" class="md-nav__link">
         
   
   
@@ -1281,37 +1275,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Threat Model
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../threat-model/" class="md-nav__link">
         
   
   
@@ -1327,192 +1294,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-bijotel-protects-against" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What BIJOTEL protects against
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What BIJOTEL protects against">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-factum-database-tampering" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Post-factum database tampering
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cross-version-and-cross-architecture-portability" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cross-version and cross-architecture portability
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#silent-model-degradation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Silent model degradation
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prompt-injection-and-jailbreak-attempts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prompt injection and jailbreak attempts
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-bijotel-does-not-protect-against" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What BIJOTEL does NOT protect against
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What BIJOTEL does NOT protect against">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#insider-with-the-hmac-secret" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Insider with the HMAC secret
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#secret-leakage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Secret leakage
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-deletion-or-filesystem-loss" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database deletion or filesystem loss
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#lost-spans-on-disk-pressure-or-write-failure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Lost spans on disk pressure or write failure
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#multi-writer-contention-at-extreme-scale" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Multi-writer contention at extreme scale
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#paraphrase-and-multimodal-attacks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Paraphrase and multimodal attacks
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#formal-correctness-of-agent-actions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Formal correctness of agent actions
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#bijotel-vs-substrate-guard-scope-boundary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BIJOTEL vs substrate-guard — scope boundary
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1584,7 +1365,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../operations/secret-rotation/" class="md-nav__link">
+      <a href="../../operations/secret-rotation/" class="md-nav__link">
         
   
   
@@ -1612,7 +1393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../operations/multi-provider/" class="md-nav__link">
+      <a href="../../operations/multi-provider/" class="md-nav__link">
         
   
   
@@ -1640,7 +1421,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../operations/chain-archival/" class="md-nav__link">
+      <a href="../../operations/chain-archival/" class="md-nav__link">
         
   
   
@@ -1737,7 +1518,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../design/otel-collector-exporter/" class="md-nav__link">
+      <a href="../../design/otel-collector-exporter/" class="md-nav__link">
         
   
   
@@ -1765,7 +1546,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../design/tee-anchored-chains/" class="md-nav__link">
+      <a href="../../design/tee-anchored-chains/" class="md-nav__link">
         
   
   
@@ -1793,7 +1574,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../design/cross-org-federation/" class="md-nav__link">
+      <a href="../../design/cross-org-federation/" class="md-nav__link">
         
   
   
@@ -1821,7 +1602,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../design/bijotel-mcp/" class="md-nav__link">
+      <a href="../../design/bijotel-mcp/" class="md-nav__link">
         
   
   
@@ -1856,7 +1637,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../changelog/" class="md-nav__link">
+      <a href="../../changelog/" class="md-nav__link">
         
   
   
@@ -1903,22 +1684,44 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-bijotel-protects-against" class="md-nav__link">
+  <a href="#1-context" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What BIJOTEL protects against
+        1. Context
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="What BIJOTEL protects against">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-points-of-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Points of alignment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-implementation-experience-that-may-inform-the-draft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Implementation experience that may inform the draft
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Implementation experience that may inform the draft">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#post-factum-database-tampering" class="md-nav__link">
+  <a href="#31-hmac-vs-plain-sha-256-chain" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Post-factum database tampering
+        3.1 HMAC vs plain SHA-256 chain
       
     </span>
   </a>
@@ -1926,10 +1729,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#cross-version-and-cross-architecture-portability" class="md-nav__link">
+  <a href="#32-secretkey-rotation-procedure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cross-version and cross-architecture portability
+        3.2 Secret/key rotation procedure
       
     </span>
   </a>
@@ -1937,10 +1740,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#silent-model-degradation" class="md-nav__link">
+  <a href="#33-ed25519-vs-ecdsa-p-256" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Silent model degradation
+        3.3 Ed25519 vs ECDSA P-256
       
     </span>
   </a>
@@ -1948,10 +1751,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#prompt-injection-and-jailbreak-attempts" class="md-nav__link">
+  <a href="#34-chain-segmentation-and-archival" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prompt injection and jailbreak attempts
+        3.4 Chain segmentation and archival
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-cross-architecture-portability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Cross-architecture portability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-environmental-impact-logging-forward-looking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Environmental impact logging (forward-looking)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-mcp-specific-extension-forward-looking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 MCP-specific extension (forward-looking)
       
     </span>
   </a>
@@ -1964,104 +1800,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-bijotel-does-not-protect-against" class="md-nav__link">
+  <a href="#4-data-points-we-can-contribute" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What BIJOTEL does NOT protect against
+        4. Data points we can contribute
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="What BIJOTEL does NOT protect against">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#insider-with-the-hmac-secret" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Insider with the HMAC secret
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#secret-leakage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Secret leakage
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-deletion-or-filesystem-loss" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database deletion or filesystem loss
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#lost-spans-on-disk-pressure-or-write-failure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Lost spans on disk pressure or write failure
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#multi-writer-contention-at-extreme-scale" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Multi-writer contention at extreme scale
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#paraphrase-and-multimodal-attacks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Paraphrase and multimodal attacks
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#formal-correctness-of-agent-actions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Formal correctness of agent actions
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#bijotel-vs-substrate-guard-scope-boundary" class="md-nav__link">
+  <a href="#5-format-of-this-note" class="md-nav__link">
     <span class="md-ellipsis">
       
-        BIJOTEL vs substrate-guard — scope boundary
+        5. Format of this note
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. References
       
     </span>
   </a>
@@ -2088,249 +1852,301 @@
   
 
 
-<h1 id="threat-model">Threat Model<a class="headerlink" href="#threat-model" title="Anchor link to this section">&para;</a></h1>
-<p>BIJOTEL is a tamper-evident HMAC audit chain for LLM applications. This
-page documents exactly what BIJOTEL <strong>does</strong> protect against, what it
-<strong>does not</strong>, and where to reach for stronger guarantees.</p>
-<p>The framing follows the same M2 principle the rest of the docs use:
-reality beats marketing. If a threat sits outside our scope, that's
-stated explicitly here rather than implied away.</p>
+<h1 id="bijotel-implementation-notes-on-draft-sharif-agent-audit-trail-00">BIJOTEL implementation notes on draft-sharif-agent-audit-trail-00<a class="headerlink" href="#bijotel-implementation-notes-on-draft-sharif-agent-audit-trail-00" title="Anchor link to this section">&para;</a></h1>
+<p><strong>Document:</strong> <a href="https://datatracker.ietf.org/doc/draft-sharif-agent-audit-trail/"><code>draft-sharif-agent-audit-trail-00</code></a>
+(Individual submission, March 29 2026, expires Sep 29 2026)
+<strong>Author of draft:</strong> R. Sharif, CyberSecAI Ltd.
+<strong>Author of this note:</strong> Octavian Untilă (BIJOTEL maintainer)
+<strong>Date:</strong> 2026-05-27
+<strong>Status:</strong> Internal reference; may be shared with the draft author if helpful</p>
+<blockquote>
+<p>The draft has <strong>no formal IETF working group standing</strong> and is <strong>not
+endorsed by the IETF</strong>. This note is implementation-experience input
+only — not a review, not a critique, not a vote.</p>
+</blockquote>
 <hr />
-<h2 id="what-bijotel-protects-against">What BIJOTEL protects against<a class="headerlink" href="#what-bijotel-protects-against" title="Anchor link to this section">&para;</a></h2>
-<h3 id="post-factum-database-tampering">Post-factum database tampering<a class="headerlink" href="#post-factum-database-tampering" title="Anchor link to this section">&para;</a></h3>
-<p>An attacker who gains read/write access to <code>chain.db</code> <strong>after</strong> an entry
-has been sealed cannot:</p>
-<ul>
-<li>Modify any entry's body without breaking the HMAC chain at the exact
-  <code>seq</code>.</li>
-<li>Delete entries without creating a gap detected by <code>bijotel verify</code>.</li>
-<li>Insert fake entries without the HMAC secret.</li>
-<li>Alter <code>canonical_body</code> while keeping the chain links valid — the
-  v2.0.3+ verifier re-hashes the body and compares against
-  <code>canonical_hash</code>. Tampering at this layer raises
-  <code>Export INVALID: canonical_body tampered at seq=N</code>.</li>
-</ul>
-<p><strong>Verification:</strong></p>
-<ul>
-<li><code>bijotel verify --db chain.db</code> walks the full SQLite chain.</li>
-<li><code>bijotel verify-export some_export.json</code> verifies an exported archive
-  with no SQLite or filesystem dependency on the auditor side.</li>
-</ul>
-<h3 id="cross-version-and-cross-architecture-portability">Cross-version and cross-architecture portability<a class="headerlink" href="#cross-version-and-cross-architecture-portability" title="Anchor link to this section">&para;</a></h3>
-<p>Chain exports are bit-identical across platforms. A chain sealed on
-x86_64 (e.g. GENA, Nuremberg) verifies identically on aarch64 (e.g. ARA,
-Helsinki). JCS canonicalization (RFC 8785) makes the hash inputs
-deterministic regardless of CPU, Python build, or JSON serializer.</p>
-<p><strong>Evidence:</strong> Round 2 Test D verified 5,687 entries cross-architecture
-at ~15,328 entries/sec on a stock ARM64 instance.</p>
-<h3 id="silent-model-degradation">Silent model degradation<a class="headerlink" href="#silent-model-degradation" title="Anchor link to this section">&para;</a></h3>
-<p>The F12 regression detector watches statistical drift in token counts,
-costs, and latency using z-score and IQR methods over the sealed chain.</p>
-<p><strong>Evidence:</strong> an hourly <code>/regression/run</code> cron on GENA fires against
-the live chain; baselines are recomputed automatically and anomalies
-appear in <code>/api/regression/latest</code>.</p>
-<h3 id="prompt-injection-and-jailbreak-attempts">Prompt injection and jailbreak attempts<a class="headerlink" href="#prompt-injection-and-jailbreak-attempts" title="Anchor link to this section">&para;</a></h3>
-<p>The F11 <code>PolicyEngine</code> evaluates prompts pre-call against 50 patterns
-in 7 categories (instruction override, system prompt extraction, role
-override, jailbreak framing, encoding bypass, hypothetical framing,
-multi-turn priming). The <code>ast_safety_check</code> rule additionally inspects
-code blocks structurally with <code>tree-sitter-bash</code> and Python's <code>ast</code>
-module.</p>
-<p><strong>Evidence:</strong> 100% detection on the R1 probe corpus with 0 false
-positives on the benign corpus. Probes and corpus are checked into the
-repository for replay.</p>
-<hr />
-<h2 id="what-bijotel-does-not-protect-against">What BIJOTEL does NOT protect against<a class="headerlink" href="#what-bijotel-does-not-protect-against" title="Anchor link to this section">&para;</a></h2>
-<h3 id="insider-with-the-hmac-secret">Insider with the HMAC secret<a class="headerlink" href="#insider-with-the-hmac-secret" title="Anchor link to this section">&para;</a></h3>
-<p>BIJOTEL's HMAC chain uses a <strong>symmetric</strong> secret. Anyone who possesses
-<code>BIJOTEL_HMAC_SECRET</code> can append valid entries to the chain. This is
-the same trust model as TLS pre-shared keys or git's SSH deploy keys.</p>
-<p>BIJOTEL's HMAC tamper-evidence is for <strong>post-factum</strong> modification by
-a party that <em>doesn't</em> hold the secret, not for malicious operators
-who do.</p>
-<p><strong>Mitigation:</strong></p>
-<ul>
-<li>Treat the secret like a database credential.</li>
-<li>Store it in a secrets manager (Vault, AWS Secrets Manager, GCP Secret
-  Manager) — not in repo config or <code>.env</code> files in production.</li>
-<li>Rotate periodically. The verifier handles rotation boundaries
-  correctly: <code>bijotel verify</code> returns the exact <code>seq</code> where the old
-  secret stops verifying. See the
-  <a href="../operations/secret-rotation/">Secret Rotation Playbook</a>.</li>
-<li><strong>For external auditors: use v2.1.0+ Ed25519 signed exports.</strong> An
-  auditor never needs the seal-time HMAC secret — they verify the
-  export with the operator's public key only, and cannot forge entries.
-  See "Auditor verification without the HMAC secret" below.</li>
-</ul>
-<h3 id="secret-leakage">Secret leakage<a class="headerlink" href="#secret-leakage" title="Anchor link to this section">&para;</a></h3>
-<p>If the HMAC secret is leaked, an attacker can:</p>
-<ul>
-<li>Generate valid chain entries from scratch.</li>
-<li>Forge exports that pass <code>verify-export</code> against the same secret.</li>
-</ul>
-<p>They still <strong>cannot</strong>:</p>
-<ul>
-<li>Modify existing entries in a chain they don't have write access to.</li>
-<li>Break the linkage of an already-distributed export without detection.</li>
-</ul>
-<p><strong>Mitigation:</strong> rotate the secret on suspicion and re-seal new entries
-under the new key. Older entries verify under the old key by design;
-the boundary <code>seq</code> is detectable.</p>
-<h3 id="database-deletion-or-filesystem-loss">Database deletion or filesystem loss<a class="headerlink" href="#database-deletion-or-filesystem-loss" title="Anchor link to this section">&para;</a></h3>
-<p>If <code>chain.db</code> is deleted entirely, the audit trail is lost. BIJOTEL is
-an <strong>integrity</strong> layer, not a <strong>backup</strong> system.</p>
-<p><strong>Mitigation:</strong> standard backup discipline — periodic snapshots,
-periodic <code>bijotel export</code> of the chain to an external location, and
-ideally a 3-2-1 backup posture for the seal host.</p>
-<h3 id="lost-spans-on-disk-pressure-or-write-failure">Lost spans on disk pressure or write failure<a class="headerlink" href="#lost-spans-on-disk-pressure-or-write-failure" title="Anchor link to this section">&para;</a></h3>
-<p>If <code>on_end()</code> fails (disk full, SQLite locked beyond retry, container
-killed mid-write), the span is logged at ERROR level but <strong>not</strong> sealed
-into the chain. The host application continues unaffected (crash
-isolation, v0.6.0+).</p>
-<p>The result is a gap in the audit trail, not a host crash. The chain
-itself remains <code>VALID</code> — the gap is detectable by inspecting <code>seq</code>
-numbering. Round 3 Test B1 (<code>kill -9</code> mid-write) and Test B2
-(read-only DB) confirmed this isolation behaviour empirically.</p>
-<h3 id="multi-writer-contention-at-extreme-scale">Multi-writer contention at extreme scale<a class="headerlink" href="#multi-writer-contention-at-extreme-scale" title="Anchor link to this section">&para;</a></h3>
-<p>SQLite with WAL + <code>BEGIN IMMEDIATE</code> handles concurrent writers cleanly
-up to roughly 200 spans/sec on a single chain file (Round 3 Test D2).
-Past that, contention shows up as <code>BUSY</code> retries that eat into latency
-budget. At extreme scale (≫1,000 concurrent writers on one chain),
-consider PostgreSQL with the chain table or partition by writer
-identity.</p>
-<h3 id="paraphrase-and-multimodal-attacks">Paraphrase and multimodal attacks<a class="headerlink" href="#paraphrase-and-multimodal-attacks" title="Anchor link to this section">&para;</a></h3>
-<p>The F11 detector is regex-based. Synonym-substitution paraphrases,
-unicode confusables outside the catalogued set, or multimodal attacks
-(prompts embedded in images, audio, or files) are outside F11 scope.</p>
-<p>For defence in depth, layer F11 with a model-based guard such as
-Lakera Guard, Prompt Security, or Rebuff. F11 catches the cheap surface
-forms quickly and cheaply; the model-based guard catches the long tail.</p>
-<h3 id="formal-correctness-of-agent-actions">Formal correctness of agent actions<a class="headerlink" href="#formal-correctness-of-agent-actions" title="Anchor link to this section">&para;</a></h3>
-<p>BIJOTEL proves <strong>integrity</strong> of the audit log (the log wasn't
-tampered). It does <strong>not</strong> prove <strong>correctness</strong> of what the agent
-did. A perfectly sealed chain can document a perfectly disastrous
-decision.</p>
-<p>For formal verification of agent actions (Z3 SMT solver, OPA/Rego
-policy decisions over actions, eBPF syscall enforcement, ZK proofs
-over training data), see
-<a href="https://github.com/octavuntila-prog/substrate-guard">substrate-guard</a>.
-BIJOTEL and substrate-guard are designed to be deployed together when
-the application demands both properties.</p>
-<hr />
-<h2 id="bijotel-vs-substrate-guard-scope-boundary">BIJOTEL vs substrate-guard — scope boundary<a class="headerlink" href="#bijotel-vs-substrate-guard-scope-boundary" title="Anchor link to this section">&para;</a></h2>
+<h2 id="1-context">1. Context<a class="headerlink" href="#1-context" title="Anchor link to this section">&para;</a></h2>
+<p>BIJOTEL (<code>pip install bijotel</code>, MIT) is a tamper-evident HMAC audit
+chain for LLM applications, in production on two independent systems
+(GENA + ARA) since May 2026. As of 2026-05-27:</p>
 <table>
 <thead>
 <tr>
-<th>Claim</th>
-<th>BIJOTEL</th>
-<th>substrate-guard</th>
+<th>Metric</th>
+<th>Value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>"Log wasn't tampered"</td>
-<td>✅ HMAC chain</td>
-<td>✅ HMAC chain (same primitive)</td>
+<td>Production chain entries (GENA)</td>
+<td>6,500+</td>
 </tr>
 <tr>
-<td>"Agent action was safe"</td>
-<td>❌</td>
-<td>✅ Z3 SMT + OPA/Rego</td>
+<td>Continuous operation</td>
+<td>16 days</td>
 </tr>
 <tr>
-<td>"No unauthorized syscalls"</td>
-<td>❌</td>
-<td>✅ eBPF kernel layer</td>
+<td>Independent systems</td>
+<td>2 (x86_64 + aarch64)</td>
 </tr>
 <tr>
-<td>"Training data compliant"</td>
-<td>❌</td>
-<td>✅ ZK-SNM</td>
+<td>Automated tests</td>
+<td>919 (passing)</td>
 </tr>
 <tr>
-<td>"Signed by hardware"</td>
-<td>❌</td>
-<td>✅ Ed25519 / TPM attestation</td>
+<td>Architecture portability validated</td>
+<td>yes (cross-machine verify)</td>
 </tr>
 <tr>
-<td>"Works offline (CRDT)"</td>
-<td>❌</td>
-<td>✅</td>
+<td>External anchoring</td>
+<td>Sigstore Rekor (v2.9, design + library)</td>
 </tr>
 <tr>
-<td>"<code>pip install</code> one-liner"</td>
-<td>✅</td>
-<td>❌</td>
+<td>Cross-org federation</td>
+<td>client + design doc (v2.11)</td>
 </tr>
 <tr>
-<td>"Bundled REST API + dashboard"</td>
-<td>✅</td>
-<td>❌</td>
+<td>MCP invocation sealing</td>
+<td>v2.12.0 (shipped 2026-05-27)</td>
 </tr>
 </tbody>
 </table>
-<p>BIJOTEL is the PyPI-installable subset focused on LLM observability +
-forensic chain — the demonstrator of bijuteria #11 (Forensic-First
-Architecture) at scale. The remaining safety bijuterii (#1 Z3,</p>
-<h1 id="6-zk-8-ebpf-12-hardware-trust-live-in-substrate-guard-not">6 ZK, #8 eBPF, #12 hardware trust) live in <code>substrate-guard</code>, not<a class="headerlink" href="#6-zk-8-ebpf-12-hardware-trust-live-in-substrate-guard-not" title="Anchor link to this section">&para;</a></h1>
-<p>here. The README and CHANGELOG state this explicitly; this page exists
-so that scope distinction is visible from the docs site too.</p>
-<hr />
-<h2 id="secret-rotation">Secret rotation<a class="headerlink" href="#secret-rotation" title="Anchor link to this section">&para;</a></h2>
-<p>The chain verifier handles HMAC secret rotation correctly: it detects
-the exact <code>seq</code> where the old secret stops verifying and the new
-secret takes over. Round 2 Test E3 confirmed boundary detection at
-<code>seq=51</code> with zero false positives on either half of the chain.</p>
-<p>The full procedure — when to rotate, how to record the boundary, how
-to verify both halves of the chain, how to hand a rotated chain to an
-auditor — lives in the dedicated
-<a href="../operations/secret-rotation/">Secret Rotation Playbook</a>.</p>
-<p>In one paragraph: generate a fresh 64-hex secret, write down the
-current chain length (that's the boundary), swap
-<code>BIJOTEL_HMAC_SECRET</code>, restart the sealing process, then verify each
-half of the chain with its corresponding secret. The old half stays
-verifiable under the old key; the new half under the new key. There
-is no re-signing.</p>
-<hr />
-<h2 id="auditor-verification-without-the-hmac-secret">Auditor verification without the HMAC secret<a class="headerlink" href="#auditor-verification-without-the-hmac-secret" title="Anchor link to this section">&para;</a></h2>
-<p><strong>Added in v2.1.0.</strong> Pre-v2.1.0 the auditor needed the HMAC secret to
-verify an export — which made the auditor a potential forger. v2.1.0
-adds Ed25519 asymmetric signatures on exports as an outer attestation
-layer over the unchanged HMAC chain.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Operator side (once):</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>bijotel<span class="w"> </span>keygen<span class="w"> </span>--output-dir<span class="w"> </span>./keys
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">#  → keys/bijotel_private.pem  (keep secret)</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">#  → keys/bijotel_public.pem   (share with auditors)</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># Operator side (each export):</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>bijotel<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--db<span class="w"> </span>chain.db<span class="w"> </span>-o<span class="w"> </span>export.json<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">               </span>--sign-key<span class="w"> </span>keys/bijotel_private.pem
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># Auditor side (with only the public key — NO HMAC secret):</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>bijotel<span class="w"> </span>verify-export<span class="w"> </span>export.json<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">                      </span>--public-key<span class="w"> </span>bijotel_public.pem
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># → Export VALID — Ed25519 signature verified</span>
-</span></code></pre></div>
-<p>The auditor verifies the export's Ed25519 signature, then checks that
-each entry's canonical body still hashes to its stored
-<code>canonical_hash</code> and that the <code>prev_hash</code> chain links remain
-consistent. They never see the seal-time HMAC secret, so they cannot
-mint new entries that would verify under it.</p>
-<p><strong>Empirical evidence (2026-05-26):</strong> a 6,341-entry chain signed on
-GENA (x86_64, Nuremberg) verified bit-identically on ARA (aarch64,
-Helsinki) using only the operator's public key. No HMAC secret left
-the operator host. See <code>tests/test_export_signed.py</code> for the property
-tests covering signature tamper, key-swap attack, and canonical-body
-tamper under auditor mode.</p>
-<p>The v1 export format (<code>bijotel-chain-v1</code>) is still produced when
-<code>--sign-key</code> is not supplied — backward-compatible with every reader
-since v1.1.</p>
-<hr />
-<h2 id="reporting-a-finding">Reporting a finding<a class="headerlink" href="#reporting-a-finding" title="Anchor link to this section">&para;</a></h2>
-<p>Security issues should go to <code>contact@aisophical.com</code> rather than the
-public GitHub issue tracker. See
-<a href="https://github.com/octavuntila-prog/BIJOTEL/blob/main/SECURITY.md"><code>SECURITY.md</code></a>
-for the disclosure window.</p>
+<p>This document captures what we've learned from running a production
+hash-chained audit trail that is <em>broadly aligned with the goals of
+AAT</em>, with the goal of being useful to the draft author and to anyone
+else navigating the same design space.</p>
+<h2 id="2-points-of-alignment">2. Points of alignment<a class="headerlink" href="#2-points-of-alignment" title="Anchor link to this section">&para;</a></h2>
+<p>Where BIJOTEL and AAT make compatible choices:</p>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>AAT</th>
+<th>BIJOTEL</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hash algorithm</td>
+<td>SHA-256</td>
+<td>SHA-256 (inside HMAC)</td>
+<td>aligned</td>
+</tr>
+<tr>
+<td>Canonicalization</td>
+<td>RFC 8785 JCS (mandated)</td>
+<td>RFC 8785 JCS</td>
+<td>byte-identical in our cross-machine tests</td>
+</tr>
+<tr>
+<td>Append-only</td>
+<td>yes</td>
+<td>yes</td>
+<td>aligned</td>
+</tr>
+<tr>
+<td>Per-record timestamp</td>
+<td>RFC 3339 UTC</td>
+<td>nanosecond integer (epoch ns)</td>
+<td>semantically same</td>
+</tr>
+<tr>
+<td>Action classification</td>
+<td>controlled vocabulary</td>
+<td>OTel GenAI semconv <code>gen_ai.operation.name</code></td>
+<td>different namespace, same intent</td>
+</tr>
+<tr>
+<td>Trust levels</td>
+<td>L0–L4</td>
+<td>layer attribution (<code>bijotel.layer</code>)</td>
+<td>different model, similar intent</td>
+</tr>
+<tr>
+<td>Optional ECDSA signature</td>
+<td>P-256, IEEE P1363 r∥s, base64url</td>
+<td>Ed25519 (v2.1+)</td>
+<td>different curve; both sound</td>
+</tr>
+<tr>
+<td>JSONL export</td>
+<td>"primary"</td>
+<td>JSONL v2 (signed)</td>
+<td>aligned</td>
+</tr>
+</tbody>
+</table>
+<p>The most striking alignment is <strong>JCS as a hard MUST</strong>: this matched our
+own production experience. Anything weaker (e.g. <code>json.dumps(...,
+sort_keys=True)</code> alone) produces non-canonical output on
+non-ASCII payloads and breaks cross-machine verification.</p>
+<h2 id="3-implementation-experience-that-may-inform-the-draft">3. Implementation experience that may inform the draft<a class="headerlink" href="#3-implementation-experience-that-may-inform-the-draft" title="Anchor link to this section">&para;</a></h2>
+<h3 id="31-hmac-vs-plain-sha-256-chain">3.1 HMAC vs plain SHA-256 chain<a class="headerlink" href="#31-hmac-vs-plain-sha-256-chain" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Draft:</strong> <code>prev_hash = hex(SHA-256(JCS(previous_record)))</code>.
+<strong>BIJOTEL:</strong> <code>hmac_hash = HMAC-SHA256(secret, prev_hash ∥ canonical_hash)</code>.</p>
+<p>The difference: an HMAC chain requires a secret-keyed integrity check.
+An attacker who can write to the storage but does <strong>not</strong> possess the
+HMAC secret cannot forge a record that the chain will accept on verify.
+A plain SHA-256 chain can be forged trivially by an attacker who can
+write to storage (the entire chain re-computes deterministically from
+new content).</p>
+<p><strong>Trade-off:</strong> HMAC adds operational cost — secret rotation, secret
+distribution, secret storage hygiene. We have a <a href="../../operations/secret-rotation/">secret-rotation
+playbook</a> we maintain alongside the
+spec, and we verified rotation boundary detection in production at
+exact <code>seq=51</code> (test R2-E3).</p>
+<p><strong>Suggestion (if the author finds it useful):</strong>
+Consider treating HMAC as a SHOULD where insider-threat is in scope,
+with the plain-SHA chain remaining MUST as a baseline. Operators who
+care primarily about external-tamper detection can stay on the SHA
+chain; operators who care about insider-threat (e.g. cloud
+deployments with privileged operators) can opt into HMAC without
+diverging from the spec.</p>
+<h3 id="32-secretkey-rotation-procedure">3.2 Secret/key rotation procedure<a class="headerlink" href="#32-secretkey-rotation-procedure" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Draft Section 5.7</strong> lists <code>"key_rotation"</code> as a vocabulary value
+under the lifecycle event type, but does not specify how a verifier
+should handle a chain that spans a rotation.</p>
+<p><strong>BIJOTEL production experience:</strong> at rotation, we emit a <em>boundary
+marker</em> record whose <code>canonical_body</code> includes both the new key
+fingerprint and the previous-segment terminal hash. Verifiers walk the
+chain segment-by-segment, switching keys at the boundary. We have a
+test (R2-E3) that confirms rotation boundary detection at exact
+<code>seq=51</code>.</p>
+<p><strong>Suggestion:</strong>
+Add a normative section on rotation procedure — at minimum, the
+record format that verifiers can use to detect a rotation boundary,
+and the expected verifier behaviour across segments. The current
+vocabulary mention is insufficient for an implementer.</p>
+<h3 id="33-ed25519-vs-ecdsa-p-256">3.3 Ed25519 vs ECDSA P-256<a class="headerlink" href="#33-ed25519-vs-ecdsa-p-256" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Draft:</strong> ECDSA P-256, IEEE P1363 r∥s, base64url.
+<strong>BIJOTEL:</strong> Ed25519 (since v2.1), PKCS#8 PEM keys, base64.</p>
+<p>Both are sound. Ed25519 is simpler (deterministic signatures, no
+secure-random requirement at sign time), faster (~2x in our
+benchmarks), and produces shorter signatures (64 bytes vs 64 bytes for
+P1363 P-256 — same length, but Ed25519 doesn't require ASN.1
+unwrapping). ECDSA P-256 has wider HSM/FIPS support.</p>
+<p><strong>Suggestion:</strong>
+Consider algorithm agility — either an algorithm OID in the signature
+envelope, or a SHOULD/MUST split where Ed25519 is SHOULD-implement and
+ECDSA P-256 is SHOULD-implement, with operators choosing. The current
+single-algorithm mandate is a forward-compatibility risk.</p>
+<h3 id="34-chain-segmentation-and-archival">3.4 Chain segmentation and archival<a class="headerlink" href="#34-chain-segmentation-and-archival" title="Anchor link to this section">&para;</a></h3>
+<p><strong>Draft Section 6</strong> defines per-session genesis + close records with a
+<code>session_hash</code>. Multi-session archival is described as "store
+session_hash values in a separate, append-only system" but the
+mechanism is not specified.</p>
+<p><strong>BIJOTEL production experience:</strong> at 6,500 entries / 16 days, our
+chain.db is ~88 MB. At our projected 100k entries the file is ~1.3 GB
+and <code>verify</code> takes ~4.4 seconds (R2-B3 benchmark). We ship CLI commands
+for <em>range verify</em> (<code>bijotel verify --range 1-10000</code>) and <em>archival</em>
+(<code>bijotel archive --range 1-50000 --to archive.db</code>) since v2.2.0. The
+archival produces a self-contained, individually-verifiable segment
+linked to the live chain by <code>previous_segment_hash</code>.</p>
+<p><strong>Suggestion:</strong>
+Specify a normative archive record format. A minimum viable spec would
+define:
+1. The hash linking an archived segment to its successor (the
+   "boundary hash"),
+2. How a verifier walks across segment boundaries,
+3. Whether segment exports carry their own session-hash chain
+   (yes/no/optional).</p>
+<p>This becomes increasingly relevant beyond ~1M records, where naive
+"verify the whole chain" becomes operationally expensive.</p>
+<h3 id="35-cross-architecture-portability">3.5 Cross-architecture portability<a class="headerlink" href="#35-cross-architecture-portability" title="Anchor link to this section">&para;</a></h3>
+<p><strong>BIJOTEL test result:</strong> chains produced on x86_64 verify byte-identically
+on aarch64, including HMAC and Ed25519 signatures, at 15,328 entries/sec
+(R2-D test).</p>
+<p>The draft is silent on cross-architecture determinism. Implementers
+might assume JCS + SHA-256 trivially gives portability, but in
+practice:</p>
+<ul>
+<li>Some JSON libraries serialize floats non-deterministically across
+  CPU architectures.</li>
+<li><code>json.dumps(..., ensure_ascii=False)</code> is critical for non-Latin
+  scripts — <code>ensure_ascii=True</code> produces different byte output than
+  raw UTF-8.</li>
+<li>Integer overflow handling differs across language runtimes (e.g.
+  <code>&gt;2^53</code> numbers in JavaScript JCS implementations).</li>
+</ul>
+<p><strong>Suggestion:</strong>
+Add a paragraph noting that JCS + SHA-256 gives architectural
+portability <em>if and only if</em> the JCS implementation correctly handles
+the I-JSON profile (RFC 7493). Reference the I-JSON profile explicitly.</p>
+<h3 id="36-environmental-impact-logging-forward-looking">3.6 Environmental impact logging (forward-looking)<a class="headerlink" href="#36-environmental-impact-logging-forward-looking" title="Anchor link to this section">&para;</a></h3>
+<p>EU AI Act Article 12 includes log-retention requirements for
+high-risk AI systems. Article 12(2) is general ("logging shall enable
+the monitoring of operation"). Whether environmental impact must
+appear in the log depends on national implementation acts (still being
+written as of May 2026).</p>
+<p><strong>BIJOTEL production experience:</strong> since v1.9, our chain entries
+include energy estimates (Wh per call) and CO2 estimates (gCO2e per
+call), based on EnergyEstimator and CarbonCalculator components. These
+land as <code>bijotel.energy.*</code> and <code>bijotel.carbon.*</code> span attributes — no
+schema disruption to the OTel core fields.</p>
+<p><strong>Suggestion:</strong>
+Consider adding <code>environmental_impact</code> as an OPTIONAL field at the
+record level, with sub-fields <code>energy_wh: number</code> and
+<code>co2_grams: number</code>. Marking it OPTIONAL keeps the spec future-proof
+without imposing a measurement burden on every implementer. A
+forward-compatible namespace (e.g. <code>extensions.environmental_impact</code>)
+would be even cleaner.</p>
+<h3 id="37-mcp-specific-extension-forward-looking">3.7 MCP-specific extension (forward-looking)<a class="headerlink" href="#37-mcp-specific-extension-forward-looking" title="Anchor link to this section">&para;</a></h3>
+<p>The AAT draft uses an <code>action_type</code> controlled vocabulary. MCP tool
+invocations don't have an obvious bucket in the current vocabulary —
+they're not exactly <code>tool_call</code> (which is LLM tool-calling) and not
+<code>api_call</code> (which is HTTP-style).</p>
+<p><strong>BIJOTEL approach (v2.12.0):</strong> we added an <code>mcp.tool.*</code> span family
+with its own attribute namespace (<code>bijotel.mcp.*</code>). This avoids
+overloading existing AAT vocabulary, but it does mean external
+auditors need to know two namespaces.</p>
+<p><strong>Suggestion:</strong>
+Either (a) add <code>mcp_invocation</code> to the AAT vocabulary, or (b) add a
+section "5.X Extension namespaces" defining how implementations may
+introduce new action types without colliding with the core vocabulary.
+The MCP ecosystem is large (40+ CVEs in Jan–Apr 2026, NSA CSI in May
+2026) and isn't going away — AAT will benefit from a clear story here.</p>
+<h2 id="4-data-points-we-can-contribute">4. Data points we can contribute<a class="headerlink" href="#4-data-points-we-can-contribute" title="Anchor link to this section">&para;</a></h2>
+<p>If the draft author or a future working group wants empirical data,
+we have:</p>
+<ul>
+<li><strong>Performance benchmarks</strong> at the scales mentioned above (R3-D
+  test family).</li>
+<li><strong>Concurrent-writer correctness</strong> under SQLite WAL + BEGIN IMMEDIATE
+  (R2-B1 test).</li>
+<li><strong>Tamper-detection roundtrip</strong> including the 6 known-bad mutation
+  classes (Test 1 from R3).</li>
+<li><strong>Multi-provider chains</strong> (Anthropic + OpenAI in the same chain.db,
+  d9 cross-provider sanity test family).</li>
+<li><strong>Cross-org federation receipts</strong> (v2.11 — Ed25519-signed,
+  externally verifiable).</li>
+<li><strong>MCP invocation sealing</strong> (v2.12.0 — hashes of tool input/output,
+  status, transport, duration).</li>
+</ul>
+<p>All testing artifacts are reproducible from the public repo
+(<a href="https://github.com/octavuntila-prog/BIJOTEL">github.com/octavuntila-prog/BIJOTEL</a>)
+under MIT. We're happy to share specific numbers or run additional
+benchmarks if useful.</p>
+<h2 id="5-format-of-this-note">5. Format of this note<a class="headerlink" href="#5-format-of-this-note" title="Anchor link to this section">&para;</a></h2>
+<p>This note is not a formal IETF review. It's implementation feedback
+from a single production deployment. The draft author may use, ignore,
+or excerpt anything here without attribution requirements. If any of
+the suggestions land in a future draft revision, that's a win for both
+specs; if none do, that's also fine — different design choices serve
+different operator profiles.</p>
+<h2 id="6-references">6. References<a class="headerlink" href="#6-references" title="Anchor link to this section">&para;</a></h2>
+<ul>
+<li>Draft: <code>draft-sharif-agent-audit-trail-00</code></li>
+<li>BIJOTEL repository: <code>github.com/octavuntila-prog/BIJOTEL</code></li>
+<li>BIJOTEL threat model: <code>docs/threat-model.md</code></li>
+<li>BIJOTEL secret rotation: <code>docs/operations/secret-rotation.md</code></li>
+<li>BIJOTEL chain archival: <code>docs/operations/chain-archival.md</code></li>
+<li>bijotel-mcp design: <code>docs/design/bijotel-mcp.md</code></li>
+<li>RFC 8785 — JSON Canonicalization Scheme</li>
+<li>RFC 7493 — I-JSON Profile</li>
+<li>FIPS 186-5 — Digital Signature Standard (ECDSA, EdDSA)</li>
+<li>EU AI Act, Article 12 — Logging requirements</li>
+</ul>
 
 
 
@@ -2425,10 +2241,10 @@ for the disclosure window.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.highlight", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.highlight", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
