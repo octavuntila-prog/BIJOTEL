@@ -376,7 +376,8 @@ See `docs/operations/chain-archival.md` for the operational playbook.
 
 ---
 
-For schema changes, see migration notes in
-[CHANGELOG.md](CHANGELOG.md). For the production integration test
-that exercises all this, see
-[INTEGRATION_TEST_20260523.md](INTEGRATION_TEST_20260523.md).
+For schema changes, see migration notes in the
+[Changelog](changelog.md). For production integration evidence,
+see the GENA + ARA chain stats reported in the
+[Threat Model](threat-model.md) and the per-release notes on
+[GitHub Releases](https://github.com/octavuntila-prog/BIJOTEL/releases).
