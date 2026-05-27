@@ -5,6 +5,68 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.12.0] — 2026-05-27 — MCP invocation sealing
+
+First non-LLM seal target: Model Context Protocol (MCP) tool invocations
+now land in the same HMAC chain alongside LLM calls. Motivated by 40+
+CVEs filed against MCP servers in Jan-Apr 2026 and NSA CSI (May 2026)
+recommending audit logging for MCP — bijotel-mcp adds the cryptographic
+integrity layer NSA stops short of specifying.
+
+### Added
+
+- **`bijotel.mcp` module**:
+  - `MCPInstrumentor` — monkey-patches `mcp.ClientSession.call_tool` so
+    every async tool invocation emits an OTel span carrying
+    `bijotel.mcp.*` attributes. Idempotent; raises a clean
+    `ImportError` if the MCP SDK isn't installed.
+  - `mcp_invocation_context(...)` — public helper that builds the
+    attribute dict for callers who emit MCP spans manually (e.g. from
+    a non-stdlib MCP client).
+  - `MCP_ATTRS` — authoritative attribute vocabulary (10 keys covering
+    server identity, tool, input/output hashes, status, transport,
+    timing).
+- **MCP attribute vocabulary** under the `bijotel.mcp.*` namespace:
+  server_name, server_version, tool_name, tool_input_hash (SHA-256 hex),
+  tool_output_hash, caller, duration_ms, status, error_type, transport.
+- **Hash-only content capture**: tool inputs/outputs are SHA-256 hashed
+  before sealing, never stored raw. Preserves forensic value (verify
+  against a known-good blob later) without exposing potentially
+  sensitive content (file paths, credentials, prompts) in the chain.
+- **Optional dependency**: `pip install bijotel[mcp]` pulls in the MCP
+  SDK. The base install does NOT require MCP — `bijotel.mcp` module
+  imports cleanly, only `.instrument()` needs the SDK.
+- **Design doc**: `docs/design/bijotel-mcp.md` covers attribute
+  vocabulary, 3 integration patterns (in-process, proxy, Go collector),
+  threat model, and explicit out-of-scope items.
+- **18 new tests** in `tests/test_mcp_invocation.py`: hash determinism,
+  attribute completeness, instrumentor idempotency, success/error path
+  span emission. Uses an in-tree `mcp` module stub so tests are hermetic.
+
+### Honest scope
+
+- v2.12.0 covers **integration pattern A** (in-process Python
+  instrumentor) only. Pattern B (`bijotel-mcp-proxy` for non-Python
+  servers) and pattern C (`bijotel-collector` extension) are documented
+  but not implemented.
+- bijotel-mcp **seals** invocations; it does not **gate** them. Policy
+  enforcement on MCP tool calls (e.g. "deny `write_file` for user X")
+  is separate PolicyEngine work.
+- No production MCP traffic was sealed at release time — pattern A is
+  built and tested against a stub, real deployment validation
+  follows once an MCP-consuming agent is running on GENA or ARA.
+
+### Trust hierarchy after v2.12.0
+
+| Layer | Mechanism | Scope |
+|---|---|---|
+| L1 | HMAC chain | LLM calls (existing) |
+| L2 | + MCP attrs | LLM **+ MCP** tool invocations (new) |
+| L3 | Ed25519 export | external auditors |
+| L4 | Rekor anchor | public transparency log |
+| L5 | TEE attestation | producing software |
+| L6 | Federation | cross-org co-signing |
+
 ## [2.11.0] — 2026-05-26 — Cross-org federation (client + CLI)
 
 The fifth and last trust layer in the v2.x roadmap: a chain

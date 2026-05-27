@@ -40,6 +40,10 @@ from bijotel.integrity import (
     IntegrityReport,
     analyze_chain_integrity,
 )
+from bijotel.mcp import (
+    MCPInstrumentor,
+    mcp_invocation_context,
+)
 from bijotel.layers import (
     ASTSafetyChecker,
     ASTViolation,
@@ -115,7 +119,7 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.11.0"
+__version__ = "2.12.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -144,6 +148,7 @@ __all__ = [
     "FederationClient",
     "FingerprintSpanProcessor",
     "IntegrityReport",
+    "MCPInstrumentor",
     "MerkleDAG",
     "MisalignmentReport",
     "ModelRegistry",
@@ -192,6 +197,8 @@ __all__ = [
     "inspect_export",
     "load_private_pem",
     "load_public_pem",
+    # v2.12.0 MCP invocation sealing
+    "mcp_invocation_context",
     "misalignment_check",
     "model_allowlist",
     "model_version_pin",
