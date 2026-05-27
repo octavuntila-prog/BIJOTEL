@@ -58,6 +58,7 @@ nav:
       - Attestation: guides/attestation.md
       - Federation: guides/federation.md
       - MCP Invocations: guides/mcp-invocations.md
+      - Cross-Ecosystem View: guides/cross-ecosystem.md
   - API Reference:
       - CLI: api/cli.md
       - REST API: api/rest.md

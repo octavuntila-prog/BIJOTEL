@@ -40,6 +40,10 @@ from bijotel.integrity import (
     IntegrityReport,
     analyze_chain_integrity,
 )
+from bijotel.cross_view import (
+    ChainStats,
+    CrossEcosystemView,
+)
 from bijotel.mcp import (
     MCPInstrumentor,
     mcp_invocation_context,
@@ -119,7 +123,7 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.12.0"
+__version__ = "2.13.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -132,11 +136,13 @@ __all__ = [
     "Budget",
     "CarbonCalculator",
     "ChainIntegrityMonitor",
+    "ChainStats",
     "ConsensusResult",
     "ConsensusVoter",
     "ContainmentDecision",
     "ContainmentGuard",
     "CrossAnchorReceipt",
+    "CrossEcosystemView",
     "DAGNode",
     "Decision",
     "DeterministicFingerprinter",

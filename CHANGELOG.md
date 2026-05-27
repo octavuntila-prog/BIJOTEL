@@ -5,6 +5,49 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.0] — 2026-05-27 — Cross-ecosystem view
+
+For operators with more than one BIJOTEL-instrumented ecosystem
+(GENA + ARA + Gen4, or production + staging), the new
+`CrossEcosystemView` aggregates totals, provider union, and
+per-chain integrity in one read-only view. No chain merging —
+each chain keeps its own HMAC secret, signing key, and Rekor
+anchor.
+
+### Added
+
+- **`bijotel.cross_view` module**:
+  - `CrossEcosystemView` class — add N chains by local DB path or
+    pre-exported JSON, get unified `summary()` dict and
+    `integrity_report()`.
+  - `ChainStats` dataclass — per-chain snapshot (entries, providers,
+    models, first/last timestamps).
+  - `load_chain_stats_from_db(name, db_path)` — read SQLite chain.db.
+  - `load_chain_stats_from_export(name, export_path)` — read v2 export
+    JSON.
+- **`bijotel cross-view` CLI subcommand**: `--chain NAME=PATH`
+  (repeatable, mix DB and export files), `--json`, `--integrity`.
+- **20 new tests** in `tests/test_cross_view.py` covering loaders,
+  summary, integrity report, CLI human + JSON paths, edge cases
+  (empty, single chain, duplicate names, mixed sources).
+- **Public API**: `CrossEcosystemView`, `ChainStats` promoted to
+  top-level `bijotel.*` namespace.
+- **Docs**: `docs/guides/cross-ecosystem.md` (usage + CLI + what it
+  proves / does not prove).
+
+### Honest scope
+
+- The view is **read-only and observational**. It does not validate
+  cross-chain causality, does not merge chains, does not propose
+  trust beyond what each chain establishes individually.
+- The structural integrity check (when no HMAC secret is provided)
+  is weaker than a full `bijotel verify` — it only confirms the
+  chain is non-empty and parseable. For real HMAC integrity, pass
+  the secret via `integrity_report({"name": secret_bytes})`.
+- Mixed DB + export sources work, but exports lose the HMAC chain
+  (the export format strips raw `prev_hash` linkage by design);
+  integrity for export-sourced chains is structural only.
+
 ## [2.12.0] — 2026-05-27 — MCP invocation sealing
 
 First non-LLM seal target: Model Context Protocol (MCP) tool invocations

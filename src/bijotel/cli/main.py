@@ -6,6 +6,7 @@ import argparse
 import sys
 
 from bijotel.cli.cmd_anchor import add_anchor_subparser
+from bijotel.cli.cmd_cross_view import add_cross_view_subparser, cross_view_cmd
 from bijotel.cli.cmd_federation import add_federation_subparser
 from bijotel.cli.commands import (
     anchor_cmd,
@@ -323,6 +324,9 @@ def _build_parser() -> argparse.ArgumentParser:
     # bijotel federation register/submit/verify/status (v2.11.0)
     add_federation_subparser(subparsers)
 
+    # bijotel cross-view (v2.13.0)
+    add_cross_view_subparser(subparsers)
+
     # bijotel integrity (v2.8.0)
     p_integrity = subparsers.add_parser(
         "integrity",
@@ -429,6 +433,7 @@ def main(argv: list[str] | None = None) -> int:
         "integrity": integrity_cmd,
         "anchor": anchor_cmd,
         "federation": federation_cmd,
+        "cross-view": cross_view_cmd,
         "replay": replay_cmd,
         "energy": energy_cmd,
         "serve": serve_cmd,
