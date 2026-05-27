@@ -4,7 +4,7 @@
 [![CI](https://github.com/octavuntila-prog/BIJOTEL/actions/workflows/ci.yml/badge.svg)](https://github.com/octavuntila-prog/BIJOTEL/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/pypi/pyversions/bijotel.svg)](https://pypi.org/project/bijotel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-877%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-919%20passing-brightgreen.svg)](#)
 [![Coverage](https://img.shields.io/badge/coverage-86%25-green.svg)](#)
 [![Layers](https://img.shields.io/badge/layers-14%2F14%20active-brightgreen.svg)](#)
 [![Providers](https://img.shields.io/badge/chain%20providers-Anthropic%20%C2%B7%20xAI%20%28OpenAI%20adapter%29-blue.svg)](#)
@@ -18,15 +18,16 @@ It's a plug-in to whatever tracer you have (OpenLLMetry,
 `AnthropicInstrumentor`, custom wrappers) — it does not replace your
 tracer; it extends it.
 
-**Status:** v2.0.6 on PyPI; **GENA production runs v2.0.6** (deployed
-2026-05-25 via the metadata-polish release). Validated on **2 independent
-production systems**: **GENA** (9-ecosystem AI mesh, x86_64, Nuremberg —
-running BIJOTEL since 2026-05-10) and **ARA** (AI Research Agency,
-aarch64, Helsinki — running since 2026-05-25). Production-validated
-through 15 consecutive days on GENA: **5,889 chain entries, 15 wheel
-deploys (v0.5.0 → v2.0.6), 0 chain breaks, 2 LLM providers in the same
-chain** (Anthropic + xAI; the OpenAI SDK adapter is shipped, no
-`api.openai.com` calls in production).
+**Status:** v2.12.0 on PyPI; **GENA production runs v2.11.0** (deployed
+2026-05-26 via the federation-client release; v2.12.0 ships MCP
+instrumentation, which GENA does not yet consume). Validated on **2
+independent production systems**: **GENA** (9-ecosystem AI mesh,
+x86_64, Nuremberg — running BIJOTEL since 2026-05-10) and **ARA** (AI
+Research Agency, aarch64, Helsinki — running since 2026-05-25).
+Production-validated through 18 consecutive days on GENA: **6,805
+chain entries, 25+ wheel deploys (v0.5.0 → v2.12.0), 0 chain breaks,
+2 LLM providers in the same chain** (Anthropic + xAI; the OpenAI SDK
+adapter is shipped, no `api.openai.com` calls in production).
 **All 14 bijuterii layers active** at the default `bijotel serve` engine.
 
 ## Multi-provider chain (v2.0.0)
@@ -40,14 +41,14 @@ chain without distinguishing — the HMAC linkage holds regardless of
 who emitted each span.
 
 ```
-chain rows on GENA (excerpt, 2026-05-24):
-  seq 5490  openai.chat     provider=xai        grok-3-mini      (gen4 verifier)
-  seq 5489  anthropic.chat  provider=anthropic  claude-haiku-4-5 (gen4 extractor)
-  seq 5488  openai.chat     provider=xai        grok-3-mini
-  seq 5487  anthropic.chat  provider=anthropic  claude-haiku-4-5
+chain rows on GENA (excerpt, 2026-05-27):
+  seq 6805  anthropic.chat  provider=anthropic  claude-haiku-4-5
+  seq 6804  anthropic.chat  provider=anthropic  claude-haiku-4-5
+  seq 6803  openai.chat     provider=xai        grok-3-mini      (gen4 verifier)
+  seq 6802  anthropic.chat  provider=anthropic  claude-haiku-4-5 (gen4 extractor)
   ...
   $ bijotel verify --db chain.db
-  Chain VALID (5490 entries).
+  Chain VALID (6805 entries).
 ```
 
 That's N-version programming in production: one provider extracts,
@@ -285,16 +286,16 @@ v2.0.0 is the tag for the moment the column emptied.
   ``opentelemetry-instrumentation-openai`` chain. It never wraps the
   SDK call itself, so there's no provider-specific glue to maintain.
 
-## Production validated (v2.0.5 deploy, 2026-05-25)
+## Production validated (v2.11.0 deploy, 2026-05-26)
 
 GENA's production agent ecosystem (Aisophical) has been the rolling
 integration test since v0.5.0:
 
-* **15 days continuous operation** (2026-05-10 → 2026-05-25), **14
-  wheel deploys** on GENA: v0.5.0 → v0.6.0 → v0.6.1 → v1.1.0 → v1.4.0
-  → v1.5.2 → v1.5.3 → v1.7.0 → v1.8.0 → v1.9.0 → v1.9.1 → v2.0.3
-  → v2.0.4 → v2.0.5.
-* **5,889 chain entries**, `bijotel verify --db chain.db` returns
+* **18 days continuous operation** (2026-05-10 → 2026-05-27), **25+
+  wheel deploys** on GENA spanning v0.5.0 → v2.11.0; v2.12.0 (MCP
+  instrumentation) shipped to PyPI but intentionally not deployed to
+  GENA — no MCP consumer exists there yet.
+* **6,805 chain entries**, `bijotel verify --db chain.db` returns
   `Chain VALID` end-to-end — cross-version *and* cross-provider
   HMAC continuity.
 * **0 chain breaks** across the 14-deploy window; the chain

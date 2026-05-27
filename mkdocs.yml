@@ -57,6 +57,7 @@ nav:
       - Rekor Anchoring: guides/rekor-anchoring.md
       - Attestation: guides/attestation.md
       - Federation: guides/federation.md
+      - MCP Invocations: guides/mcp-invocations.md
   - API Reference:
       - CLI: api/cli.md
       - REST API: api/rest.md
@@ -72,6 +73,7 @@ nav:
       - OTel Collector Exporter: design/otel-collector-exporter.md
       - TEE-Anchored Chains: design/tee-anchored-chains.md
       - Cross-Org Federation: design/cross-org-federation.md
+      - MCP Invocation Traces: design/bijotel-mcp.md
   - Changelog: changelog.md
 
 markdown_extensions:
