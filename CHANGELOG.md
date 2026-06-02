@@ -5,6 +5,28 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.1] — 2026-06-02 — verify_chain reports last_seq
+
+### Fixed
+
+- `verify_chain(...)` now reports the **last verified seq** in its
+  success tuple `(True, last_seq, None)`. Previously the success path
+  always returned `(True, None, None)` regardless of how many rows were
+  verified — confusing when callers wanted to know how far the verify
+  reached. The `valid` flag was always authoritative and is unchanged;
+  this only populates the previously-`None` middle element.
+  - Full-chain verify: `last_seq` = seq of the last row in the chain.
+  - Range / `last_n` verify: `last_seq` = last seq in the window.
+  - Empty chain: `last_seq` stays `None` (nothing verified) — documented.
+  - Surfaced during the stabilization freeze (ARA Day-4 check showed
+    `(valid=True, last_seq=None)` on a full-chain verify).
+
+### Notes
+
+- Behavior change is limited to the middle element of the return tuple
+  on the **success** path. Failure path `(False, seq, reason)` unchanged.
+  Tests updated to assert the real last seq; 1 new empty-chain test.
+
 ## [2.13.0] — 2026-05-27 — Cross-ecosystem view
 
 For operators with more than one BIJOTEL-instrumented ecosystem

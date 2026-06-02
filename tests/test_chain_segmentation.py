@@ -52,10 +52,14 @@ def chain_db(tmp_path: Path) -> Path:
 
 
 def test_verify_chain_full_chain_still_works(chain_db: Path) -> None:
-    """Backward compat: zero kwargs = full-chain verify (v1.x behaviour)."""
+    """Backward compat: zero kwargs = full-chain verify (v1.x behaviour).
+
+    Since v2.13.1 the success tuple reports the last verified seq (20 for
+    this 20-span fixture); the valid flag is unchanged + authoritative.
+    """
     valid, seq, reason = verify_chain(chain_db, SECRET)
     assert valid is True
-    assert seq is None
+    assert seq == 20  # last verified seq (fixture = 20 spans), not None
     assert reason is None
 
 
@@ -63,12 +67,14 @@ def test_verify_chain_range_middle_segment(chain_db: Path) -> None:
     """seq 5..15 verifies cleanly when its predecessor is still in the DB."""
     valid, seq, reason = verify_chain(chain_db, SECRET, seq_start=5, seq_end=15)
     assert valid is True, reason
+    assert seq == 15  # last seq in the verified range
 
 
 def test_verify_chain_last_n(chain_db: Path) -> None:
     """--last 5 verifies the tail of the chain."""
     valid, seq, reason = verify_chain(chain_db, SECRET, last_n=5)
     assert valid is True, reason
+    assert seq == 20  # tail of a 20-span chain ends at seq 20
 
 
 def test_verify_chain_last_n_greater_than_chain(chain_db: Path) -> None:

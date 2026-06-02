@@ -298,12 +298,18 @@ def verify_chain(
         consistency within the window is still enforced.
 
     Returns:
-        ``(True, None, None)`` if every checked row passes.
+        ``(True, last_seq, None)`` if every checked row passes, where
+        ``last_seq`` is the ``seq`` of the last row verified (full-chain
+        or range). ``last_seq`` is ``None`` only when the window is
+        empty (no rows verified).
         ``(False, seq, reason)`` on the first failure encountered.
 
     Backward compatibility:
         ``verify_chain(db, secret)`` with no kwargs behaves exactly
-        like v1.x — full-chain verify against genesis.
+        like v1.x — full-chain verify against genesis. (Note: prior to
+        v2.13.1 the success tuple always carried ``None`` here; it now
+        reports the actual last seq. The ``valid`` flag is unchanged
+        and remains authoritative.)
     """
     with sqlite3.connect(db_path) as conn:
         # Resolve the actual seq window we will verify.
@@ -386,6 +392,7 @@ def verify_chain(
             """,
             params,
         )
+        last_verified_seq: int | None = None
         for seq, body, stored_canonical, stored_prev, stored_hmac in cursor:
             recomputed_canonical = hashlib.sha256(body).hexdigest()
             if recomputed_canonical != stored_canonical:
@@ -399,7 +406,8 @@ def verify_chain(
             if recomputed_hmac != stored_hmac:
                 return (False, seq, "hmac_hash mismatch (secret wrong or hmac mutated)")
             expected_prev = stored_hmac
-    return (True, None, None)
+            last_verified_seq = seq
+    return (True, last_verified_seq, None)
 
 
 def chain_range_summary(

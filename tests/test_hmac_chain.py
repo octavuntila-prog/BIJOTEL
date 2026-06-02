@@ -91,14 +91,34 @@ def test_chain_links_correctly(
 def test_verify_chain_passes_on_intact_chain(
     provider_with_chain: TracerProvider, db_path: Path
 ) -> None:
-    """100 spans -> verify_chain returnează (True, None, None)."""
+    """100 spans -> verify_chain returns (True, last_seq=100, None).
+
+    Since v2.13.1 the success tuple reports the last verified seq
+    (was None pre-2.13.1; the valid flag is unchanged + authoritative).
+    """
     for _ in range(100):
         _emit_genai_span()
     provider_with_chain.shutdown()
 
     valid, seq, reason = verify_chain(db_path, SECRET)
     assert valid is True
-    assert seq is None
+    assert seq == 100  # last verified seq, not None
+    assert reason is None
+
+
+def test_verify_chain_empty_reports_none_seq(db_path: Path) -> None:
+    """Empty chain: valid (vacuously) with last_seq=None — nothing verified."""
+    # Touch an empty chain.db with the schema by opening + shutting a provider
+    # that emits nothing.
+    provider = TracerProvider()
+    provider.add_span_processor(
+        HmacChainSpanProcessor(db_path=db_path, secret_key=SECRET)
+    )
+    provider.shutdown()
+
+    valid, seq, reason = verify_chain(db_path, SECRET)
+    assert valid is True
+    assert seq is None  # no rows verified
     assert reason is None
 
 
