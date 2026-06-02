@@ -1,23 +1,17 @@
-"""Tests for Rekor anchoring (v2.9.0).
+"""Tests for Rekor anchoring (v2.9.0; ECDSA P-256 live-interop fix v2.13.2).
 
-The Rekor HTTP client is mocked via monkeypatch so tests are fast and
-hermetic — no network needed. The Ed25519 signing path is real
-(uses ``bijotel.crypto.ed25519``) and the chain.db setup is real (uses
-``HmacChainSpanProcessor``), so anything that could go wrong on the
-crypto/storage seam still gets covered.
+The Rekor HTTP client is mocked via monkeypatch so most tests are fast and
+hermetic — no network needed. The ECDSA P-256 signing path is real (uses
+``bijotel.crypto.ecdsa_p256``) and the chain.db setup is real (uses
+``HmacChainSpanProcessor``), so the crypto/storage seam is covered.
 
-What we DO test:
-  - anchor_chain_head builds the right Rekor payload from a real chain
-  - verify_rekor_anchor accepts a well-formed Rekor response
-  - verify_rekor_anchor rejects each mismatch type with a specific reason
-  - CLI publish + verify via subprocess (with the same mock injection)
-  - Top-level public-API exports
-
-What we DON'T test here (intentional):
-  - A real round-trip to rekor.sigstore.dev. That's a manual smoke
-    step at release time — adding it to CI would be flaky (Rekor's
-    public instance can be slow / rate-limit) and would couple the
-    test suite to an external service.
+History note: anchors were originally signed with Ed25519, but Rekor verifies
+Ed25519 hashedrekord entries via Ed25519ph (pre-hashed EdDSA), which Python's
+``cryptography`` cannot emit — so live submissions failed with "ed25519:
+invalid signature". v2.13.2 switched anchoring to ECDSA P-256 (signs a SHA-256
+digest, Rekor's canonical hashedrekord path). The mocked tests below assert the
+new ECDSA/SHA-256 wire shape; ``test_live_rekor_roundtrip`` (env-gated) is the
+non-mocked guard that actually hits rekor.sigstore.dev.
 """
 
 from __future__ import annotations
@@ -42,7 +36,7 @@ from bijotel.anchoring import (
     anchor_chain_head,
     verify_rekor_anchor,
 )
-from bijotel.crypto.ed25519 import generate_keypair
+from bijotel.crypto.ecdsa_p256 import generate_keypair, verify_digest
 
 # ----------------------------------------------------------------------
 # Fixtures
@@ -76,11 +70,11 @@ def _seed_chain_with_head(tmp_path: Path) -> tuple[Path, str, int]:
     return db, hmac_hash, int(seq)
 
 
-def _ed25519_keypair(tmp_path: Path) -> tuple[Path, Path, bytes, bytes]:
-    """Generate a fresh Ed25519 keypair and write it to PEM files."""
+def _ecdsa_keypair(tmp_path: Path) -> tuple[Path, Path, bytes, bytes]:
+    """Generate a fresh ECDSA P-256 keypair and write it to PEM files."""
     priv_pem, pub_pem = generate_keypair()
-    priv_path = tmp_path / "private.pem"
-    pub_path = tmp_path / "public.pem"
+    priv_path = tmp_path / "ecdsa_private.pem"
+    pub_path = tmp_path / "ecdsa_public.pem"
     priv_path.write_bytes(priv_pem)
     pub_path.write_bytes(pub_pem)
     return priv_path, pub_path, priv_pem, pub_pem
@@ -100,7 +94,7 @@ def _fake_rekor_response(
         "apiVersion": "0.0.1",
         "kind": "hashedrekord",
         "spec": {
-            "data": {"hash": {"algorithm": "sha512", "value": data_hash_hex}},
+            "data": {"hash": {"algorithm": "sha256", "value": data_hash_hex}},
             "signature": {
                 "content": signature_b64,
                 "publicKey": {"content": public_pem_b64},
@@ -127,18 +121,15 @@ def _fake_rekor_response(
 
 def test_anchor_chain_head_uploads_correct_payload(tmp_path: Path) -> None:
     db, head_hash, head_seq = _seed_chain_with_head(tmp_path)
-    priv_path, _pub_path, _priv_pem, pub_pem = _ed25519_keypair(tmp_path)
+    priv_path, _pub_path, _priv_pem, pub_pem = _ecdsa_keypair(tmp_path)
 
     captured = {}
 
     def fake_urlopen(req, timeout):
-        # Capture what the client sends so we can assert structure.
         captured["url"] = req.full_url
         captured["body"] = req.data
         head_bytes = bytes.fromhex(head_hash)
-        data_hash = hashlib.sha512(head_bytes).hexdigest()
-        # Echo back a Rekor-shaped response so the call completes.
-        # signature_b64 isn't checked here — we just need a non-empty value.
+        data_hash = hashlib.sha256(head_bytes).hexdigest()
         resp = _fake_rekor_response(
             data_hash_hex=data_hash,
             signature_b64="UExBQ0VIT0xERVI=",  # b64("PLACEHOLDER")
@@ -149,15 +140,14 @@ def test_anchor_chain_head_uploads_correct_payload(tmp_path: Path) -> None:
     with patch("urllib.request.urlopen", side_effect=fake_urlopen):
         anchor = anchor_chain_head(db, sign_key_pem=priv_path)
 
-    # The request hit the expected endpoint
     assert "/api/v1/log/entries" in captured["url"]
-    # Payload was a hashedrekord with the right hash
     sent = json.loads(captured["body"])
     assert sent["kind"] == "hashedrekord"
-    expected_hash = hashlib.sha512(bytes.fromhex(head_hash)).hexdigest()
+    # ECDSA P-256 entries carry a SHA-256 digest (NOT sha512 — that's the bug fix).
+    assert sent["spec"]["data"]["hash"]["algorithm"] == "sha256"
+    expected_hash = hashlib.sha256(bytes.fromhex(head_hash)).hexdigest()
     assert sent["spec"]["data"]["hash"]["value"] == expected_hash
 
-    # Anchor fields populated correctly
     assert anchor.log_index == 12345
     assert anchor.log_uuid == "abc123def456"
     assert anchor.integrated_time == 1716730000
@@ -166,17 +156,14 @@ def test_anchor_chain_head_uploads_correct_payload(tmp_path: Path) -> None:
     assert anchor.rekor_url == REKOR_PUBLIC_URL
 
 
-def test_anchor_chain_head_signature_is_real_ed25519(tmp_path: Path) -> None:
+def test_anchor_chain_head_signature_is_real_ecdsa(tmp_path: Path) -> None:
     """The signature embedded in the anchor must verify with the public key."""
-    from bijotel.crypto.ed25519 import verify as ed_verify
-
     db, head_hash, _seq = _seed_chain_with_head(tmp_path)
-    priv_path, _pub_path, _priv_pem, pub_pem = _ed25519_keypair(tmp_path)
+    priv_path, _pub_path, _priv_pem, pub_pem = _ecdsa_keypair(tmp_path)
 
     def fake_urlopen(req, timeout):
         head_bytes = bytes.fromhex(head_hash)
-        data_hash = hashlib.sha512(head_bytes).hexdigest()
-        # Echo whatever signature the client sent so the anchor records it.
+        data_hash = hashlib.sha256(head_bytes).hexdigest()
         sent = json.loads(req.data)
         return io.BytesIO(_fake_rekor_response(
             data_hash_hex=data_hash,
@@ -187,15 +174,31 @@ def test_anchor_chain_head_signature_is_real_ed25519(tmp_path: Path) -> None:
     with patch("urllib.request.urlopen", side_effect=fake_urlopen):
         anchor = anchor_chain_head(db, sign_key_pem=priv_path)
 
-    # The signature is over the SHA-512 digest of the head_hash bytes
-    # (matches Rekor's hashedrekord verify convention for Ed25519).
+    # The DER ECDSA signature verifies over SHA-256(head_bytes) — exactly what
+    # Rekor checks. verify_digest re-hashes head_bytes with SHA-256 internally.
     sig_bytes = base64.b64decode(anchor.signature_b64)
-    data_digest = hashlib.sha512(bytes.fromhex(head_hash)).digest()
-    assert ed_verify(data_digest, sig_bytes, pub_pem) is True
+    assert verify_digest(bytes.fromhex(head_hash), sig_bytes, pub_pem) is True
+
+
+def test_anchor_chain_head_rejects_ed25519_key(tmp_path: Path) -> None:
+    """An Ed25519 key must be rejected with a clear, actionable error.
+
+    Rekor cannot verify Ed25519 hashedrekord entries from Python — this guard
+    stops a confusing live 'invalid signature' failure at sign time instead.
+    """
+    from bijotel.crypto.ed25519 import generate_keypair as ed_generate
+
+    db, _head_hash, _seq = _seed_chain_with_head(tmp_path)
+    ed_priv, _ed_pub = ed_generate()
+    ed_path = tmp_path / "ed25519_private.pem"
+    ed_path.write_bytes(ed_priv)
+
+    with pytest.raises(ValueError, match="ECDSA P-256"):
+        anchor_chain_head(db, sign_key_pem=ed_path)
 
 
 def test_anchor_chain_head_missing_db_raises(tmp_path: Path) -> None:
-    priv_path, _pub, _, _ = _ed25519_keypair(tmp_path)
+    priv_path, _pub, _, _ = _ecdsa_keypair(tmp_path)
     with pytest.raises(FileNotFoundError):
         anchor_chain_head(tmp_path / "nope.db", sign_key_pem=priv_path)
 
@@ -205,7 +208,7 @@ def test_anchor_chain_head_empty_chain_raises(tmp_path: Path) -> None:
     db = tmp_path / "chain.db"
     with sqlite3.connect(db) as conn:
         conn.execute("CREATE TABLE chain (seq INTEGER PRIMARY KEY, hmac_hash TEXT)")
-    priv_path, _pub, _, _ = _ed25519_keypair(tmp_path)
+    priv_path, _pub, _, _ = _ecdsa_keypair(tmp_path)
     with pytest.raises(RuntimeError, match="empty"):
         anchor_chain_head(db, sign_key_pem=priv_path)
 
@@ -218,10 +221,10 @@ def test_anchor_chain_head_empty_chain_raises(tmp_path: Path) -> None:
 def _build_anchor_and_response(tmp_path: Path) -> tuple[RekorAnchor, bytes, bytes]:
     """Helper: create a real anchor + the matching Rekor response bytes."""
     db, head_hash, _ = _seed_chain_with_head(tmp_path)
-    priv_path, _pub_path, _priv_pem, pub_pem = _ed25519_keypair(tmp_path)
+    priv_path, _pub_path, _priv_pem, pub_pem = _ecdsa_keypair(tmp_path)
 
     head_bytes = bytes.fromhex(head_hash)
-    data_hash = hashlib.sha512(head_bytes).hexdigest()
+    data_hash = hashlib.sha256(head_bytes).hexdigest()
     pub_pem_b64 = base64.b64encode(pub_pem).decode("ascii")
 
     def fake_urlopen(req, timeout):
@@ -270,7 +273,7 @@ def test_verify_rekor_anchor_hash_mismatch(tmp_path: Path) -> None:
     """If Rekor's hash doesn't match what we recompute, verify fails."""
     anchor, _matching, pub_pem = _build_anchor_and_response(tmp_path)
     wrong_response = _fake_rekor_response(
-        data_hash_hex="0" * 128,  # nonsense sha512 (128 hex chars)
+        data_hash_hex="0" * 64,  # nonsense sha256 (64 hex chars)
         signature_b64=anchor.signature_b64,
         public_pem_b64=base64.b64encode(pub_pem).decode("ascii"),
     )
@@ -286,12 +289,11 @@ def test_verify_rekor_anchor_hash_mismatch(tmp_path: Path) -> None:
 def test_verify_rekor_anchor_pubkey_mismatch(tmp_path: Path) -> None:
     """A different pubkey in Rekor (e.g. forged anchor) fails the external check."""
     anchor, _matching, pub_pem = _build_anchor_and_response(tmp_path)
-    # Generate an *unrelated* keypair, use its public key in Rekor's response.
     _other_priv, other_pub = generate_keypair()
     head_bytes = bytes.fromhex(anchor.head_hash)
 
     wrong_response = _fake_rekor_response(
-        data_hash_hex=hashlib.sha512(head_bytes).hexdigest(),
+        data_hash_hex=hashlib.sha256(head_bytes).hexdigest(),
         signature_b64=anchor.signature_b64,
         public_pem_b64=base64.b64encode(other_pub).decode("ascii"),
     )
@@ -310,7 +312,6 @@ def test_verify_rekor_anchor_signature_invalid(tmp_path: Path) -> None:
     """Tampering with the anchor's signature_b64 breaks verify."""
     anchor, matching_response, _pub_pem = _build_anchor_and_response(tmp_path)
 
-    # Flip the first base64 char of the signature.
     sig = anchor.signature_b64
     flipped = ("z" if sig[0] != "z" else "y") + sig[1:]
     bad_anchor = RekorAnchor(
@@ -403,20 +404,13 @@ def _run_cli(*args: str, env_extra: dict | None = None) -> subprocess.CompletedP
 
 
 def test_cli_anchor_publish_writes_sidecar(tmp_path: Path) -> None:
-    """`bijotel anchor publish` runs end-to-end via a tiny in-tree mock.
-
-    We can't subprocess-monkeypatch urllib from the parent process, so
-    this test points the CLI at a tiny local HTTP server that mimics
-    Rekor. Strategy: spin up an http.server on an ephemeral port,
-    point --rekor-url at it, run the subprocess, then check stdout +
-    sidecar contents.
-    """
+    """`bijotel anchor publish` runs end-to-end against a local fake Rekor."""
     import http.server
     import socketserver
     import threading
 
     db, head_hash, _seq = _seed_chain_with_head(tmp_path)
-    priv_path, _pub_path, _priv_pem, pub_pem = _ed25519_keypair(tmp_path)
+    priv_path, _pub_path, _priv_pem, pub_pem = _ecdsa_keypair(tmp_path)
 
     captured_requests = []
 
@@ -428,7 +422,7 @@ def test_cli_anchor_publish_writes_sidecar(tmp_path: Path) -> None:
 
             sent = json.loads(body)
             head_bytes = bytes.fromhex(head_hash)
-            data_hash = hashlib.sha512(head_bytes).hexdigest()
+            data_hash = hashlib.sha256(head_bytes).hexdigest()
             response = _fake_rekor_response(
                 data_hash_hex=data_hash,
                 signature_b64=sent["spec"]["signature"]["content"],
@@ -441,7 +435,7 @@ def test_cli_anchor_publish_writes_sidecar(tmp_path: Path) -> None:
             self.wfile.write(response)
 
         def log_message(self, *args):
-            pass  # silence the default access log
+            pass
 
     with socketserver.TCPServer(("127.0.0.1", 0), FakeRekor) as httpd:
         port = httpd.server_address[1]
@@ -468,7 +462,7 @@ def test_cli_anchor_publish_writes_sidecar(tmp_path: Path) -> None:
 
 
 def test_cli_anchor_publish_missing_db_exits_1(tmp_path: Path) -> None:
-    priv_path, _pub, _, _ = _ed25519_keypair(tmp_path)
+    priv_path, _pub, _, _ = _ecdsa_keypair(tmp_path)
     out = _run_cli(
         "anchor", "publish",
         "--db", str(tmp_path / "no-such.db"),
@@ -495,3 +489,26 @@ def test_public_api_exports() -> None:
     ):
         assert hasattr(bijotel, name), f"bijotel.{name} missing"
         assert name in bijotel.__all__
+
+
+# ----------------------------------------------------------------------
+# 6. LIVE Rekor round-trip (non-mocked) — the guard that would have caught
+#    the Ed25519ph bug. Opt-in: set BIJOTEL_REKOR_LIVE=1 (hits the network).
+# ----------------------------------------------------------------------
+
+
+@pytest.mark.skipif(
+    os.environ.get("BIJOTEL_REKOR_LIVE") != "1",
+    reason="set BIJOTEL_REKOR_LIVE=1 to hit the real rekor.sigstore.dev",
+)
+def test_live_rekor_roundtrip(tmp_path: Path) -> None:
+    """Publish a real anchor to public Rekor and fetch it back. No mocks."""
+    db, _head_hash, _seq = _seed_chain_with_head(tmp_path)
+    priv_path, _pub_path, _priv_pem, pub_pem = _ecdsa_keypair(tmp_path)
+
+    anchor = anchor_chain_head(db, sign_key_pem=priv_path)
+    assert anchor.log_index > 0, "Rekor should return a positive log index"
+
+    result = verify_rekor_anchor(anchor, expected_public_key_pem=pub_pem)
+    assert result.match is True, f"live verify failed: {result.reason}"
+    assert result.hash_matches and result.pubkey_matches and result.signature_valid

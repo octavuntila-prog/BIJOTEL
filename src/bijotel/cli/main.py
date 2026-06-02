@@ -153,13 +153,21 @@ def _build_parser() -> argparse.ArgumentParser:
     # bijotel keygen
     p_keygen = subparsers.add_parser(
         "keygen",
-        help="Generate Ed25519 keypair for signing chain exports.",
+        help="Generate a signing keypair (Ed25519 for exports, ECDSA P-256 for Rekor anchoring).",
     )
     p_keygen.add_argument(
         "--output-dir",
         default="./keys",
         help="Directory to write keys into (default ./keys). "
         "Creates bijotel_private.pem (mode 0600) and bijotel_public.pem.",
+    )
+    p_keygen.add_argument(
+        "--type",
+        choices=["ed25519", "ecdsa"],
+        default="ed25519",
+        help="Key type: 'ed25519' (default, for chain exports) or 'ecdsa' "
+        "(P-256, for Rekor anchoring — Rekor cannot verify Ed25519). ecdsa "
+        "writes bijotel_ecdsa_private.pem / bijotel_ecdsa_public.pem.",
     )
     p_keygen.add_argument(
         "--force",

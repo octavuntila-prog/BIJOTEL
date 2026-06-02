@@ -31,7 +31,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from bijotel.crypto.ed25519 import load_private_pem, load_public_pem, sign, verify
+from bijotel.crypto.ecdsa_p256 import (
+    load_private_pem,
+    load_public_pem,
+    sign_digest,
+    verify_digest,
+)
 
 #: The public Rekor instance run by the Linux Foundation / Sigstore.
 #: Override via ``rekor_url=`` to point at a private Rekor for
@@ -125,9 +130,11 @@ class RekorClient:
             "kind": "hashedrekord",
             "spec": {
                 "data": {
-                    # Rekor demands sha512 for Ed25519-signed entries
-                    # (Ed25519 hashes internally with SHA-512).
-                    "hash": {"algorithm": "sha512", "value": data_hash_hex},
+                    # ECDSA P-256 anchors use SHA-256 — Rekor's canonical
+                    # hashedrekord digest for EC keys. (Ed25519 is NOT used:
+                    # Rekor verifies it via Ed25519ph, which Python's
+                    # cryptography cannot emit. See bijotel.crypto.ecdsa_p256.)
+                    "hash": {"algorithm": "sha256", "value": data_hash_hex},
                 },
                 "signature": {
                     "content": signature_b64,
@@ -235,17 +242,13 @@ def anchor_chain_head(
     else:
         private_pem = sign_key_pem
 
-    # Rekor's hashedrekord type verifies the signature against the
-    # *raw bytes of the hash* (decoded from the hex string in the
-    # body) — not against the original data, because hashedrekord
-    # entries don't carry the data. For Ed25519 the convention is
-    # SHA-512: caller computes SHA-512(data), signs THAT digest, and
-    # uploads (hash_hex, signature). Rekor then re-decodes hash_hex
-    # to bytes and runs ed25519.verify(pubkey, hash_bytes, signature).
+    # Rekor's hashedrekord verifies an ECDSA P-256 entry by ECDSA-verifying
+    # the signature against the SHA-256 digest carried in data.hash.value.
+    # cryptography's ECDSA(SHA256) hashes head_bytes -> SHA-256 -> signs that
+    # digest, so signing head_bytes and uploading SHA-256(head_bytes) line up.
     head_bytes = bytes.fromhex(head_hash)
-    data_digest = hashlib.sha512(head_bytes).digest()
-    data_hash = data_digest.hex()  # for the hash.value field
-    signature_bytes = sign(data_digest, private_pem)
+    data_hash = hashlib.sha256(head_bytes).hexdigest()  # for the hash.value field
+    signature_bytes = sign_digest(head_bytes, private_pem)  # DER ECDSA over SHA-256
     signature_b64 = base64.b64encode(signature_bytes).decode("ascii")
 
     # Derive the public PEM from the private PEM and base64-encode the
@@ -355,9 +358,9 @@ def verify_rekor_anchor(
     )
 
     # Check 1: hash matches what we recompute from the head_hash.
-    # Rekor uses SHA-512 for Ed25519 entries (see comment in upload()).
+    # ECDSA P-256 anchors use SHA-256 (see comment in upload()).
     head_bytes = bytes.fromhex(anchor.head_hash)
-    expected_data_hash = hashlib.sha512(head_bytes).hexdigest()
+    expected_data_hash = hashlib.sha256(head_bytes).hexdigest()
     hash_matches = (rekor_hash == expected_data_hash)
 
     # Check 2: pubkey matches.
@@ -383,9 +386,8 @@ def verify_rekor_anchor(
         # Weaker self-contained check: anchor's pubkey matches Rekor's.
         pubkey_matches = (rekor_pubkey_pem.strip() == anchor.public_key_pem.strip())
 
-    # Check 3: Ed25519 signature verifies against the SHA-512 digest of
-    # head_bytes (the same thing Rekor verifies — see the upload-path
-    # comment in ChainWriter.Seal-equivalent above).
+    # Check 3: the ECDSA P-256 signature verifies over SHA-256(head_bytes)
+    # (the same digest Rekor verifies — see the upload-path comment above).
     try:
         sig_bytes = base64.b64decode(anchor.signature_b64)
         pubkey_for_verify = (
@@ -393,8 +395,7 @@ def verify_rekor_anchor(
             if expected_public_key_pem is None
             else expected_pem_bytes  # type: ignore[possibly-undefined]
         )
-        data_digest = hashlib.sha512(head_bytes).digest()
-        signature_valid = verify(data_digest, sig_bytes, pubkey_for_verify)
+        signature_valid = verify_digest(head_bytes, sig_bytes, pubkey_for_verify)
     except Exception:
         signature_valid = False
 

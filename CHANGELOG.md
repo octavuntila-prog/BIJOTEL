@@ -5,6 +5,37 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.2] — 2026-06-02 — Rekor anchoring: live-interop fix (ECDSA P-256)
+
+### Fixed
+
+- **Rekor anchoring now actually works against the live Sigstore Rekor.**
+  `bijotel anchor publish` previously signed with **pure Ed25519**, but
+  Rekor verifies Ed25519 `hashedrekord` entries via **Ed25519ph**
+  (pre-hashed EdDSA), which Python's `cryptography` cannot emit — so every
+  live submission failed with `HTTP 400: ed25519: invalid signature`. The
+  15 unit tests mocked Rekor, so this never surfaced. Anchoring now signs
+  with **ECDSA P-256 over a SHA-256 digest** — Rekor's canonical,
+  natively-supported `hashedrekord` path. Verified by a real round-trip to
+  `rekor.sigstore.dev` (logIndex returned + fetched back + MATCH).
+
+### Added
+
+- `bijotel.crypto.ecdsa_p256` — ECDSA P-256 sign/verify helpers (parallel to
+  `bijotel.crypto.ed25519`; Ed25519 remains the algorithm for signed *exports*).
+- `bijotel keygen --type ecdsa` — generates an ECDSA P-256 anchoring keypair
+  (`bijotel_ecdsa_private.pem` / `bijotel_ecdsa_public.pem`).
+- `tests/test_anchoring.py::test_live_rekor_roundtrip` — a **non-mocked** guard
+  (opt-in via `BIJOTEL_REKOR_LIVE=1`) that publishes + verifies against the real
+  Rekor, so this interop class of bug cannot recur silently.
+
+### Changed
+
+- `anchor_chain_head` / `verify_rekor_anchor` use SHA-256 (was SHA-512) + ECDSA
+  verification. `anchor publish` with an Ed25519 key now fails fast with a clear
+  "generate one with `bijotel keygen --type ecdsa`" message instead of an opaque
+  Rekor 400.
+
 ## [2.13.1] — 2026-06-02 — verify_chain reports last_seq
 
 ### Fixed

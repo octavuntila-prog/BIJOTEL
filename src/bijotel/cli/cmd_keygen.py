@@ -22,17 +22,27 @@ def keygen_cmd(args: argparse.Namespace) -> int:
     Refuses to overwrite an existing private key file unless ``--force``
     is passed; rotating a signing key by accident is bad.
     """
-    from bijotel.crypto.ed25519 import generate_keypair, public_key_fingerprint
-
+    key_type = getattr(args, "type", "ed25519")
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    priv_path = out_dir / "bijotel_private.pem"
-    pub_path = out_dir / "bijotel_public.pem"
+
+    if key_type == "ecdsa":
+        # ECDSA P-256 — required for Rekor anchoring (Rekor verifies Ed25519
+        # via Ed25519ph, which cryptography cannot emit). See ecdsa_p256.py.
+        from bijotel.crypto.ecdsa_p256 import generate_keypair, public_key_fingerprint
+        priv_path = out_dir / "bijotel_ecdsa_private.pem"
+        pub_path = out_dir / "bijotel_ecdsa_public.pem"
+        label = "ECDSA P-256"
+    else:
+        from bijotel.crypto.ed25519 import generate_keypair, public_key_fingerprint
+        priv_path = out_dir / "bijotel_private.pem"
+        pub_path = out_dir / "bijotel_public.pem"
+        label = "Ed25519"
 
     if priv_path.exists() and not args.force:
         print(
             f"ERROR: {priv_path} already exists. Pass --force to overwrite "
-            "(this rotates your signing key — old signed exports will no "
+            "(this rotates your signing key — old signatures will no "
             "longer carry a matching key).",
             file=sys.stderr,
         )
@@ -50,15 +60,25 @@ def keygen_cmd(args: argparse.Namespace) -> int:
         os.chmod(priv_path, 0o600)
 
     fp = public_key_fingerprint(public_pem)
-    print(f"Generated Ed25519 keypair in {out_dir}/")
+    print(f"Generated {label} keypair in {out_dir}/")
     print(f"  Private key: {priv_path}  (mode 0o600 — keep secret)")
     print(f"  Public key:  {pub_path}   (share with auditors)")
     print(f"  Fingerprint: {fp}")
     print()
     print("Next steps:")
-    print(f"  bijotel export --db chain.db -o export.json --sign-key {priv_path}")
-    print(
-        f"  bijotel verify-export export.json --public-key {pub_path} "
-        "[--secret-hex <hex>]"
-    )
+    if key_type == "ecdsa":
+        print(
+            f"  bijotel anchor publish --db chain.db --sign-key {priv_path} "
+            "--output anchor.json"
+        )
+        print(
+            f"  bijotel anchor verify --anchor-file anchor.json "
+            f"--public-key {pub_path}"
+        )
+    else:
+        print(f"  bijotel export --db chain.db -o export.json --sign-key {priv_path}")
+        print(
+            f"  bijotel verify-export export.json --public-key {pub_path} "
+            "[--secret-hex <hex>]"
+        )
     return 0
