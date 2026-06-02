@@ -87,7 +87,7 @@ docker run -p 8080:8080 \
 
 Then open <http://localhost:8080/> for the dashboard and
 <http://localhost:8080/api/health> for the REST liveness probe. Versioned
-tags (`:2.7.0`, `:latest`) live at
+tags (`:2.13.1`, `:latest`) live at
 [ghcr.io/octavuntila-prog/bijotel](https://github.com/octavuntila-prog/BIJOTEL/pkgs/container/bijotel).
 
 ## Quickstart
