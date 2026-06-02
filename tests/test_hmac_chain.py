@@ -218,6 +218,31 @@ def test_custom_filter_fn(db_path: Path) -> None:
         assert rows[0] == 1
 
 
+def test_default_filter_keeps_mcp_and_gen_ai_spans() -> None:
+    """Regression guard (v2.13.3): the default filter seals MCP invocations.
+
+    Before v2.13.3 the default filter kept only ``gen_ai.*`` spans, so MCP
+    spans (``bijotel.mcp.*`` attrs, emitted by MCPInstrumentor) were silently
+    dropped — the "sealed by the existing processor" claim only held with a
+    custom ``filter_fn``. This locks the fix at the exact changed line.
+    """
+    from bijotel.processors.hmac_chain import _default_filter
+
+    class _Span:
+        def __init__(self, attrs: object) -> None:
+            self.attributes = attrs
+
+    # gen_ai.* still kept
+    assert _default_filter(_Span({"gen_ai.system": "anthropic"})) is True
+    # bijotel.mcp.* now kept (THE FIX; was False before v2.13.3)
+    assert _default_filter(_Span({"bijotel.mcp.tool_name": "echo"})) is True
+    # unrelated spans still dropped
+    assert _default_filter(_Span({"http.method": "GET"})) is False
+    # empty / missing attributes dropped
+    assert _default_filter(_Span({})) is False
+    assert _default_filter(_Span(None)) is False
+
+
 def test_semantic_body_hash_populated(
     provider_with_chain: TracerProvider, db_path: Path
 ) -> None:

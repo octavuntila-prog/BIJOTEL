@@ -18,6 +18,10 @@ from bijotel.attestation import (
     SoftwareAttestation,
 )
 from bijotel.core.init import init, shutdown
+from bijotel.cross_view import (
+    ChainStats,
+    CrossEcosystemView,
+)
 from bijotel.crypto.ed25519 import (
     generate_keypair,
     load_private_pem,
@@ -39,14 +43,6 @@ from bijotel.integrity import (
     ChainIntegrityMonitor,
     IntegrityReport,
     analyze_chain_integrity,
-)
-from bijotel.cross_view import (
-    ChainStats,
-    CrossEcosystemView,
-)
-from bijotel.mcp import (
-    MCPInstrumentor,
-    mcp_invocation_context,
 )
 from bijotel.layers import (
     ASTSafetyChecker,
@@ -79,6 +75,10 @@ from bijotel.layers import (
     misalignment_check,
     routing_recommendation,
     similarity_search,
+)
+from bijotel.mcp import (
+    MCPInstrumentor,
+    mcp_invocation_context,
 )
 from bijotel.policy import (
     Decision,
@@ -123,7 +123,7 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.13.2"
+__version__ = "2.13.3"
 
 __all__ = [
     "ASTSafetyChecker",

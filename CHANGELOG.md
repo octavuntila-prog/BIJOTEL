@@ -5,6 +5,33 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.3] — 2026-06-02 — MCP invocations now sealed by the default processor
+
+### Fixed
+
+- **MCP tool invocations are now sealed into the audit chain out-of-the-box.**
+  `MCPInstrumentor` emits spans carrying `bijotel.mcp.*` attributes, but the
+  default `HmacChainSpanProcessor` filter kept only `gen_ai.*` spans — so a
+  default-configured processor silently **dropped** every MCP invocation. The
+  v2.12 "sealed by the existing processor" claim only held if the host passed a
+  custom `filter_fn`. The 18 MCP unit tests mocked `ClientSession` and never
+  verified a real sealed call, so this never surfaced (same class of gap as the
+  2.13.2 Rekor fix). The default filter now also keeps `bijotel.mcp.*` spans.
+
+### Added
+
+- **End-to-end MCP sealing test** (`tests/test_mcp_e2e.py`, not mocked): stands
+  up a real in-memory MCP server + client, instruments via `MCPInstrumentor`,
+  makes a real `call_tool`, and asserts the invocation is sealed by the
+  **default** processor. Plus a `_default_filter` regression-guard unit test in
+  `tests/test_hmac_chain.py`.
+
+### Notes
+
+- No impact on existing GENA/ARA deployments: neither instruments an MCP
+  *client*, so neither emits `bijotel.mcp.*` spans. The fix only changes
+  behavior for hosts that actually use `MCPInstrumentor`.
+
 ## [2.13.2] — 2026-06-02 — Rekor anchoring: live-interop fix (ECDSA P-256)
 
 ### Fixed

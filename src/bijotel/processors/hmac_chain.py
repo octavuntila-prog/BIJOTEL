@@ -28,10 +28,20 @@ _LOG = logging.getLogger("bijotel.chain")
 
 
 def _default_filter(span: ReadableSpan) -> bool:
-    """Default: keep spans cu cel puțin un atribut gen_ai.*."""
+    """Default: keep spans with at least one ``gen_ai.*`` or ``bijotel.mcp.*`` attr.
+
+    ``gen_ai.*`` covers LLM calls; ``bijotel.mcp.*`` covers MCP tool invocations
+    (emitted by :class:`bijotel.mcp.MCPInstrumentor`). Both belong in the audit
+    chain. Before v2.13.3 this kept only ``gen_ai.*``, so MCP spans were silently
+    dropped by the default filter — the v2.12 "sealed by the existing processor"
+    claim only held if the host passed a custom ``filter_fn``. Now true by default.
+    """
     if not span.attributes:
         return False
-    return any(key.startswith("gen_ai.") for key in span.attributes)
+    return any(
+        key.startswith("gen_ai.") or key.startswith("bijotel.mcp.")
+        for key in span.attributes
+    )
 
 
 class HmacChainSpanProcessor(SpanProcessor):
