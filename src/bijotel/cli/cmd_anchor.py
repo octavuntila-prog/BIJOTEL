@@ -8,7 +8,7 @@ Two subcommands:
         resulting log_index + UUID, and optionally writes the full
         ``RekorAnchor`` JSON sidecar so an auditor can verify later.
 
-  * ``bijotel anchor verify --anchor-file PATH [--public-key PATH]``
+  * ``bijotel anchor verify PATH [--public-key PATH]``  (PATH is positional)
         re-fetches the entry from Rekor by log_index and checks
         (hash, public key, signature) all line up. Exit 0 on match,
         3 on mismatch, 1 on operational error, 2 on bad args.

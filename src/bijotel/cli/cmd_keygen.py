@@ -72,8 +72,7 @@ def keygen_cmd(args: argparse.Namespace) -> int:
             "--output anchor.json"
         )
         print(
-            f"  bijotel anchor verify --anchor-file anchor.json "
-            f"--public-key {pub_path}"
+            f"  bijotel anchor verify anchor.json --public-key {pub_path}"
         )
     else:
         print(f"  bijotel export --db chain.db -o export.json --sign-key {priv_path}")
