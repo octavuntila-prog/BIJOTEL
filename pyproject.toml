@@ -124,5 +124,6 @@ exclude = [
     "src/bijotel/dashboard/index.html",
     "src/bijotel/dashboard/package.json",
     "src/bijotel/dashboard/vite.config.js",
+    "ops",   # internal GENA ops/monitoring scripts — version-controlled, not shipped
 ]
 artifacts = ["src/bijotel/dashboard_dist/**/*"]
