@@ -76,12 +76,12 @@ SpanProcessors. Every call gets:
 
 ## Production validated
 
-- **5,889+ chain entries** across 15 days continuous operation
+- **10,606+ chain entries (GENA) + 801 (ARA)** across 24+ days continuous operation
 - **2 independent production systems**: **GENA** (9-ecosystem AI mesh,
   x86_64, Nuremberg) and **ARA** (AI Research Agency, aarch64, Helsinki)
 - **Cross-architecture** verification proven (R2-D)
 - **Cross-provider** chains (Anthropic + xAI via OpenAI adapter)
-- **686 unit tests** + **46 production tests** across 3 rounds (0 partial/fail)
+- **968 unit tests** + **46 production tests** across 3 rounds (0 partial/fail)
 - **CI green** on Python 3.11 + 3.12
 
 ## How it compares
