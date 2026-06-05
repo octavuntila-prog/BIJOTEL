@@ -377,9 +377,60 @@ class EnergyTracker:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_energy_ts ON energy_log(timestamp_ns)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_energy_model ON energy_log(model)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_energy_agent ON energy_log(agent_id)")
+            # Key/value meta. Currently holds 'live_cutover_seq': the chain seq
+            # from which the live EnergySpanProcessor owns recording. Backfill
+            # skips seq > cutover so it never double-counts the live NULL-seq
+            # rows (which the span_seq UNIQUE dedup cannot catch).
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS energy_meta (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+            """)
             conn.execute("COMMIT")
         finally:
             conn.close()
+
+    # ---- live-cutover marker (live-vs-backfill reconciliation) ----
+
+    def set_live_cutover_seq(self, seq: int) -> None:
+        """Mark the chain seq from which energy is recorded LIVE.
+
+        Backfill skips chain rows with ``seq > cutover`` so it never
+        double-counts spans the live :class:`EnergySpanProcessor` already
+        recorded — live rows carry ``span_seq=NULL``, which the
+        ``span_seq`` UNIQUE / INSERT-OR-IGNORE dedup cannot catch. Set this
+        ONCE at the live cutover (just before the host starts the live
+        processor). Stored in the DB, not in docs, so the guard survives
+        operator memory.
+        """
+        with self._lock:
+            conn = sqlite3.connect(self._db_path, isolation_level=None)
+            try:
+                conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
+                conn.execute(
+                    "INSERT INTO energy_meta (key, value) "
+                    "VALUES ('live_cutover_seq', ?) "
+                    "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                    (str(int(seq)),),
+                )
+            finally:
+                conn.close()
+
+    def get_live_cutover_seq(self) -> int | None:
+        """Return the live-cutover seq if set, else ``None``.
+
+        See :meth:`set_live_cutover_seq`. Tolerates a pre-2.14 DB that has
+        no ``energy_meta`` table (returns ``None``).
+        """
+        try:
+            with sqlite3.connect(self._db_path) as conn:
+                row = conn.execute(
+                    "SELECT value FROM energy_meta WHERE key='live_cutover_seq'"
+                ).fetchone()
+        except sqlite3.OperationalError:
+            return None
+        return int(row[0]) if row and row[0] is not None else None
 
     def record(
         self,

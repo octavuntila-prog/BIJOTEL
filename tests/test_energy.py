@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import argparse
+import json
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -428,3 +431,64 @@ def test_gena_workload_estimate(tmp_path: Path) -> None:
     assert s.total_co2_grams == pytest.approx(2.68, rel=0.05)
     # < 0.03 km driven equivalent — basically nothing
     assert s.equivalent_km_driven < 0.05
+
+
+# ============================================================================
+# Live-cutover marker — live-vs-backfill reconciliation (v2.14.0)
+# ============================================================================
+
+
+def test_live_cutover_set_get_roundtrip(tmp_path: Path) -> None:
+    tracker = EnergyTracker(tmp_path / "energy.db")
+    assert tracker.get_live_cutover_seq() is None  # unset by default
+    tracker.set_live_cutover_seq(100)
+    assert tracker.get_live_cutover_seq() == 100
+    tracker.set_live_cutover_seq(250)  # overwrite (upsert)
+    assert tracker.get_live_cutover_seq() == 250
+
+
+def test_get_live_cutover_none_on_fresh_db(tmp_path: Path) -> None:
+    assert EnergyTracker(tmp_path / "fresh.db").get_live_cutover_seq() is None
+
+
+def test_backfill_skips_seq_beyond_cutover(tmp_path: Path) -> None:
+    """Backfill records seq <= cutover and skips seq > cutover, so it never
+    double-counts the live EnergySpanProcessor's NULL-seq rows."""
+    from bijotel.cli.cmd_energy import _energy_backfill_cmd
+
+    db = tmp_path / "chain.db"
+    body = json.dumps(
+        {
+            "attributes": {
+                "gen_ai.request.model": "claude-haiku-4-5",
+                "gen_ai.usage.input_tokens": 10,
+                "gen_ai.usage.output_tokens": 5,
+            }
+        }
+    )
+    with sqlite3.connect(db) as conn:
+        conn.execute(
+            "CREATE TABLE chain (seq INTEGER PRIMARY KEY, "
+            "timestamp_ns INTEGER, canonical_body TEXT)"
+        )
+        for seq in range(1, 6):  # seq 1..5
+            conn.execute(
+                "INSERT INTO chain (seq, timestamp_ns, canonical_body) "
+                "VALUES (?, ?, ?)",
+                (seq, seq * 1_000_000, body),
+            )
+        conn.commit()
+
+    # Energy goes live from seq 3 onward -> backfill must cover only 1, 2, 3.
+    EnergyTracker(db).set_live_cutover_seq(3)
+    rc = _energy_backfill_cmd(argparse.Namespace(db=str(db), region="us-east"))
+    assert rc == 0
+
+    with sqlite3.connect(db) as conn:
+        seqs = [
+            r[0]
+            for r in conn.execute(
+                "SELECT span_seq FROM energy_log ORDER BY span_seq"
+            ).fetchall()
+        ]
+    assert seqs == [1, 2, 3]  # seq 4, 5 skipped (live-owned)

@@ -38,6 +38,8 @@ def energy_cmd(args: argparse.Namespace) -> int:
         return _energy_backfill_cmd(args)
     if sub == "summary":
         return _energy_summary_cmd(args)
+    if sub == "mark-live":
+        return _energy_mark_live_cmd(args)
     print(f"ERROR: unknown energy subcommand {sub!r}", file=sys.stderr)
     return 2
 
@@ -55,8 +57,17 @@ def _energy_backfill_cmd(args: argparse.Namespace) -> int:
         calculator=CarbonCalculator(args.region),
     )
 
+    cutover = tracker.get_live_cutover_seq()
+    if cutover is not None:
+        print(
+            f"Live cutover at seq {cutover}: chain rows with seq > {cutover} are "
+            "owned by the live EnergySpanProcessor and will be skipped "
+            "(prevents double-counting NULL-seq live rows)."
+        )
+
     inserted = 0
     skipped = 0
+    live_skipped = 0
     failed = 0
     with sqlite3.connect(db_path) as conn:
         total = conn.execute("SELECT COUNT(*) FROM chain").fetchone()[0]
@@ -65,6 +76,9 @@ def _energy_backfill_cmd(args: argparse.Namespace) -> int:
             "SELECT seq, timestamp_ns, canonical_body FROM chain ORDER BY seq"
         ):
             seq, ts_ns, body = row
+            if cutover is not None and seq > cutover:
+                live_skipped += 1
+                continue
             try:
                 d = json.loads(body.decode() if isinstance(body, bytes) else body)
                 attrs = d.get("attributes", {})
@@ -104,7 +118,8 @@ def _energy_backfill_cmd(args: argparse.Namespace) -> int:
                     )
 
     print(
-        f"Done. inserted={inserted}, skipped={skipped}, failed={failed}, total={total}"
+        f"Done. inserted={inserted}, skipped={skipped}, "
+        f"live_skipped={live_skipped}, failed={failed}, total={total}"
     )
 
     # Show summary right after
@@ -118,6 +133,41 @@ def _energy_backfill_cmd(args: argparse.Namespace) -> int:
     print(f"  ≈ km driven (gasoline car): {s.equivalent_km_driven:.4f}")
     print(f"  ≈ phone charges:            {s.equivalent_phone_charges:.4f}")
     print(f"  ≈ kettle boils:             {s.equivalent_kettle_boils:.4f}")
+    return 0
+
+
+def _energy_mark_live_cmd(args: argparse.Namespace) -> int:
+    """Set the live-cutover seq so future backfills skip the live-owned tail.
+
+    With ``--seq N`` uses N; otherwise uses the current chain head
+    (``MAX(seq)``). Run this ONCE, just before the host starts recording
+    energy live via :class:`EnergySpanProcessor`, so backfill (seq <=
+    cutover) and live (span_seq NULL, for seq > cutover) cover disjoint
+    ranges and never double-count. The marker lives in the DB, so the
+    guard holds even if the operator forgets the rule.
+    """
+    from bijotel.layers.energy import EnergyTracker
+
+    db_path = args.db
+    if not Path(db_path).is_file():
+        print(f"ERROR: chain DB not found at {db_path}", file=sys.stderr)
+        return 1
+
+    seq = args.seq
+    if seq is None:
+        with sqlite3.connect(db_path) as conn:
+            row = conn.execute("SELECT MAX(seq) FROM chain").fetchone()
+        if not row or row[0] is None:
+            print("ERROR: chain is empty; nothing to mark.", file=sys.stderr)
+            return 1
+        seq = int(row[0])
+
+    tracker = EnergyTracker(db_path)
+    tracker.set_live_cutover_seq(seq)
+    print(
+        f"Live cutover set: seq {seq}. Backfill now covers seq <= {seq} and "
+        f"skips seq > {seq} (owned by the live EnergySpanProcessor)."
+    )
     return 0
 
 

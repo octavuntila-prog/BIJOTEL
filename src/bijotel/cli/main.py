@@ -291,7 +291,10 @@ def _build_parser() -> argparse.ArgumentParser:
     # bijotel energy
     p_energy = subparsers.add_parser(
         "energy",
-        help="AI energy + carbon accounting (Bijuteria #3). Subcommands: backfill, summary.",
+        help=(
+            "AI energy + carbon accounting (Bijuteria #3). "
+            "Subcommands: backfill, summary, mark-live."
+        ),
     )
     energy_sub = p_energy.add_subparsers(dest="energy_command", required=True)
 
@@ -324,6 +327,19 @@ def _build_parser() -> argparse.ArgumentParser:
     p_esum.add_argument(
         "--agent-id",
         help="Filter to one agent.",
+    )
+
+    # bijotel energy mark-live --db ... [--seq N]
+    p_mark = energy_sub.add_parser(
+        "mark-live",
+        help="Mark the chain seq from which energy is live; backfill skips beyond it.",
+    )
+    p_mark.add_argument("--db", required=True, help="SQLite chain DB path.")
+    p_mark.add_argument(
+        "--seq",
+        type=int,
+        default=None,
+        help="Cutover seq. Default: current chain head (MAX(seq)).",
     )
 
     # bijotel anchor publish/verify (v2.9.0)
