@@ -1,0 +1,38 @@
+services:
+  bijotel-federation:
+    image: bijotel-federation:0.2.0
+    container_name: bijotel-federation
+    restart: unless-stopped
+    ports:
+      # localhost-only bind — the service is NOT internet-exposed. A peer
+      # operator reaches it over an SSH tunnel keyed to permitopen this one
+      # port only (see README "Networking"). Change to 0.0.0.0 only behind a
+      # real firewall/VPN.
+      - "127.0.0.1:8088:8088"
+    environment:
+      # PEM *content* (not paths) — multi-line, so injected via the shell by
+      # start.sh (`export VAR="$(cat keys/...)"`), never via a .env file.
+      BIJOTEL_FED_PRIVATE_KEY_PEM: "${BIJOTEL_FED_PRIVATE_KEY_PEM:?federation private key required}"
+      BIJOTEL_FED_PUBLIC_KEY_PEM: "${BIJOTEL_FED_PUBLIC_KEY_PEM:?federation public key required}"
+      BIJOTEL_FED_REKOR_URL: "https://rekor.sigstore.dev"
+      # ECDSA P-256 key for Rekor (Rekor cannot verify Ed25519). Optional —
+      # without it the cross-anchor still signs + verifies, just no public
+      # timestamp. Generate: bijotel keygen --type ecdsa
+      BIJOTEL_FED_REKOR_PRIVATE_KEY_PEM: "${BIJOTEL_FED_REKOR_PRIVATE_KEY_PEM:-}"
+      BIJOTEL_FED_MIN_PARTICIPANTS: "2"
+      BIJOTEL_FED_ANCHOR_INTERVAL_SECONDS: "3600"
+      BIJOTEL_FED_DB_PATH: "/data/federation.db"
+    volumes:
+      # Host dir must be owned by the image's `fed` user (uid 999):
+      #   chown -R 999:999 ./data
+      - ./data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8088/status', timeout=3).status==200 else 1)"
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
