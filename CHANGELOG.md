@@ -5,6 +5,35 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.0] — 2026-06-05 — Cross-view REST, idempotent Rekor re-anchor, energy live-cutover guard
+
+### Added
+
+- **`POST /cross-view` REST endpoint** — exposes the `bijotel cross-view` CLI
+  capability over `bijotel serve`: per-ecosystem stats (entries, providers,
+  models, timestamps) plus optional **structural** integrity across N
+  operator-supplied chains. Each chain stays sovereign — read-only, no merge.
+  Trust model matches `/verify-continuity` (operator-supplied server-side
+  paths). Full HMAC verification stays CLI-only (no secret crosses the wire).
+  This is the local `bijotel.cross_view` aggregator — **not** federation.
+- **`bijotel energy mark-live` + a DB-stored `live_cutover_seq` marker.** When
+  energy is recorded live (the `EnergySpanProcessor`, which writes
+  `span_seq=NULL`), `bijotel energy backfill` now skips chain rows with
+  `seq > cutover`, so the live processor and the backfill cover disjoint seq
+  ranges and never double-count. The guard lives in the DB (`energy_meta`
+  table), so it holds regardless of operator memory.
+
+### Fixed
+
+- **Rekor 409 (an equivalent entry already exists) is now an idempotent
+  success.** Re-anchoring an unchanged chain head — e.g. an idle gap between
+  two daily anchor runs — made Rekor return HTTP 409, which
+  `bijotel anchor publish` surfaced as a hard error (non-zero exit → a
+  false-alarm in the daily cron). `RekorClient.upload` now raises a typed
+  `RekorEntryExistsError` on 409, and `anchor publish` treats it as success
+  (exit 0) with an "already anchored" message. Non-409 HTTP errors still fail
+  hard, so real upload failures are never swallowed.
+
 ## [2.13.3] — 2026-06-02 — MCP invocations now sealed by the default processor
 
 ### Fixed
