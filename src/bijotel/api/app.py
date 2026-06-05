@@ -271,6 +271,7 @@ def create_app(
     from bijotel.api.routes import chain as chain_routes
     from bijotel.api.routes import consensus as consensus_routes
     from bijotel.api.routes import containment as containment_routes
+    from bijotel.api.routes import cross_view as cross_view_routes
     from bijotel.api.routes import energy as energy_routes
     from bijotel.api.routes import export as export_routes
     from bijotel.api.routes import integrity as integrity_routes
@@ -291,6 +292,7 @@ def create_app(
         archive_routes,
         replay_routes,
         integrity_routes,
+        cross_view_routes,
     ]
 
     if serve_dashboard:

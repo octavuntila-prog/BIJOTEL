@@ -798,3 +798,46 @@ class IntegrityReportResponse(BaseModel):
     provider_shift: dict | None
     rate_anomalies: list[dict]
     rotation_boundaries: list[dict]
+
+
+class CrossViewChainSpec(BaseModel):
+    """One chain to include in a cross-ecosystem view (``POST /cross-view``)."""
+
+    name: str = Field(..., min_length=1, description="Ecosystem label, e.g. 'GENA'.")
+    path: str = Field(
+        ...,
+        min_length=1,
+        description="Path to the chain on the SERVER's filesystem. Ending in "
+        ".db/.sqlite/.sqlite3 is read as SQLite; otherwise as an exported JSON. "
+        "Operator-supplied, same trust model as /verify-continuity's db_paths.",
+    )
+
+
+class CrossViewRequest(BaseModel):
+    """Body of ``POST /cross-view``."""
+
+    chains: list[CrossViewChainSpec] = Field(
+        ...,
+        min_length=1,
+        description="One or more chains to aggregate. Each stays sovereign — "
+        "no merging, no rewriting. Read-only.",
+    )
+    integrity: bool = Field(
+        default=False,
+        description="Also run a STRUCTURAL integrity report (per-chain row-count "
+        "validity + cross-chain timeline/provider notes). Full HMAC verify is "
+        "NOT run over REST (no secret on the wire) — use the CLI "
+        "`bijotel cross-view --integrity --hmac-secret …` for that.",
+    )
+
+
+class CrossViewResponse(BaseModel):
+    """Response of ``POST /cross-view`` — mirrors ``CrossEcosystemView.summary()``."""
+
+    ecosystems: int
+    total_entries: int
+    total_providers: list[str]
+    earliest_timestamp_ns: int | None = None
+    latest_timestamp_ns: int | None = None
+    per_ecosystem: dict[str, dict]
+    integrity_report: dict | None = None
