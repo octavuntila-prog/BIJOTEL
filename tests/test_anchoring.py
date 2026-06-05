@@ -33,6 +33,7 @@ from bijotel.anchoring import (
     REKOR_PUBLIC_URL,
     AnchorVerifyResult,
     RekorAnchor,
+    RekorEntryExistsError,
     anchor_chain_head,
     verify_rekor_anchor,
 )
@@ -348,6 +349,90 @@ def test_verify_rekor_anchor_404_returns_clean_result(tmp_path: Path) -> None:
 
     assert result.match is False
     assert "not found" in (result.reason or "").lower()
+
+
+# ----------------------------------------------------------------------
+# 7. Idempotent re-anchor — Rekor 409 (entry already exists) is success
+# ----------------------------------------------------------------------
+
+
+def test_anchor_chain_head_409_raises_entry_exists(tmp_path: Path) -> None:
+    """Rekor 409 (an equivalent entry already exists) → the typed
+    ``RekorEntryExistsError``, NOT a generic RuntimeError. This is what lets
+    the publish command treat an idempotent re-anchor (head unchanged since
+    the last run) as success rather than a hard failure."""
+    import urllib.error
+
+    db, _head_hash, _seq = _seed_chain_with_head(tmp_path)
+    priv_path, _pub_path, _priv_pem, _pub_pem = _ecdsa_keypair(tmp_path)
+
+    def raise_409(req, timeout):
+        raise urllib.error.HTTPError(
+            req.full_url,
+            409,
+            "Conflict",
+            {},
+            io.BytesIO(
+                b'{"code":409,"message":"An equivalent entry already exists '
+                b'in the transparency log with UUID deadbeef"}'
+            ),
+        )
+
+    with (
+        patch("urllib.request.urlopen", side_effect=raise_409),
+        pytest.raises(RekorEntryExistsError),
+    ):
+        anchor_chain_head(db, sign_key_pem=priv_path)
+
+
+def test_anchor_chain_head_non_409_http_error_still_raises(tmp_path: Path) -> None:
+    """A non-409 Rekor HTTP error (e.g. 500) must STILL surface as a hard
+    RuntimeError — only 409 is treated as idempotent-success. Guards against
+    silently swallowing real upload failures."""
+    import urllib.error
+
+    db, _head_hash, _seq = _seed_chain_with_head(tmp_path)
+    priv_path, _pub_path, _priv_pem, _pub_pem = _ecdsa_keypair(tmp_path)
+
+    def raise_500(req, timeout):
+        raise urllib.error.HTTPError(
+            req.full_url, 500, "Server Error", {}, io.BytesIO(b'{"error":"boom"}')
+        )
+
+    with (
+        patch("urllib.request.urlopen", side_effect=raise_500),
+        pytest.raises(RuntimeError) as exc,
+    ):
+        anchor_chain_head(db, sign_key_pem=priv_path)
+    assert not isinstance(exc.value, RekorEntryExistsError)
+    assert "500" in str(exc.value)
+
+
+def test_anchor_publish_cmd_returns_0_on_existing_entry(tmp_path: Path) -> None:
+    """``bijotel anchor publish`` exits 0 (success) when the head was already
+    anchored (Rekor 409), so the daily cron does not false-alarm on an idle
+    day when the chain head has not advanced."""
+    import argparse
+
+    from bijotel.cli.cmd_anchor import _anchor_publish_cmd
+
+    db, _head_hash, _seq = _seed_chain_with_head(tmp_path)
+    priv_path, _pub_path, _priv_pem, _pub_pem = _ecdsa_keypair(tmp_path)
+
+    args = argparse.Namespace(
+        db=str(db),
+        sign_key=str(priv_path),
+        rekor_url=REKOR_PUBLIC_URL,
+        output=None,
+    )
+
+    with patch(
+        "bijotel.cli.cmd_anchor.anchor_chain_head",
+        side_effect=RekorEntryExistsError("already exists"),
+    ):
+        rc = _anchor_publish_cmd(args)
+
+    assert rc == 0
 
 
 # ----------------------------------------------------------------------

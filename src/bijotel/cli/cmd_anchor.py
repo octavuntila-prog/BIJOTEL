@@ -25,6 +25,7 @@ from pathlib import Path
 from bijotel.anchoring import (
     REKOR_PUBLIC_URL,
     RekorAnchor,
+    RekorEntryExistsError,
     anchor_chain_head,
     verify_rekor_anchor,
 )
@@ -67,6 +68,17 @@ def _anchor_publish_cmd(args: argparse.Namespace) -> int:
     except FileNotFoundError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 1
+    except RekorEntryExistsError:
+        # Idempotent re-anchor: the chain head has not advanced since the last
+        # anchor, so Rekor already holds an equivalent entry. Nothing new to
+        # publish — the existing entry stands. Success (exit 0), not failure.
+        # (Must precede the generic RuntimeError handler — it is a subclass.)
+        print("=== Rekor anchor SKIPPED (already anchored) ===")
+        print(
+            "  reason: chain head unchanged since last anchor; "
+            "existing Rekor entry stands"
+        )
+        return 0
     except RuntimeError as e:
         print(f"ERROR: anchor publish failed: {e}", file=sys.stderr)
         return 1

@@ -45,6 +45,25 @@ REKOR_PUBLIC_URL = "https://rekor.sigstore.dev"
 
 
 # ---------------------------------------------------------------------
+# Exceptions
+# ---------------------------------------------------------------------
+
+
+class RekorEntryExistsError(RuntimeError):
+    """Raised by :meth:`RekorClient.upload` on HTTP 409 (Conflict).
+
+    Rekor returns 409 when an *equivalent* entry already exists in the
+    transparency log — the same (data hash, signature, public key) triple
+    was uploaded before. For BIJOTEL this happens when a chain head is
+    re-anchored without having advanced (an idle gap between two daily
+    anchor runs). The existing entry already witnesses that head, so this
+    is an idempotent no-op, not a failure — callers should treat it as
+    success. Subclasses :class:`RuntimeError` so existing
+    ``except RuntimeError`` handlers still catch it as a safe fallback.
+    """
+
+
+# ---------------------------------------------------------------------
 # Result dataclasses
 # ---------------------------------------------------------------------
 
@@ -155,6 +174,13 @@ class RekorClient:
         except urllib.error.HTTPError as e:
             # Rekor includes a JSON error body — surface it for triage.
             detail = e.read().decode("utf-8", errors="replace")
+            if e.code == 409:
+                # Equivalent entry already exists — idempotent re-anchor of an
+                # unchanged head. Raise a typed error so callers can treat it
+                # as "already anchored" (success) rather than a hard failure.
+                raise RekorEntryExistsError(
+                    f"Rekor entry already exists (HTTP 409): {detail[:400]}"
+                ) from e
             raise RuntimeError(
                 f"Rekor upload HTTP {e.code}: {detail[:400]}"
             ) from e

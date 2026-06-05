@@ -39,6 +39,7 @@ from bijotel.anchoring.rekor import (
     AnchorVerifyResult,
     RekorAnchor,
     RekorClient,
+    RekorEntryExistsError,
     anchor_chain_head,
     verify_rekor_anchor,
 )
@@ -48,6 +49,7 @@ __all__ = [
     "AnchorVerifyResult",
     "RekorAnchor",
     "RekorClient",
+    "RekorEntryExistsError",
     "anchor_chain_head",
     "verify_rekor_anchor",
 ]
