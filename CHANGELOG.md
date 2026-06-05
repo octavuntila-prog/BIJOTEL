@@ -5,6 +5,26 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.1] — 2026-06-05 — Fix: EnergySpanProcessor broke chain sealing on a live TracerProvider
+
+### Fixed
+
+- **`EnergySpanProcessor` now subclasses `opentelemetry.sdk.trace.SpanProcessor`.**
+  It was duck-typed and lacked `_on_ending`, a method the OpenTelemetry SDK
+  (≥1.42) calls on span end (`span.end()` → `processor._on_ending(span)`).
+  Registering it on a *live* `TracerProvider` raised `AttributeError` on every
+  span end and **broke chain sealing** — a production incident on a real
+  deployment (2026-06-05). Subclassing inherits the full processor protocol,
+  including `_on_ending` and any future hooks, mirroring the other bijotel
+  processors (`HmacChainSpanProcessor`, `CasSpanProcessor`,
+  `FingerprintSpanProcessor`).
+- **New `tests/test_span_processor_protocol.py`** drives a real `TracerProvider`
+  start→end cycle parametrized over **all** processors, so a duck-typed
+  processor missing any protocol method is caught. Red-first validated (failed
+  on energy with the exact `_on_ending` `AttributeError` before the fix). The
+  per-processor unit tests only called `on_end()` directly and never exercised
+  `_on_ending`, so the gap was invisible to them.
+
 ## [2.14.0] — 2026-06-05 — Cross-view REST, idempotent Rekor re-anchor, energy live-cutover guard
 
 ### Added

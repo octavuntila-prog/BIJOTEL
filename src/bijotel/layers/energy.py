@@ -60,6 +60,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from opentelemetry.sdk.trace import SpanProcessor
+
 from bijotel.policy.decision import Decision
 
 if TYPE_CHECKING:
@@ -640,7 +642,7 @@ def _to_iso(ns: int | None) -> str | None:
 # ============================================================================
 
 
-class EnergySpanProcessor:
+class EnergySpanProcessor(SpanProcessor):
     """OTel SpanProcessor that records energy per LLM call.
 
     Crash-isolated: any exception during attribute extraction,
@@ -653,11 +655,12 @@ class EnergySpanProcessor:
             identifier (e.g. ``"agent.name"``). When the attribute
             is missing, ``"default"`` is used.
 
-    Note: this class doesn't inherit from
-    :class:`opentelemetry.sdk.trace.SpanProcessor` directly to avoid
-    pulling OTel into the import chain at module load time. The
-    methods match the protocol so registering with a TracerProvider
-    works as expected.
+    Subclasses :class:`opentelemetry.sdk.trace.SpanProcessor` so it inherits
+    the FULL protocol — including ``_on_ending`` and any future hooks the OTel
+    SDK invokes on span end. (Duck-typing the protocol bit us on 2026-06-05: a
+    missing ``_on_ending`` raised ``AttributeError`` on every span end and
+    broke chain sealing on a live TracerProvider. See
+    ``tests/test_span_processor_protocol.py``.)
     """
 
     def __init__(
