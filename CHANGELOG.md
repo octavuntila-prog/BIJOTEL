@@ -5,6 +5,19 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.2] — 2026-06-07 — Security: redact internal host IP from shipped source
+
+### Security
+
+- **Removed a verbatim internal host IP** that had been included in a provenance
+  note in `src/bijotel/policy/prompt_patterns.py` (module docstring) and three
+  historical CHANGELOG entries — so it shipped in the 2.14.1 sdist/wheel and was
+  visible in the public GitHub repo. The literal is replaced with a
+  non-identifying label. Comments/docs only — **no code or behaviour change**.
+  Treat the prior value as already disclosed (it remains in git history and the
+  immutable 2.14.1 artifact); this release stops further distribution and is the
+  recommended version going forward.
+
 ## [2.14.1] — 2026-06-05 — Fix: EnergySpanProcessor broke chain sealing on a live TracerProvider
 
 ### Fixed
@@ -3165,7 +3178,7 @@ existing entries → continued VALID after deploy).
 ## [0.5.0] — 2026-05-14
 
 Third pattern adapted from substrate-guard (separate project at
-`89.167.66.225`, read-only access). Adds a regex-based prompt-injection /
+an internal host, read-only access). Adds a regex-based prompt-injection /
 jailbreak detection rule to the policy gate. Same shape as the existing
 F4 / F8 built-in rules: composable into `PolicyEngine`, supports
 `deny` / `warn` modes, validates fail-safe (no patterns → `ValueError`,
@@ -3209,7 +3222,7 @@ not silent allow).
   giant regexes into chain.db audit records.
 
 Pattern catalog adapted from `substrate-guard/policy/policies/agent_safety.rego`
-`dangerous_patterns` concept (separate project at `89.167.66.225`, read-only
+`dangerous_patterns` concept (separate project at an internal host, read-only
 access 2026-05-10). The substrate-guard version targets filesystem / network /
 shell actions; this BIJOTEL adaptation targets LLM prompts (instruction
 overrides, system-prompt extraction, role overrides, jailbreak framings,
@@ -3405,7 +3418,7 @@ Patch release. No API changes. Bugfix + documentation + coverage push.
 
 ## [0.2.0] — 2026-05-10
 
-Patterns adapted from substrate-guard (separate project at `89.167.66.225`,
+Patterns adapted from substrate-guard (separate project at an internal host,
 read-only access). Two features ported with attribution: portable chain
 export and rate-limit policy rule.
 

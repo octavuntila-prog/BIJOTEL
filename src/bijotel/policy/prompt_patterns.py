@@ -1,7 +1,7 @@
 """Default prompt patterns for jailbreak / prompt injection detection (F11).
 
 Patterns adapted from substrate-guard's ``agent_safety.rego`` ``dangerous_patterns``
-concept (separate project at ``89.167.66.225``, read-only access 2026-05-10).
+concept (a separate internal project, read-only access 2026-05-10).
 The substrate-guard version targets filesystem/network/shell actions; this
 BIJOTEL adaptation targets LLM prompts (instruction overrides, system-prompt
 extraction, role overrides, jailbreak framings, encoding bypass, multi-turn
