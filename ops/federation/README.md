@@ -97,9 +97,11 @@ bijotel federation verify receipt.json --federation-key <federation_public.pem>
   (`*/5 * * * *`): probes `/status`, relaunches via `start.sh` on outage.
   `restart: unless-stopped` handles crashes + reboots; the watchdog handles the
   recreate-needed case.
-- **Backup** — `federation_backup.sh` bundles `federation.db` + all keys.
-  Set `FED_BAK_PASS=<passfile>` to AES-256 encrypt (recommended). Keep 3 copies
-  (origin + off-host peer + laptop). Keys are static; the db drifts per anchor.
+- **Backup** — `federation_backup.sh` bundles `federation.db` + all keys,
+  **AES-256 encrypted** (`openssl enc -aes-256-cbc -pbkdf2`) when
+  `FED_BAK_PASS=<passfile>` is set — the production default (the cron passes it).
+  Without it, it falls back to plaintext (mode 600). Keep 3 copies (origin +
+  off-host peer + laptop). Keys are static; the db drifts per anchor.
 - **Restore test** — decrypt/untar into a scratch dir, confirm a key PEM loads
   and `federation.db` opens + lists operators.
 - **Morning digest** — `morning_digest.sh` (`0 6 * * *`): a daily Telegram push
