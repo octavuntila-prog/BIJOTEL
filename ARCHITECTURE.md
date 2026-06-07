@@ -171,7 +171,30 @@ The same logic ships server-side in `POST /chain/verify` with
 `full=true`. The CLI and the API give the same answer on the same
 chain.db + secret.
 
+## Trust ladder (L1–L5) — canonical
+
+The **trust ladder** is the cryptographic-assurance axis: each rung removes one
+more thing you have to take on the operator's word. This table is the single
+source of truth for `L`-numbering across the repo, docs, and status notes — when
+something says "L5" it means this table (Federation), **not** feature layer #5.
+
+| Rung | What you no longer trust the operator for | Mechanism | Status (2026-06-07) |
+|---|---|---|---|
+| **L1** | entries weren't edited after sealing | HMAC-SHA256 tamper-evident chain | ✅ live — GENA + ARA, `Chain VALID` |
+| **L2** | a specific key signed the export | Ed25519-signed export (v2 format) | ⚠️ coded — verified on demand, not on a daily cron |
+| **L3** | the data existed by time T (external witness) | Sigstore Rekor (ECDSA hashedrekord) | ✅ live — daily cron, public `logIndex` |
+| **L4** | the producing code ran in trusted hardware | TEE attestation (TPM / Nitro / SEV-SNP / SGX) | 🔴 software stub (`NotImplementedError`) — by design, no TEE hardware |
+| **L5** | a single org isn't lying (multi-party witness) | Cross-org federation cross-anchor | ✅ running — GENA + ARA operators, cross-anchors in Rekor |
+
+> **Two distinct axes — don't conflate.** The `L1–L5` *trust ladder* above
+> (assurance levels) is separate from the `#1–#N` *feature layers* ("bijuterii")
+> below (e.g. #5 AST Safety, #10 PolicyGate, #11 Forensic Chain). Write trust
+> rungs as `L3` and feature layers as `#5` to keep them apart.
+
 ## 14-layer bijuterii positioning
+
+The numbered nodes below (`#10`, `#11`, …) are **feature layers** — a different
+axis from the L1–L5 trust ladder above.
 
 ```mermaid
 graph TB
