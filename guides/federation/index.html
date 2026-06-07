@@ -2098,10 +2098,12 @@
 
 
 <h1 id="federation-cross-org-chain-federation">Federation (cross-org chain federation)<a class="headerlink" href="#federation-cross-org-chain-federation" title="Anchor link to this section">&para;</a></h1>
-<p><strong>Status:</strong> v2.11.0 — <strong>client side only</strong>. The Python client + CLI
-ship today and can be exercised against any future federation service.
-The federation <strong>service itself does not yet exist</strong> (a reference
-implementation lands in <code>bijotel-federation</code>, separate repo).</p>
+<p><strong>Status:</strong> RUNNING (service v0.2.0, 2026-06-07). The reference
+federation service in the <code>bijotel-federation</code> repo is deployed and
+live; the Python client + CLI (<code>bijotel federation</code>) ship in the
+package. <strong>GENA + ARA are the first two operators</strong>, with cross-anchors
+publicly witnessed in Sigstore Rekor. (Both operators are first-party —
+no third-party external organisation has joined yet.)</p>
 <h2 id="what-federation-buys-you">What federation buys you<a class="headerlink" href="#what-federation-buys-you" title="Anchor link to this section">&para;</a></h2>
 <p>The HMAC chain proves your own entries weren't tampered. Ed25519
 proves a specific key signed them. Rekor (v2.9) proves they existed at
@@ -2147,19 +2149,21 @@ Certificate Transparency for TLS certs.</p>
 <p>For the full protocol see
 <a href="../../design/cross-org-federation/"><code>docs/design/cross-org-federation.md</code></a>.</p>
 <h2 id="honest-scope-m2-reality-docs">Honest scope (M2: reality &gt; docs)<a class="headerlink" href="#honest-scope-m2-reality-docs" title="Anchor link to this section">&para;</a></h2>
-<p>At v2.11.0:</p>
+<p>As of 2026-06-07 (service v0.2.0):</p>
 <ul>
-<li>✓ The Python <code>FederationClient</code> is functional against any
-  conforming HTTP service.</li>
-<li>✓ The <code>bijotel federation</code> CLI works with <code>--dry-run</code>, which emits
-  the registration/submission payload locally with no network call.</li>
-<li>✓ <code>bijotel federation verify</code> is fully local — given a receipt JSON
-  it recomputes the cross-anchor hash and checks the Ed25519
-  signature with no service round-trip.</li>
-<li>✗ <strong>Zero external federation operators exist.</strong> The
-  reference service skeleton is the next item shipped, in a separate
-  repo. Until then, federation is a forward-looking protocol with a
-  working client.</li>
+<li>✓ The reference federation service is <strong>deployed and running</strong> (on
+  ARA, loopback-bound, reached by peers over a port-restricted SSH
+  tunnel).</li>
+<li>✓ <strong>2 operators registered</strong> (GENA + ARA) and submitting chain heads;
+  <strong>4 cross-anchors</strong> built and anchored in Sigstore Rekor (public
+  logIndex) — the latest produced by the daily cron, not by hand.</li>
+<li>✓ The Python <code>FederationClient</code> + <code>bijotel federation</code> CLI
+  (<code>register</code> / <code>submit</code> / <code>verify</code> / <code>status</code>) drive the live service;
+  <code>bijotel federation verify</code> is fully local (recomputes the
+  cross-anchor hash + checks the Ed25519 signature offline).</li>
+<li>✗ <strong>No third-party external organisation has joined yet</strong> — both
+  operators are first-party (GENA + ARA). Cross-org-with-a-stranger is
+  the next milestone; the protocol + service are proven with two.</li>
 </ul>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Anchor link to this section">&para;</a></h2>
 <p><code>bijotel</code> 2.11.0 ships the federation surface in the default install
