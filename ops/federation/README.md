@@ -102,6 +102,14 @@ bijotel federation verify receipt.json --federation-key <federation_public.pem>
   (origin + off-host peer + laptop). Keys are static; the db drifts per anchor.
 - **Restore test** — decrypt/untar into a scratch dir, confirm a key PEM loads
   and `federation.db` opens + lists operators.
+- **Morning digest** — `morning_digest.sh` (`0 6 * * *`): a daily Telegram push
+  that checks ARTIFACT FRESHNESS (anchor < 24h, every operator submitted < 24h,
+  backups written < 24h, chain advancing, rekor anchor today, 0 DOWN events,
+  regression log fresh) — catching the silent-death paths the down/stall
+  watchdogs miss. ALWAYS sends (green = one line; red = ⚠ per failed check) so a
+  quiet digest can't be mistaken for a dead one. Peer liveness is inferred from
+  artifacts the peer pushes here (its chain backup + its federation submission)
+  — no cross-host SSH; the peer's own rekor/stall stay in its local crons.
 
 ## Security notes
 
