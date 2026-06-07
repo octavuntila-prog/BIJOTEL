@@ -80,7 +80,7 @@ bijotel --help
 python -c "import bijotel; print(bijotel.__version__)"
 ```
 
-You should see `2.0.5` (or newer) and the CLI subcommand list:
+You should see `2.14.2` (or newer) and the CLI subcommand list:
 `verify`, `inspect`, `stats`, `list`, `export`, `verify-export`,
 `regression`, `energy`, `serve`.
 

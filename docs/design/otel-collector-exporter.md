@@ -1,8 +1,8 @@
 # BIJOTEL OTel Collector Exporter — Design
 
-**Status:** Design only. No code yet. This document is the spec for a future Go implementation.
+**Status:** Implemented (Go, v0.1.0) — not yet deployed in production. This document is the spec the implementation follows.
 
-**Repo (planned):** `github.com/octavuntila-prog/bijotel-collector`
+**Repo:** `github.com/octavuntila-prog/bijotel-collector`
 
 **Owner:** Aisophical SRL.
 

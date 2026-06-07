@@ -1,9 +1,11 @@
 # Federation (cross-org chain federation)
 
-**Status:** v2.11.0 — **client side only**. The Python client + CLI
-ship today and can be exercised against any future federation service.
-The federation **service itself does not yet exist** (a reference
-implementation lands in `bijotel-federation`, separate repo).
+**Status:** RUNNING (service v0.2.0, 2026-06-07). The reference
+federation service in the `bijotel-federation` repo is deployed and
+live; the Python client + CLI (`bijotel federation`) ship in the
+package. **GENA + ARA are the first two operators**, with cross-anchors
+publicly witnessed in Sigstore Rekor. (Both operators are first-party —
+no third-party external organisation has joined yet.)
 
 ## What federation buys you
 
@@ -26,19 +28,21 @@ For the full protocol see
 
 ## Honest scope (M2: reality > docs)
 
-At v2.11.0:
+As of 2026-06-07 (service v0.2.0):
 
-- ✓ The Python `FederationClient` is functional against any
-  conforming HTTP service.
-- ✓ The `bijotel federation` CLI works with `--dry-run`, which emits
-  the registration/submission payload locally with no network call.
-- ✓ `bijotel federation verify` is fully local — given a receipt JSON
-  it recomputes the cross-anchor hash and checks the Ed25519
-  signature with no service round-trip.
-- ✗ **Zero external federation operators exist.** The
-  reference service skeleton is the next item shipped, in a separate
-  repo. Until then, federation is a forward-looking protocol with a
-  working client.
+- ✓ The reference federation service is **deployed and running** (on
+  ARA, loopback-bound, reached by peers over a port-restricted SSH
+  tunnel).
+- ✓ **2 operators registered** (GENA + ARA) and submitting chain heads;
+  **4 cross-anchors** built and anchored in Sigstore Rekor (public
+  logIndex) — the latest produced by the daily cron, not by hand.
+- ✓ The Python `FederationClient` + `bijotel federation` CLI
+  (`register` / `submit` / `verify` / `status`) drive the live service;
+  `bijotel federation verify` is fully local (recomputes the
+  cross-anchor hash + checks the Ed25519 signature offline).
+- ✗ **No third-party external organisation has joined yet** — both
+  operators are first-party (GENA + ARA). Cross-org-with-a-stranger is
+  the next milestone; the protocol + service are proven with two.
 
 ## Install
 

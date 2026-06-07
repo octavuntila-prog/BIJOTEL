@@ -1,10 +1,10 @@
 # Cross-Organization Chain Federation — Design
 
-**Status:** Design only. No code yet. This document is the spec for a
-future implementation, intended for review and refinement before any
-runtime work begins.
+**Status:** IMPLEMENTED + RUNNING (service v0.2.0, 2026-06-07). This
+document is the protocol spec; the reference service implementing it is
+live, with GENA + ARA as the first two operators (4 Rekor cross-anchors).
 
-**Repo (planned):** `github.com/octavuntila-prog/bijotel-federation`
+**Repo:** `github.com/octavuntila-prog/bijotel-federation`
 
 **Owner:** Aisophical SRL.
 
