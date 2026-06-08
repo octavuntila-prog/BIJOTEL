@@ -176,7 +176,12 @@ def _federation_verify_cmd(args: argparse.Namespace) -> int:
 
     result = verify_cross_anchor_receipt(receipt, federation_public_key_pem=expected_pubkey)
 
-    verdict = "MATCH" if result["valid"] else "MISMATCH"
+    if result["valid"]:
+        verdict = "MATCH"
+    elif not result["checks"].get("bound", True):
+        verdict = "UNVERIFIED (no trust anchor)"
+    else:
+        verdict = "MISMATCH"
     print(f"=== Federation receipt {verdict} (anchor_id={receipt.anchor_id}) ===")
     for k, v in result["checks"].items():
         print(f"  {k}:  {v}")
@@ -257,9 +262,12 @@ def add_federation_subparser(subparsers: argparse._SubParsersAction) -> None:
     p_ver.add_argument("receipt", help="Path to CrossAnchorReceipt JSON.")
     p_ver.add_argument(
         "--federation-key",
+        required=True,
         help=(
-            "Path to expected federation public PEM (external trust "
-            "anchor). Strongly recommended."
+            "Path to the expected federation public PEM (external trust "
+            "anchor), obtained out of band. REQUIRED — without it a receipt "
+            "cannot be authenticated (the embedded key is "
+            "attacker-controllable)."
         ),
     )
     p_ver.add_argument(

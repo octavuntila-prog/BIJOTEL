@@ -135,11 +135,12 @@ def verify_cross_anchor_receipt(
     Args:
         receipt: A ``CrossAnchorReceipt`` (typically loaded from a
             sidecar JSON file).
-        federation_public_key_pem: Optional. The federation's expected
-            public key (PEM bytes or str). If omitted, the check uses
-            the public key embedded in the receipt — useful for sanity
-            checks, but a real auditor binds against an out-of-band
-            copy of the federation's public key.
+        federation_public_key_pem: The federation's expected public key
+            (PEM bytes or str), obtained out of band. REQUIRED for a
+            VALID verdict: without it the receipt is reported UNVERIFIED
+            (``valid=False``, ``checks.bound=False``) because the key
+            embedded in the receipt is attacker-controllable and cannot
+            establish authenticity on its own.
 
     Returns:
         ``{"valid": bool, "checks": {...}, "reason": str|None}`` — keep
@@ -191,10 +192,23 @@ def verify_cross_anchor_receipt(
     except Exception:
         sig_ok = False
 
-    valid = hash_matches and sig_ok
+    # A receipt is AUTHENTIC only when the caller supplied an out-of-band
+    # federation public key (matched against the embedded key above). When
+    # unbound, the embedded key is attacker-controllable — a self-signed
+    # forged receipt would otherwise verify as VALID. Treat an unbound
+    # receipt as UNVERIFIED, never valid. (audit 2026-06-08 ISSUE-3)
+    bound = federation_public_key_pem is not None
+    valid = bool(hash_matches and sig_ok and bound)
     reason = None
     if not valid:
         bits = []
+        if not bound:
+            bits.append(
+                "no out-of-band federation public key supplied — receipt is "
+                "UNVERIFIED; the embedded key cannot establish authenticity. "
+                "Re-run with the federation's expected public key "
+                "(CLI: --federation-key)."
+            )
         if not hash_matches:
             bits.append(
                 "cross-anchor hash mismatch — receipt's stored hash "
@@ -212,11 +226,12 @@ def verify_cross_anchor_receipt(
     return {
         "valid": valid,
         "checks": {
-            "pubkey_matches_expected": (
-                True if federation_public_key_pem is None else True
-            ),
+            # None when unbound (no trust anchor supplied) — NOT True. A
+            # VALID verdict now requires bound is True. (audit ISSUE-3)
+            "pubkey_matches_expected": (True if bound else None),
             "signature_verified": sig_ok,
             "cross_anchor_hash_recomputed": hash_matches,
+            "bound": bound,
         },
         "reason": reason,
     }

@@ -18,8 +18,8 @@ It's a plug-in to whatever tracer you have (OpenLLMetry,
 `AnthropicInstrumentor`, custom wrappers) — it does not replace your
 tracer; it extends it.
 
-**Status:** v2.14.2 on PyPI; **GENA + ARA production both run v2.14.1**
-(as of 2026-06-07). Validated on **2 independent
+**Status:** v2.15.0 on PyPI; **GENA + ARA production both run v2.15.0**
+(as of 2026-06-08). Validated on **2 independent
 production systems**: **GENA** (9-ecosystem AI mesh, x86_64, Nuremberg
 — running BIJOTEL since 2026-05-10) and **ARA** (AI Research Agency,
 aarch64, Helsinki — running since 2026-05-25).
@@ -88,7 +88,7 @@ docker run -p 8080:8080 \
 
 Then open <http://localhost:8080/> for the dashboard and
 <http://localhost:8080/api/health> for the REST liveness probe. Versioned
-tags (`:2.14.2`, `:latest`) live at
+tags (`:2.15.0`, `:latest`) live at
 [ghcr.io/octavuntila-prog/bijotel](https://github.com/octavuntila-prog/BIJOTEL/pkgs/container/bijotel).
 
 ## Quickstart

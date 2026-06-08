@@ -331,23 +331,18 @@ def test_export_with_nonexistent_sign_key_raises(
         )
 
 
-def test_verify_export_no_secret_no_pubkey_against_v2_is_rejected_by_cli(
+def test_verify_export_no_secret_no_pubkey_is_rejected(
     chain_db: Path, tmp_path: Path, keypair_paths: tuple[Path, Path]
 ) -> None:
-    """The library-level verify_export allows secret=None on a v2 file
-    when called with no public_key — it skips HMAC checks and the
-    body-hash + chain-link checks still run. The CLI layer enforces
-    'at least one credential' as a UX rule; the library is more
-    permissive so callers can pick. This test pins down the library
-    contract.
+    """ISSUE-8 fix (audit 2026-06-08): the library-level verify_export now
+    REJECTS a call with neither secret nor public_key. With no trust anchor
+    only self-referential structure is checked, which a forged export can
+    satisfy (it previously returned (True, None) — a false VALID). The
+    library contract is now honest, matching the CLI gate.
     """
     priv_path, _ = keypair_paths
     out = tmp_path / "v2.json"
     export_chain(chain_db, out, SECRET, sign_key_path=priv_path)
     valid, reason = verify_export(out, secret_key=None, public_key_path=None)
-    # Body-hash + chain-link checks pass on an untampered file. Ed25519
-    # not checked (no key supplied). HMAC not checked (no secret).
-    # This is structurally weak verification — the CLI gates against
-    # this case and requires at least one credential. The library
-    # permits it for programmatic introspection.
-    assert valid is True, reason
+    assert valid is False
+    assert "trust anchor" in (reason or "")

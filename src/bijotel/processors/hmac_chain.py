@@ -99,7 +99,6 @@ class HmacChainSpanProcessor(SpanProcessor):
         Best-effort: silently skipped on platforms without chmod semantics
         (Windows, some special filesystems).
         """
-        db_existed = self._db_path.exists()
         # Autocommit mode so we control transaction boundaries explicitly.
         conn = sqlite3.connect(self._db_path, isolation_level=None)
         try:
@@ -149,9 +148,12 @@ class HmacChainSpanProcessor(SpanProcessor):
         finally:
             conn.close()
 
-        # Apply restrictive perms only on newly-created files; never alter existing.
-        # Best-effort: Windows / some filesystems lack POSIX chmod semantics.
-        if not db_existed and self._db_path.exists():
+        # Apply restrictive perms idempotently on EVERY init — not only on
+        # create — so a pre-hardening db left at a looser mode (e.g. 0644) is
+        # tightened to DB_FILE_MODE the next time a processor opens it.
+        # (audit 2026-06-08 ISSUE-15). Best-effort: Windows / some filesystems
+        # lack POSIX chmod semantics.
+        if self._db_path.exists():
             with contextlib.suppress(OSError):
                 self._db_path.chmod(DB_FILE_MODE)
 

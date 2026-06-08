@@ -237,10 +237,44 @@ def _build_signed_receipt(
 def test_verify_receipt_happy_path() -> None:
     priv, pub = generate_keypair()
     receipt = _build_signed_receipt(federation_priv=priv, federation_pub=pub)
-    result = verify_cross_anchor_receipt(receipt)
+    # A VALID verdict requires the out-of-band federation key (audit ISSUE-3).
+    result = verify_cross_anchor_receipt(receipt, federation_public_key_pem=pub)
     assert result["valid"] is True
     assert result["checks"]["signature_verified"] is True
     assert result["checks"]["cross_anchor_hash_recomputed"] is True
+    assert result["checks"]["bound"] is True
+
+
+def test_verify_receipt_unbound_is_unverified() -> None:
+    """Without an out-of-band trust anchor a genuine receipt is reported
+    UNVERIFIED (valid=False) — the embedded key cannot self-authenticate."""
+    priv, pub = generate_keypair()
+    receipt = _build_signed_receipt(federation_priv=priv, federation_pub=pub)
+    result = verify_cross_anchor_receipt(receipt)  # no federation key
+    assert result["valid"] is False
+    assert result["checks"]["bound"] is False
+    assert result["checks"]["pubkey_matches_expected"] is None
+    assert "UNVERIFIED" in (result["reason"] or "")
+
+
+def test_verify_receipt_forged_unbound_is_rejected() -> None:
+    """ISSUE-3 regression (audit 2026-06-08): a fully self-consistent receipt
+    signed by an ATTACKER key must NOT verify as valid without an out-of-band
+    trust anchor. Before the fix this returned valid=True (fail-open)."""
+    atk_priv, atk_pub = generate_keypair()
+    forged = _build_signed_receipt(federation_priv=atk_priv, federation_pub=atk_pub)
+    result = verify_cross_anchor_receipt(forged)  # no trust anchor
+    # The forgery IS internally consistent — sig + hash both check out...
+    assert result["checks"]["signature_verified"] is True
+    assert result["checks"]["cross_anchor_hash_recomputed"] is True
+    # ...yet it is correctly rejected because it is unbound.
+    assert result["valid"] is False
+    assert result["checks"]["bound"] is False
+    assert result["checks"]["pubkey_matches_expected"] is None
+    # Bound against the REAL federation key, it fails as a pubkey mismatch.
+    _real_priv, real_pub = generate_keypair()
+    bound = verify_cross_anchor_receipt(forged, federation_public_key_pem=real_pub)
+    assert bound["valid"] is False
 
 
 def test_verify_receipt_with_external_expected_pubkey() -> None:
@@ -266,7 +300,7 @@ def test_verify_receipt_rejects_tampered_hash() -> None:
     receipt = _build_signed_receipt(federation_priv=priv, federation_pub=pub)
     from dataclasses import replace
     tampered = replace(receipt, cross_anchor_hash="0" * 64)
-    result = verify_cross_anchor_receipt(tampered)
+    result = verify_cross_anchor_receipt(tampered, federation_public_key_pem=pub)
     assert result["valid"] is False
     assert "hash mismatch" in (result["reason"] or "")
 
@@ -278,7 +312,7 @@ def test_verify_receipt_rejects_tampered_signature() -> None:
     flipped = ("z" if sig[0] != "z" else "y") + sig[1:]
     from dataclasses import replace
     bad = replace(receipt, federation_signature=flipped)
-    result = verify_cross_anchor_receipt(bad)
+    result = verify_cross_anchor_receipt(bad, federation_public_key_pem=pub)
     assert result["valid"] is False
     assert "signature verification failed" in (result["reason"] or "")
 
@@ -329,16 +363,34 @@ def test_cli_federation_register_dry_run(tmp_path: Path) -> None:
 
 
 def test_cli_federation_verify_local_happy_path(tmp_path: Path) -> None:
-    """--receipt PATH verifies locally against the embedded federation key."""
+    """verify with the out-of-band --federation-key (now required) → MATCH."""
+    priv, pub = generate_keypair()
+    receipt = _build_signed_receipt(federation_priv=priv, federation_pub=pub)
+    receipt_path = tmp_path / "receipt.json"
+    receipt_path.write_text(json.dumps(asdict(receipt)), encoding="utf-8")
+    pub_path = tmp_path / "fed_pub.pem"
+    pub_path.write_bytes(pub)
+
+    out = _run_cli(
+        "federation", "verify", str(receipt_path),
+        "--federation-key", str(pub_path),
+    )
+    assert out.returncode == 0, out.stderr
+    assert "MATCH" in out.stdout
+    assert "signature_verified:  True" in out.stdout
+
+
+def test_cli_federation_verify_requires_federation_key(tmp_path: Path) -> None:
+    """ISSUE-3: --federation-key is mandatory; omitting it is an error
+    (no silent verify against the attacker-controllable embedded key)."""
     priv, pub = generate_keypair()
     receipt = _build_signed_receipt(federation_priv=priv, federation_pub=pub)
     receipt_path = tmp_path / "receipt.json"
     receipt_path.write_text(json.dumps(asdict(receipt)), encoding="utf-8")
 
     out = _run_cli("federation", "verify", str(receipt_path))
-    assert out.returncode == 0
-    assert "MATCH" in out.stdout
-    assert "signature_verified:  True" in out.stdout
+    assert out.returncode != 0
+    assert "federation-key" in (out.stderr + out.stdout)
 
 
 def test_cli_federation_verify_with_external_pubkey(tmp_path: Path) -> None:
@@ -365,8 +417,13 @@ def test_cli_federation_verify_mismatch_exit_code_3(tmp_path: Path) -> None:
     data["cross_anchor_hash"] = "0" * 64
     receipt_path = tmp_path / "receipt.json"
     receipt_path.write_text(json.dumps(data), encoding="utf-8")
+    pub_path = tmp_path / "fed_pub.pem"
+    pub_path.write_bytes(pub)
 
-    out = _run_cli("federation", "verify", str(receipt_path))
+    out = _run_cli(
+        "federation", "verify", str(receipt_path),
+        "--federation-key", str(pub_path),
+    )
     assert out.returncode == 3
     assert "MISMATCH" in out.stdout
 

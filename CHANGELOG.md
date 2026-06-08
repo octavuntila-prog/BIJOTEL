@@ -5,6 +5,58 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.15.0] — 2026-06-08 — Security hardening from the technical audit (fail-open fixes + DoS + supply chain)
+
+Remediation of the 2026-06-08 multi-agent technical audit. Every fix ships with
+a regression test that failed before the change. The HMAC chain core, JCS
+canonicalization, Ed25519/ECDSA crypto, and multi-writer concurrency were
+audited and found sound (no change). 994 tests pass; ruff clean.
+
+### Security
+
+- **Cross-anchor receipt verify is no longer fail-open (ISSUE-3).**
+  `verify_cross_anchor_receipt` previously reported a fully self-consistent but
+  forged receipt as `valid: true` when called without an out-of-band federation
+  key (the embedded key is attacker-controllable, and a dead
+  `pubkey_matches_expected` conditional always returned `True`). It now requires
+  a supplied trust anchor for a VALID verdict — unbound receipts are reported
+  `valid: false` / `bound: false` — and the CLI `federation verify --federation-key`
+  is now **required**.
+- **AST safety check fails closed on unparseable input (ISSUE-5).**
+  `_check_python` previously returned zero violations on a `SyntaxError`, letting
+  an attacker dodge a `deny`-mode gate by appending trailing garbage to dangerous
+  code. It now emits an `unparseable_python` warning (deny-mode blocks, warn-mode
+  surfaces).
+- **ReDoS in the policy gate eliminated (ISSUE-4).** Two jailbreak regexes
+  (`override …`, `reverse … execute`) were O(n²) — ~50K chars pinned a worker for
+  minutes on the synchronous `/policy/evaluate` gate. Rewrote the ambiguous
+  `\s+(?:opt)?\s*` adjacencies and capped scanned input at `MAX_SCAN_CHARS`
+  (16 KB). Detection of the real attack forms is preserved.
+- **`verify_export` requires a trust anchor (ISSUE-8).** The library function
+  returned `(True, None)` on a forged export when called with neither the HMAC
+  secret nor an Ed25519 public key (only self-referential structure was checked).
+  It now refuses such calls, matching the CLI gate.
+- **Live chain DB permissions hardened (ISSUE-15).** `HmacChainSpanProcessor`
+  now applies the restrictive file mode (0600) idempotently on every open, not
+  only at create, so a pre-hardening DB left at 0644 is tightened on next start.
+  GENA's live chain DB was also chmod'd 600 out of band.
+- **Dependency floor bump (ISSUE-14).** `python-multipart>=0.0.18` closes
+  CVE-2024-24762 and CVE-2024-53981. Complements the blocking pip-audit CI gate.
+
+### Added
+
+- **`IsolatingSpanProcessor` (ISSUE-13/SP-1).** A defensive wrapper for a
+  third-party `SpanProcessor` co-registered with bijotel's chain processors:
+  exceptions in any lifecycle hook are caught, logged, and suppressed so a
+  misbehaving sibling cannot abort the shared `SynchronousMultiSpanProcessor`
+  dispatch and skip the HMAC seal (the class of the 2026-06-05 incident).
+
+### Changed
+
+- `requirements-lock.txt` carries a header clarifying it is a reference
+  snapshot for `pip install -c` (not auto-enforced); authoritative security
+  posture is the pyproject floors + the pip-audit CI gate (ISSUE-13).
+
 ## [2.14.2] — 2026-06-07 — Security: redact internal host IP from shipped source
 
 ### Security

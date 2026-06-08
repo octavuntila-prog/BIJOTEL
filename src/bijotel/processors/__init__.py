@@ -9,11 +9,13 @@ from bijotel.processors.hmac_chain import (
     chain_range_summary,
     verify_chain,
 )
+from bijotel.processors.isolation import IsolatingSpanProcessor
 
 __all__ = [
     "CasSpanProcessor",
     "DAGNode",
     "HmacChainSpanProcessor",
+    "IsolatingSpanProcessor",
     "MerkleDAG",
     "archive_chain",
     "cas_lookup",

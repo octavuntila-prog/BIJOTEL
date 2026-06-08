@@ -550,9 +550,21 @@ class ASTSafetyChecker:
     def _check_python(self, code: str) -> Iterator[ASTViolation]:
         try:
             tree = py_ast.parse(code)
-        except SyntaxError:
-            # Graceful: code that doesn't parse can't be checked (and likely
-            # won't run either, so policy gating is moot for it).
+        except SyntaxError as exc:
+            # Fail-CLOSED: a security gate must never silently return zero
+            # violations for input it could not analyse. Returning empty on
+            # SyntaxError let an attacker append garbage to a dangerous
+            # snippet to dodge a deny-mode gate. Emit a warning instead, so
+            # deny-mode blocks unanalysable code and warn-mode surfaces it.
+            # (audit 2026-06-08 ISSUE-5)
+            yield ASTViolation(
+                pattern_name="unparseable_python",
+                language="python",
+                node_type="SyntaxError",
+                line=getattr(exc, "lineno", 0) or 0,
+                code_snippet=code.strip()[:80],
+                severity="warning",
+            )
             return
         for pattern in self.python_patterns:
             yield from pattern.visit(tree, code)

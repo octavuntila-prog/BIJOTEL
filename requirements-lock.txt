@@ -1,3 +1,15 @@
+# BIJOTEL dependency lock — REFERENCE SNAPSHOT (audit 2026-06-08 ISSUE-13).
+#
+# This pins a known-good, pip-audit-clean resolution of the full extra set.
+# It is NOT auto-enforced by the build (the Dockerfile/CI install from the
+# pyproject version floors so they stay forward-compatible). Consume it
+# explicitly for a reproducible install:
+#
+#     pip install -e ".[api,ast,anthropic]" -c requirements-lock.txt
+#
+# Authoritative security posture = the pyproject floors + the blocking
+# pip-audit CI gate (ci.yml security-audit job). Regenerate from a CLEAN venv
+# (never the shared dev venv) when intentionally bumping the pinned set.
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anthropic==0.104.1

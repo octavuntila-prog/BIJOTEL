@@ -497,6 +497,18 @@ def verify_export(
     if entries_count != len(entries):
         return False, f"entries_count mismatch ({entries_count} vs len(entries)={len(entries)})"
 
+    # A verify with NEITHER the HMAC secret NOR an Ed25519 public key checks
+    # only self-referential structure (body hashes + chain links) — which a
+    # forger can satisfy, so it would hand back a false VALID. Refuse, mirroring
+    # the CLI (cmd_verify), so the library contract is honest. (audit ISSUE-8)
+    if secret_key is None and public_key_path is None:
+        return False, (
+            "verify requires a trust anchor: pass secret_key (HMAC) or "
+            "public_key_path (Ed25519, v2 export). With neither, only "
+            "self-referential structure is checked, which a forged export "
+            "can satisfy."
+        )
+
     # Reject pure-auditor calls against a v1 export — there's no
     # signature to verify, so the auditor would be relying on nothing.
     if secret_key is None and public_key_path is not None and fmt == FORMAT_ID_V1:
