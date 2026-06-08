@@ -1,6 +1,6 @@
 services:
   bijotel-federation:
-    image: bijotel-federation:0.2.0
+    image: bijotel-federation:0.3.0
     container_name: bijotel-federation
     restart: unless-stopped
     ports:
@@ -22,6 +22,8 @@ services:
       BIJOTEL_FED_MIN_PARTICIPANTS: "2"
       BIJOTEL_FED_ANCHOR_INTERVAL_SECONDS: "3600"
       BIJOTEL_FED_DB_PATH: "/data/federation.db"
+      # Admin bearer for the gated /_internal/build-anchor (audit ISSUE-10).
+      BIJOTEL_FED_ADMIN_TOKEN: "${BIJOTEL_FED_ADMIN_TOKEN:?admin token required}"
     volumes:
       # Host dir must be owned by the image's `fed` user (uid 999):
       #   chown -R 999:999 ./data

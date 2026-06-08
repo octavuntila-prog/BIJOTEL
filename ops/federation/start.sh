@@ -14,4 +14,6 @@ cd "$(dirname "$0")"
 export BIJOTEL_FED_PRIVATE_KEY_PEM="$(cat keys/bijotel_private.pem)"
 export BIJOTEL_FED_PUBLIC_KEY_PEM="$(cat keys/bijotel_public.pem)"
 export BIJOTEL_FED_REKOR_PRIVATE_KEY_PEM="$(cat keys/bijotel_ecdsa_private.pem)"
+# Admin bearer for the gated /_internal/build-anchor (audit ISSUE-10); 0600 file.
+export BIJOTEL_FED_ADMIN_TOKEN="$(cat /opt/.fed_admin_token)"
 docker compose up -d
