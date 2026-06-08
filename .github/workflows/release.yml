@@ -58,7 +58,10 @@ jobs:
           test "$PKG" = "$TAG" || { echo "::error::tag $TAG != pyproject version $PKG"; exit 1; }
       - run: python -m build
       - run: twine check dist/*
-      - run: twine upload dist/*
+      # --skip-existing keeps the workflow idempotent: if the version was
+      # already published (e.g. an out-of-band `twine upload` from ~/.pypirc),
+      # the job is a green no-op instead of failing on a duplicate.
+      - run: twine upload --skip-existing dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
