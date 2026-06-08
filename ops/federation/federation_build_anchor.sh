@@ -17,5 +17,13 @@ LOG=/var/log/bijotel/federation_anchor.log
 mkdir -p /var/log/bijotel
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-RESP=$(curl -s --max-time 90 -X POST "$URL/_internal/build-anchor" 2>/dev/null || echo '{"error":"curl failed"}')
+# Admin bearer for the gated trigger (audit ISSUE-10). From env, else a 0600
+# file. /_internal/build-anchor now rejects unauthenticated calls.
+TOKEN="${FED_ADMIN_TOKEN:-}"
+TOKEN_FILE="${FED_ADMIN_TOKEN_FILE:-/opt/.fed_admin_token}"
+if [ -z "$TOKEN" ] && [ -r "$TOKEN_FILE" ]; then TOKEN=$(cat "$TOKEN_FILE"); fi
+
+RESP=$(curl -s --max-time 90 -X POST \
+        -H "Authorization: Bearer $TOKEN" \
+        "$URL/_internal/build-anchor" 2>/dev/null || echo '{"error":"curl failed"}')
 echo "$TS $RESP" >> "$LOG"

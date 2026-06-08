@@ -36,12 +36,18 @@ LOG=/var/log/bijotel/federation_submit.log
 mkdir -p /var/log/bijotel
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# 1. export the chain HEAD inside the live container (has the HMAC secret + db)
-if ! "$DOCKER" exec "$C" bijotel export --db "$DB" --last "$LAST" -o /tmp/_fedexp.json >/dev/null 2>&1; then
-  echo "$TS [$OPID] ERROR export failed ($C:$DB)" >> "$LOG"; exit 1
+# 1. export the chain HEAD inside the live container (has the HMAC secret + db),
+# Ed25519-SIGNED with the operator's registered key so the federation can
+# cryptographically verify authenticity before witnessing it (audit ISSUE-1).
+# The key is copied into the container only for the export, then removed.
+"$DOCKER" cp "$OPDIR/bijotel_private.pem" "$C":/tmp/_opkey.pem >/dev/null 2>&1
+if ! "$DOCKER" exec "$C" bijotel export --db "$DB" --last "$LAST" \
+       --sign-key /tmp/_opkey.pem -o /tmp/_fedexp.json >/dev/null 2>&1; then
+  "$DOCKER" exec "$C" rm -f /tmp/_opkey.pem /tmp/_fedexp.json 2>/dev/null
+  echo "$TS [$OPID] ERROR signed export failed ($C:$DB)" >> "$LOG"; exit 1
 fi
 "$DOCKER" cp "$C":/tmp/_fedexp.json "$OPDIR/_fedexp.json" >/dev/null 2>&1
-"$DOCKER" exec "$C" rm -f /tmp/_fedexp.json 2>/dev/null
+"$DOCKER" exec "$C" rm -f /tmp/_fedexp.json /tmp/_opkey.pem 2>/dev/null
 chmod 644 "$OPDIR/_fedexp.json" 2>/dev/null
 
 # 2. submit (client signs the per-request Ed25519 bearer token)
