@@ -123,7 +123,7 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.15.0"
+__version__ = "2.15.1"
 
 __all__ = [
     "ASTSafetyChecker",

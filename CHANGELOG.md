@@ -5,6 +5,36 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.15.1] — 2026-06-12 — Release pipeline proven end-to-end (no runtime changes)
+
+### Fixed
+
+- **Stale test contract that blocked the v2.15.0 release run.**
+  `test_existing_chain_db_perms_preserved` still asserted the pre-2.15.0
+  contract (an existing chain.db's perms are preserved), while the ISSUE-15
+  fix deliberately changed that contract to an idempotent `chmod 0o600` on
+  every open. The release gate therefore failed on v2.15.0 — for the right
+  mechanism but the wrong reason: 2.15.0 reached PyPI only via a manual
+  `twine upload` minutes before CI went red, and the skipped docker job left
+  ghcr `latest` at 2.14.2. The test is now inverted to assert the NEW
+  contract explicitly (existing 0o644 db → open → 0o600), renamed
+  `test_existing_chain_db_perms_tightened_to_0600`.
+
+### CI
+
+- **GitHub Actions bumped ahead of the Node 24 forcing (2026-06-16):**
+  `actions/checkout` v4→v5 and `actions/setup-python` v5→v6 in both
+  `ci.yml` and `release.yml`.
+- This release is cut END-TO-END by the tag-triggered workflow
+  (test gate → PyPI → ghcr) with no manual upload — proving the pipeline
+  the audit M1/M2 fix promised, instead of leaving it untested on exactly
+  the releases that matter.
+
+### Notes
+
+- No library or runtime changes. Production hosts on 2.15.0 are unaffected
+  and need no redeploy.
+
 ## [2.15.0] — 2026-06-08 — Security hardening from the technical audit (fail-open fixes + DoS + supply chain)
 
 Remediation of the 2026-06-08 multi-agent technical audit. Every fix ships with

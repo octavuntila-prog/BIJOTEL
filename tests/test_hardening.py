@@ -290,15 +290,21 @@ def test_new_chain_db_has_0600_perms(db_path: Path) -> None:
     sys.platform == "win32",
     reason="POSIX chmod semantics; Windows uses ACLs not file mode",
 )
-def test_existing_chain_db_perms_preserved(db_path: Path) -> None:
-    """An existing chain.db's perms are NOT altered (M5 nothing-deleted)."""
+def test_existing_chain_db_perms_tightened_to_0600(db_path: Path) -> None:
+    """An existing chain.db is re-chmod'd to 0o600 on EVERY open (ISSUE-15).
+
+    Inverse of the pre-2.15.0 contract (perms preserved). A chain.db left
+    world-readable — by an older bijotel or an out-of-band chmod — must be
+    tightened back to owner-only the next time the processor opens it;
+    preserving loose perms was the fail-open the audit flagged.
+    """
     # Create db_path with mode 0o644 (the historical default)
     db_path.touch(mode=0o644)
     assert db_path.exists()
     os.chmod(db_path, 0o644)  # be explicit, umask may interfere
     HmacChainSpanProcessor(db_path=db_path, secret_key=SECRET)
     mode = os.stat(db_path).st_mode & 0o777
-    assert mode == 0o644, f"expected 0o644 preserved, got 0o{mode:o}"
+    assert mode == 0o600, f"expected 0o600 after open (ISSUE-15), got 0o{mode:o}"
 
 
 @pytest.mark.skipif(
