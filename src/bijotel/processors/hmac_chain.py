@@ -8,6 +8,7 @@ import hmac
 import logging
 import sqlite3
 import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -42,6 +43,132 @@ def _default_filter(span: ReadableSpan) -> bool:
         key.startswith("gen_ai.") or key.startswith("bijotel.mcp.")
         for key in span.attributes
     )
+
+
+def _init_chain_db(db_path: str | Path) -> None:
+    """Create the chain table (+ WAL, indexes, 0o600 perms) if needed; idempotent.
+
+    Module-level so BOTH the span path (:class:`HmacChainSpanProcessor`) and the
+    non-span path (:func:`append_event`) initialize a byte-identical schema — there
+    is exactly ONE schema definition, so a second definition cannot drift from it.
+
+    WAL mode is set once and persists at the database level. ``DB_FILE_MODE``
+    (0o600) is re-applied idempotently on every init so a pre-hardening db left at
+    a looser mode is tightened (audit 2026-06-08 ISSUE-15). The semantic_body_hash
+    column is added to older tables via ALTER TABLE (non-destructive). Best-effort
+    chmod: silently skipped on platforms without POSIX chmod semantics.
+    """
+    db_path = Path(db_path)
+    # Autocommit mode so we control transaction boundaries explicitly.
+    conn = sqlite3.connect(db_path, isolation_level=None)
+    try:
+        # busy_timeout MUST be set before journal_mode AND before any DDL,
+        # so all subsequent operations retry up to 5s under contention.
+        conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
+        current_mode = conn.execute("PRAGMA journal_mode").fetchone()[0]
+        if current_mode.lower() != "wal":
+            conn.execute("PRAGMA journal_mode=WAL")
+        # All DDL inside one BEGIN IMMEDIATE so concurrent inits from sibling
+        # processes serialize at the RESERVED lock and the table is visible to
+        # all readers immediately after COMMIT.
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS chain (
+                seq INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp_ns INTEGER NOT NULL,
+                trace_id TEXT NOT NULL,
+                span_id TEXT NOT NULL,
+                span_name TEXT NOT NULL,
+                span_kind TEXT,
+                canonical_body BLOB NOT NULL,
+                canonical_hash TEXT NOT NULL,
+                prev_hash TEXT NOT NULL,
+                hmac_hash TEXT NOT NULL,
+                semantic_body_hash TEXT
+            )
+        """)
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_chain_trace ON chain(trace_id)"
+        )
+        # Migration: add semantic_body_hash to existing chain tables.
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(chain)").fetchall()]
+        if "semantic_body_hash" not in cols:
+            conn.execute("ALTER TABLE chain ADD COLUMN semantic_body_hash TEXT")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_chain_semhash "
+            "ON chain(semantic_body_hash)"
+        )
+        conn.execute("COMMIT")
+    finally:
+        conn.close()
+
+    if db_path.exists():
+        with contextlib.suppress(OSError):
+            db_path.chmod(DB_FILE_MODE)
+
+
+def _seal_canonical(
+    conn: sqlite3.Connection,
+    secret: bytes,
+    *,
+    canonical_body: bytes,
+    canonical_hash: str,
+    timestamp_ns: int,
+    trace_id: str,
+    span_id: str,
+    span_name: str,
+    span_kind: str | None,
+    semantic_body_hash: str | None,
+) -> dict:
+    """Seal one already-canonicalized row into the chain. THE single row-write path.
+
+    Shared verbatim by :meth:`HmacChainSpanProcessor.on_end` (span source) and
+    :func:`append_event` (arbitrary-dict source): one ``BEGIN IMMEDIATE`` → read
+    ``prev_hash`` → ``HMAC(prev_hash || canonical_hash)`` → ``INSERT`` → ``COMMIT``.
+    Because both callers seal through this exact function, a span-sourced row and
+    an event-sourced row are byte-identical chain links and ``verify_chain`` cannot
+    tell them apart — parity is structural, not merely tested.
+
+    The caller owns the connection (and any in-process write lock) and the
+    rollback-on-error; this function owns the transaction boundary.
+
+    Returns: ``{"seq", "prev_hash", "hmac_hash", "canonical_hash"}``.
+    """
+    conn.execute("BEGIN IMMEDIATE")
+    row = conn.execute(
+        "SELECT hmac_hash FROM chain ORDER BY seq DESC LIMIT 1"
+    ).fetchone()
+    prev_hash = row[0] if row else GENESIS_HASH
+    hmac_input = (prev_hash + canonical_hash).encode("utf-8")
+    hmac_hash = hmac.new(secret, hmac_input, hashlib.sha256).hexdigest()
+    cur = conn.execute(
+        """
+        INSERT INTO chain (
+            timestamp_ns, trace_id, span_id, span_name, span_kind,
+            canonical_body, canonical_hash, prev_hash, hmac_hash,
+            semantic_body_hash
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            timestamp_ns,
+            trace_id,
+            span_id,
+            span_name,
+            span_kind,
+            canonical_body,
+            canonical_hash,
+            prev_hash,
+            hmac_hash,
+            semantic_body_hash,
+        ),
+    )
+    conn.execute("COMMIT")
+    return {
+        "seq": cur.lastrowid,
+        "prev_hash": prev_hash,
+        "hmac_hash": hmac_hash,
+        "canonical_hash": canonical_hash,
+    }
 
 
 class HmacChainSpanProcessor(SpanProcessor):
@@ -87,75 +214,14 @@ class HmacChainSpanProcessor(SpanProcessor):
         self._init_db()
 
     def _init_db(self) -> None:
-        """Create chain table if not exists, enable WAL, migrate older schema if needed.
+        """Create chain table if not exists, enable WAL, migrate older schema.
 
-        WAL mode (``PRAGMA journal_mode=WAL``) is set once and persists at the
-        database level, enabling safe concurrent reads + serialized writes.
-        Combined with ``BEGIN IMMEDIATE`` in ``on_end``, this gives multi-writer
-        correctness without per-process lock coordination.
-
-        ``DB_FILE_MODE`` (0o600) is applied only to newly-created files;
-        existing chain.db permissions are preserved (M5 nothing-deleted).
-        Best-effort: silently skipped on platforms without chmod semantics
-        (Windows, some special filesystems).
+        Delegates to the module-level :func:`_init_chain_db` so the span path
+        (this processor) and the non-span path (:func:`append_event`) share ONE
+        schema definition that cannot drift. See that function for the WAL /
+        0o600-perms / semantic_body_hash-migration details.
         """
-        # Autocommit mode so we control transaction boundaries explicitly.
-        conn = sqlite3.connect(self._db_path, isolation_level=None)
-        try:
-            # busy_timeout MUST be set before journal_mode AND before any DDL,
-            # so all subsequent operations retry up to 5s under contention.
-            conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
-            # Idempotent WAL set: only invoke PRAGMA journal_mode=WAL if not
-            # already WAL (avoids re-acquiring the brief EXCLUSIVE lock on
-            # every process startup; combined with BEGIN IMMEDIATE below,
-            # serializes concurrent _init_db calls cleanly).
-            current_mode = conn.execute("PRAGMA journal_mode").fetchone()[0]
-            if current_mode.lower() != "wal":
-                conn.execute("PRAGMA journal_mode=WAL")
-            # All DDL inside a single BEGIN IMMEDIATE transaction so concurrent
-            # _init_db calls from sibling processes serialize at the RESERVED
-            # lock with busy_timeout retry, AND the resulting table is visible
-            # to all readers immediately after COMMIT (eliminates the post-init
-            # "no such table" window observed on GENA Linux 22 mai).
-            conn.execute("BEGIN IMMEDIATE")
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS chain (
-                    seq INTEGER PRIMARY KEY AUTOINCREMENT,
-                    timestamp_ns INTEGER NOT NULL,
-                    trace_id TEXT NOT NULL,
-                    span_id TEXT NOT NULL,
-                    span_name TEXT NOT NULL,
-                    span_kind TEXT,
-                    canonical_body BLOB NOT NULL,
-                    canonical_hash TEXT NOT NULL,
-                    prev_hash TEXT NOT NULL,
-                    hmac_hash TEXT NOT NULL,
-                    semantic_body_hash TEXT
-                )
-            """)
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_chain_trace ON chain(trace_id)"
-            )
-            # Migration: add semantic_body_hash to existing chain tables (F2 -> F3 upgrade)
-            cols = [r[1] for r in conn.execute("PRAGMA table_info(chain)").fetchall()]
-            if "semantic_body_hash" not in cols:
-                conn.execute("ALTER TABLE chain ADD COLUMN semantic_body_hash TEXT")
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_chain_semhash "
-                "ON chain(semantic_body_hash)"
-            )
-            conn.execute("COMMIT")
-        finally:
-            conn.close()
-
-        # Apply restrictive perms idempotently on EVERY init — not only on
-        # create — so a pre-hardening db left at a looser mode (e.g. 0644) is
-        # tightened to DB_FILE_MODE the next time a processor opens it.
-        # (audit 2026-06-08 ISSUE-15). Best-effort: Windows / some filesystems
-        # lack POSIX chmod semantics.
-        if self._db_path.exists():
-            with contextlib.suppress(OSError):
-                self._db_path.chmod(DB_FILE_MODE)
+        _init_chain_db(self._db_path)
 
     def _connect_for_write(self) -> sqlite3.Connection:
         """Open a write-mode connection with explicit transaction control.
@@ -210,38 +276,18 @@ class HmacChainSpanProcessor(SpanProcessor):
             with self._lock:
                 conn = self._connect_for_write()
                 try:
-                    conn.execute("BEGIN IMMEDIATE")
-                    prev_hash = self._last_hmac_hash(conn)
-                    hmac_input = (prev_hash + canonical_hash).encode("utf-8")
-                    hmac_hash = hmac.new(
-                        self._secret, hmac_input, hashlib.sha256
-                    ).hexdigest()
-
-                    trace_id_hex = format(span.context.trace_id, "032x")
-                    span_id_hex = format(span.context.span_id, "016x")
-
-                    conn.execute(
-                        """
-                        INSERT INTO chain (
-                            timestamp_ns, trace_id, span_id, span_name, span_kind,
-                            canonical_body, canonical_hash, prev_hash, hmac_hash,
-                            semantic_body_hash
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """,
-                        (
-                            span.end_time,
-                            trace_id_hex,
-                            span_id_hex,
-                            span.name,
-                            span.kind.name if span.kind else None,
-                            canonical_body,
-                            canonical_hash,
-                            prev_hash,
-                            hmac_hash,
-                            semantic_hash,
-                        ),
+                    _seal_canonical(
+                        conn,
+                        self._secret,
+                        canonical_body=canonical_body,
+                        canonical_hash=canonical_hash,
+                        timestamp_ns=span.end_time,
+                        trace_id=format(span.context.trace_id, "032x"),
+                        span_id=format(span.context.span_id, "016x"),
+                        span_name=span.name,
+                        span_kind=span.kind.name if span.kind else None,
+                        semantic_body_hash=semantic_hash,
                     )
-                    conn.execute("COMMIT")
                 except Exception:
                     # Best-effort rollback; OperationalError = no active txn
                     with contextlib.suppress(sqlite3.OperationalError):
@@ -264,6 +310,87 @@ class HmacChainSpanProcessor(SpanProcessor):
     def force_flush(self, timeout_millis: int = 30000) -> bool:
         """SpanProcessor interface: no-op (writes sunt sync în on_end)."""
         return True
+
+
+def append_event(
+    db_path: str | Path,
+    secret_key: bytes,
+    event: dict,
+    *,
+    event_name: str = "audit.event",
+    timestamp_ns: int | None = None,
+    trace_id: str | None = None,
+    span_id: str | None = None,
+    semantic_body_hash: str | None = None,
+) -> dict:
+    """Seal an arbitrary event dict into a bijotel HMAC chain WITHOUT an OTel span.
+
+    The non-span entry point to the SAME tamper-evident chain that
+    :class:`HmacChainSpanProcessor` writes. It canonicalizes ``event`` (JCS
+    RFC 8785), SHA-256s it, and seals via the shared :func:`_seal_canonical`
+    path — so a row written here is indistinguishable to :func:`verify_chain`
+    from a span-sourced row and chain-links cleanly when the two are interleaved
+    (parity is structural: one shared row-write path, not two that agree).
+
+    For consumers that keep their own event/audit model but want bijotel's
+    durable, range-verifiable, Ed25519-exportable, Rekor-anchorable, federatable
+    chain underneath (e.g. substrate-guard's ``AuditChain``). The chain table is
+    the same one :func:`export_chain` / Rekor / federation operate on, so those
+    capabilities come for free once rows land here.
+
+    Multi-writer safe across threads and processes via ``BEGIN IMMEDIATE`` +
+    ``busy_timeout`` (the same mechanism as ``on_end``). The schema is ensured on
+    every call (idempotent :func:`_init_chain_db`).
+
+    Args:
+        db_path: chain.db path (created + initialized if absent).
+        secret_key: HMAC secret bytes (>= 16). Conventionally the
+            ``BIJOTEL_HMAC_SECRET`` hex string decoded via ``bytes.fromhex``
+            (NOTE: bijotel uses a hex secret, not a raw string — a caller
+            bridging from a raw-secret scheme must decode/encode deliberately).
+        event: the payload to seal — any JSON-canonicalizable dict.
+        event_name: stored in the schema's NOT NULL ``span_name`` label column
+            (``verify_chain`` ignores it). Default ``"audit.event"``.
+        timestamp_ns: override the seal time (defaults to ``time.time_ns()``).
+        trace_id: optional correlation id; defaults to an all-zero placeholder
+            for the schema's NOT NULL column.
+        span_id: optional correlation id; defaults to an all-zero placeholder.
+        semantic_body_hash: optional CAS cross-reference; default ``None``.
+
+    Returns:
+        ``{"seq", "prev_hash", "hmac_hash", "canonical_hash"}`` for the sealed row.
+
+    Raises:
+        ValueError: if ``secret_key`` is shorter than 16 bytes.
+    """
+    if len(secret_key) < 16:
+        raise ValueError("secret_key must be at least 16 bytes")
+    db_path = Path(db_path)
+    _init_chain_db(db_path)
+    canonical_body = canonicalize(event)
+    canonical_hash = hashlib.sha256(canonical_body).hexdigest()
+    conn = sqlite3.connect(db_path, isolation_level=None)
+    conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
+    try:
+        return _seal_canonical(
+            conn,
+            secret_key,
+            canonical_body=canonical_body,
+            canonical_hash=canonical_hash,
+            timestamp_ns=time.time_ns() if timestamp_ns is None else timestamp_ns,
+            trace_id=trace_id if trace_id is not None else "0" * 32,
+            span_id=span_id if span_id is not None else "0" * 16,
+            span_name=event_name,
+            span_kind=None,
+            semantic_body_hash=semantic_body_hash,
+        )
+    except Exception:
+        # Best-effort rollback; OperationalError = no active txn
+        with contextlib.suppress(sqlite3.OperationalError):
+            conn.execute("ROLLBACK")
+        raise
+    finally:
+        conn.close()
 
 
 def verify_chain(

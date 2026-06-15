@@ -6,6 +6,7 @@ from bijotel.processors.dag import DAGNode, MerkleDAG
 from bijotel.processors.export import export_chain, inspect_export, verify_export
 from bijotel.processors.hmac_chain import (
     HmacChainSpanProcessor,
+    append_event,
     chain_range_summary,
     verify_chain,
 )
@@ -17,6 +18,7 @@ __all__ = [
     "HmacChainSpanProcessor",
     "IsolatingSpanProcessor",
     "MerkleDAG",
+    "append_event",
     "archive_chain",
     "cas_lookup",
     "cas_stats",

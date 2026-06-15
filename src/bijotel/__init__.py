@@ -97,6 +97,7 @@ from bijotel.policy import (
 from bijotel.processors import (
     DAGNode,
     MerkleDAG,
+    append_event,
     archive_chain,
     chain_range_summary,
     export_chain,
@@ -123,7 +124,7 @@ from bijotel.replay import (
     verify_replay,
 )
 
-__version__ = "2.15.1"
+__version__ = "2.16.0"
 
 __all__ = [
     "ASTSafetyChecker",
@@ -196,6 +197,7 @@ __all__ = [
     "ed25519_sign",
     "ed25519_verify",
     "energy_budget",
+    "append_event",
     "export_chain",
     "generate_keypair",
     "guard",

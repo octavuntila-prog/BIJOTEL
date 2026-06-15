@@ -5,6 +5,40 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.16.0] — 2026-06-15 — `append_event`: seal non-span events into the chain
+
+### Added
+
+- **`bijotel.append_event(db_path, secret_key, event, ...)`** — a public
+  primitive that seals an arbitrary JSON-canonicalizable dict into the SAME
+  tamper-evident HMAC chain that `HmacChainSpanProcessor` writes, WITHOUT
+  requiring an OpenTelemetry span. Non-span consumers (e.g. an external audit
+  framework that keeps its own event model) can now back their chain with
+  bijotel and inherit `verify_chain`, signed Ed25519 export, Rekor anchoring,
+  and federation for free — the rows land in the same `chain` table those
+  capabilities already operate on. Multi-writer safe via `BEGIN IMMEDIATE` +
+  `busy_timeout`, same as the span path.
+
+### Changed (internal, no behavior change)
+
+- The row-sealing critical section (`BEGIN IMMEDIATE` → read prev_hash →
+  `HMAC(prev_hash ‖ canonical_hash)` → `INSERT` → `COMMIT`) and the schema/WAL
+  init are now **single module-level functions** (`_seal_canonical`,
+  `_init_chain_db`) called by BOTH `HmacChainSpanProcessor.on_end` (span path)
+  and `append_event` (non-span path). Parity is therefore **structural** — one
+  shared write path, not two paths that must be kept in agreement — eliminating
+  the class of bug where two "equivalent" code paths silently diverge.
+
+### Tests
+
+- New `tests/test_append_event.py` with the load-bearing **mixed-chain parity
+  test**: rows sealed via `on_end(span)` and rows sealed via `append_event`,
+  interleaved in ONE chain.db, must `verify_chain` VALID and chain-link cleanly
+  across the source boundary (proven by exercising both together on a real
+  chain, not by checking each in isolation). Plus genesis/continue/tamper/
+  short-secret coverage. The existing 994 tests remain green (the span path is
+  unchanged behaviorally).
+
 ## [2.15.1] — 2026-06-12 — Release pipeline proven end-to-end (no runtime changes)
 
 ### Fixed

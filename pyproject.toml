@@ -1,6 +1,6 @@
 [project]
 name = "bijotel"
-version = "2.15.1"
+version = "2.16.0"
 description = "Tamper-evident HMAC audit chain for LLM applications. HMAC-SHA256 chain, content-addressable storage, pre-call policy gate, regression detection, Ed25519-signed exports, chain segmentation and archival, full REST API + dashboard surface, OTel GenAI semconv v1.41 (cache + reasoning tokens, streaming timing), MCP invocation sealing."
 readme = "README.md"
 requires-python = ">=3.11"
