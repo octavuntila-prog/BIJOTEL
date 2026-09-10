@@ -156,8 +156,9 @@ did. A perfectly sealed chain can document a perfectly disastrous
 decision.
 
 For formal verification of agent actions (Z3 SMT solver, OPA/Rego
-policy decisions over actions, eBPF syscall enforcement, ZK proofs
-over training data), see
+policy decisions over actions, eBPF syscall observation, threshold
+non-membership checks over training data — see the state table below
+for which of these are deployed), see
 [substrate-guard](https://github.com/octavuntila-prog/substrate-guard).
 BIJOTEL and substrate-guard are designed to be deployed together when
 the application demands both properties.
@@ -166,23 +167,59 @@ the application demands both properties.
 
 ## BIJOTEL vs substrate-guard — scope boundary
 
-| Claim | BIJOTEL | substrate-guard |
-|-------|---------|-----------------|
-| "Log wasn't tampered" | ✅ HMAC chain | ✅ HMAC chain (same primitive) |
-| "Agent action was safe" | ❌ | ✅ Z3 SMT + OPA/Rego |
-| "No unauthorized syscalls" | ❌ | ✅ eBPF kernel layer |
-| "Training data compliant" | ❌ | ✅ ZK-SNM |
-| "Signed by hardware" | ❌ | ✅ Ed25519 / TPM attestation |
-| "Works offline (CRDT)" | ❌ | ✅ |
-| "`pip install` one-liner" | ✅ | ❌ |
-| "Bundled REST API + dashboard" | ✅ | ❌ |
+The **State** column says what each capability does *today*, not what
+its design describes. Legend:
+
+- ● **runs in production** — exercised by a production runtime (the
+  GENA/ARA chains) or by substrate-guard's nightly audit on the
+  Research server.
+- ◐ **implemented, not exercised in production** — module and tests
+  exist; not wired into the production path, behind a flag that is
+  off, or not running on a production host at measurement time.
+- ○ **design / prototype** — spec, stub, or paper-era brand only.
+- ❌ — not in scope for that project.
+
+| Claim | BIJOTEL | substrate-guard | State | Evidence (file path; measured when) |
+|-------|---------|-----------------|-------|-------------------------------------|
+| "Log wasn't tampered" (HMAC-SHA256 chain) | ✅ | ✅ (same primitive) | ● both | BIJOTEL `src/bijotel/processors/hmac_chain.py` — GENA chain 74,771 entries, last entry 2026-09-10T13:39Z; ARA chain 21,784 entries, last 2026-09-10T10:48Z (both read 2026-09-10T13:48Z). substrate-guard `substrate_guard/chain.py` + `scripts/cron-audit.sh` — nightly audit ran 2026-09-10T04:00Z, 66 events, chain intact |
+| "Agent action passed a policy check" (built-in Python rules) | ❌ | ✅ | ● | `substrate_guard/policy/engine.py`; nightly audit report `layers.policy = "builtin"` (2026-09-10T04:00Z) |
+| "Agent action passed an OPA/Rego policy" | ❌ | ✅ | ◐ | `substrate_guard/policy/policies/agent_safety.rego`, `tests/test_policy_parity.py` (CI parity gate); OPA binary present on the Research server but `SUBSTRATE_GUARD_POLICY=rego` is not set in the crontab — the cron decides with the built-in engine (2026-09-10) |
+| "Agent action was proven safe" (Z3 SMT) | ❌ | ✅ | ◐ | `substrate_guard/code_verifier.py`, `substrate_guard/perevent_verify.py`, `tests/test_verify/`; nightly report `layers.verify = "z3 (available, not exercised per-event in batch)"` (2026-09-10T04:00Z); no production producer attaches artifacts (`docs/releases/v13.4.3.md`) |
+| "Syscalls observed at kernel level" (eBPF) | ❌ | ✅ | ◐ | `substrate_guard/observe/tracer.py`, `substrate_guard/observe/bpf_programs/agent_trace.c`; wired only in `monitor --live`, not in the cron (`layers.observe = "replay"`, 2026-09-10); the kernel branch has no test in the suite and no recorded run in the repo. Observation only — neither project enforces syscalls in the kernel |
+| "Training data non-membership" (threshold check over a Merkle commitment) | ❌ | ✅ | ◐ | `substrate_guard/comply/protocol.py`, `tests/test_comply/` (6 files), CLI `comply demo`; kept out of the production import graph by `tests/test_layer_wiring.py` |
+| "Training data compliant, zero-knowledge" (ZK-SNM) | ❌ | ❌ | ○ | `substrate_guard/comply/protocol.py:3-5` — "Branded ZK-SNM but NOT zero-knowledge"; the brand survives only as the certificate wire identifier |
+| "Export signed with a software Ed25519 key" | ✅ (v2.1.0) | ✅ | BIJOTEL ● / substrate-guard ◐ | BIJOTEL `src/bijotel/crypto/ed25519.py` — GENA→ARA verification 2026-05-26 (section below); the ARA federation service verifies Ed25519 chain heads on every submission (`/status` 2026-09-10T13:48Z: 2 operators, 200 submissions). substrate-guard `substrate_guard/attest/device_key.py`, `tests/test_chain_head_signature.py` — "not wired into a deployed export yet" (`docs/releases/v13.4.3.md`) |
+| "Signed by hardware" (TPM / TEE attestation) | ❌ (stub) | ❌ | ○ | BIJOTEL `src/bijotel/attestation/tpm2.py` raises `NotImplementedError`; substrate-guard `substrate_guard/attest/fingerprint.py:1` ("no TPM"), `attest/attested_guard.py:49` `tpm_available: False` |
+| "Works offline" (local SQLite store + append-only sync) | ❌ | ✅ | ◐ | `substrate_guard/offline/local_store.py`, `substrate_guard/offline/sync.py`, `tests/test_offline/`; demo-only per `tests/test_layer_wiring.py` |
+| "Works offline (CRDT merge)" | ❌ | ❌ | ○ | `substrate_guard/offline/sync.py:14-19` — "NOT a general CRDT": `INSERT OR IGNORE` union by id, no value-level merge |
+| "`pip install` one-liner" | ✅ | ❌ | ● | PyPI `bijotel` 2.16.0 (`pip index`, 2026-09-10); the ARA container runs the 2.16.0 index install, GENA runs 2.15.0 (read 2026-09-10T13:49Z). substrate-guard is not on PyPI — source install only (`README.md`) |
+| "Bundled REST API + dashboard" | ✅ | ❌ | BIJOTEL ● (GENA) / substrate-guard ❌ | `src/bijotel/api/app.py`, `src/bijotel/dashboard_dist/`, `tests/test_api_*.py`; runs on GENA inside container `gena-v3-atelier-1` as `bijotel serve --port 8090 --host 0.0.0.0 --db /data/bijotel_chain.db --dashboard` (2.15.0; `/api/health` ok 2026-09-10T14:17Z). The port is container-internal and not published to the host, which is why a host-side probe at 2026-09-10T13:48Z found nothing; the hourly regression cron drives it — `/var/log/bijotel/regression_api.log` last written 2026-09-10T14:30Z, results `clean`. Not deployed on ARA (:8088 there is the separate `bijotel-federation` 0.3.0 service, which imports `bijotel.crypto` and `bijotel.federation`, not `bijotel.api`) |
 
 BIJOTEL is the PyPI-installable subset focused on LLM observability +
 forensic chain — the demonstrator of bijuteria #11 (Forensic-First
-Architecture) at scale. The remaining safety bijuterii (#1 Z3,
-#6 ZK, #8 eBPF, #12 hardware trust) live in `substrate-guard`, not
-here. The README and CHANGELOG state this explicitly; this page exists
-so that scope distinction is visible from the docs site too.
+Architecture) at scale. The remaining safety bijuterii live in
+`substrate-guard` in the states shown above, not as production
+features: #1 Z3 is installed on the Research server and exercised by
+tests and the CLI, but not per-event in the nightly audit (◐); #8 eBPF
+is an implemented live-monitor path that the deployed cron does not use
+(◐); #6 ZK is a non-zero-knowledge threshold prototype (○ for the ZK
+claim, ◐ for the threshold check); #12 hardware trust is a tested
+software-key path with `tpm_available: False` — the hardware part is
+design-only (○). What runs in production differs by side. On BIJOTEL,
+more than the chain runs — verified from the GENA logs on
+2026-09-10T14:45Z: the HMAC chain, the daily Ed25519-signed export
+verification (`export_verify.log`, "Export VALID — HMAC chain + Ed25519
+signature both verified", 2026-09-10T05:30:01Z), the daily federation
+submission (`federation_submit.log`, 2026-09-10T03:00:01Z) and Rekor
+anchoring (`anchor.log`, 2026-09-10T03:30:04Z), and — on GENA only —
+the bundled REST API + dashboard with its hourly regression run
+(`regression_api.log`, 2026-09-10T14:30Z). On substrate-guard, only the
+HMAC chain and the built-in policy audit run in production. This page
+is the canonical statement of that boundary on the docs site.
+
+State classification verified against substrate-guard v13.4.3 (commit
+`1c454be`, 2026-07-25 — the same commit installed at
+`/opt/substrate-guard` on the Research server) on 2026-09-10.
 
 ---
 

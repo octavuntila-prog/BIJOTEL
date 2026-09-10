@@ -5,6 +5,79 @@ All notable changes to BIJOTEL will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.0] — 2026-09-10 — production proof page + honest scope table
+
+### Added
+
+- **`bijotel.tools.proof_stats`** — a stdlib-only, read-only measurement
+  tool. `collect --chain <db> [--federation <db>] [--label L] [--link-n N]
+  [--now ISO]` opens the SQLite files with `?mode=ro` and prints ONE JSON
+  object: entry count, seq range and seq gaps, first/last entry time, days
+  running, head age at measurement, entries per UTC day for the last 7
+  days, and a keyless link check over the last N rows (`prev_hash(seq) ==
+  hmac_hash(seq-1)`, seq consecutiveness, `canonical_hash ==
+  sha256(canonical_body)`); for a federation DB: operators, submissions,
+  cross-anchors and their Rekor log indexes. `render a.json b.json -o
+  PROOF.md` turns those JSON files into a Markdown page. No network (the
+  Rekor URL is copied as stored). The HMAC is NOT recomputed — that needs
+  the operator key, and `bijotel verify` remains the keyed check. Every
+  value carries its `measured_at_utc`. The link result is three-state —
+  valid / broken / `null` when nothing could be checked (empty chain, or a
+  window with no row that has a known predecessor), rendered as
+  `UNCHECKED`, never as a pass — and `--link-n` must be >= 1. The page
+  footer states how that page was produced: by hand (default) or by the
+  scheduled job of `docs/ops/proof-page.md` (`render --generated-by cron`),
+  which is not deployed as of 2026-09-10. Invoked as
+  `python -m bijotel.tools.proof_stats`; not wired into the `bijotel` CLI.
+- **`PROOF.md`** at the repo root — the first generated snapshot
+  (rendered 2026-09-10T14:45:04Z from measurements taken 2026-09-10T13:53Z):
+  GENA 74,773 entries over 123 days and ARA 21,784
+  entries over 108 days, both `seq 1..N` with no gaps, keyless link check
+  VALID over the last 1,000 rows of each; federation 100 cross-anchors
+  since 2026-06-05, all 100 with a Rekor log index. The page states what it
+  proves and what it does not (no content correctness, no certification,
+  no rewritten-history detection by the witness alone).
+- **`docs/ops/proof-page.md`** — what the page is, how the tool works, the
+  manual regeneration procedure, and the intended daily cron on the ARA
+  host (not deployed as of 2026-09-10).
+- **`tests/test_proof_stats.py`** (16 tests) with the three JSON snapshots
+  under `tests/fixtures/proof/`: read-only connection (a `DELETE` raises
+  "readonly"), the link check covers only the last N rows, deterministic
+  output under `--now`, render output shape, the three-state link result
+  and the footer wording.
+
+### Changed
+
+- **README** — status paragraph and the production-validation section now
+  carry dated snapshots: 2026-06-07 kept as history, 2026-09-10 taken from
+  `PROOF.md`; deployed versions per host (GENA 2.15.0, ARA 2.16.0, verified
+  in-container 2026-09-10); an explicit "not verified by this page" list;
+  a "Verifiable production proof" section pointing at `PROOF.md` and the
+  tool; the Docker tag line now names the tags that exist on ghcr.io on
+  2026-09-10 (`:2.16.0`, `:latest`) and says `:2.17.0` appears only once
+  this release is tagged; the test and coverage badges
+  carry the figures measured on 2026-09-10 (1016 passed / 9 skipped of
+  1025 collected; 88% line coverage with `--cov=bijotel`) and that date.
+- **`docs/threat-model.md`** — the BIJOTEL vs substrate-guard scope table
+  is now a three-state classification (● runs in production / ◐
+  implemented, not exercised in production / ○ design or prototype) with
+  an evidence column (file path + measurement time). The surrounding prose
+  was aligned with it: eBPF is syscall observation, not enforcement;
+  ZK-SNM is a threshold check, not zero-knowledge; the bundled REST API +
+  dashboard is ● on GENA (`bijotel serve --dashboard` 2.15.0 inside
+  `gena-v3-atelier-1`, container-internal `:8090`, `/api/health` ok
+  2026-09-10T14:17Z, hourly regression run logged 2026-09-10T14:30Z) and
+  not deployed on ARA. The closing paragraph now lists everything that
+  actually runs in production on the BIJOTEL side — chain, daily
+  Ed25519-signed export verification (2026-09-10T05:30:01Z), daily
+  federation submission (03:00:01Z) and Rekor anchoring (03:30:04Z) —
+  instead of claiming only the chain does.
+
+### Notes
+
+- No runtime behaviour changes to processors, chain format, or CLI.
+  Production hosts on 2.15.0 / 2.16.0 need no redeploy.
+
 ## [2.16.0] — 2026-06-15 — `append_event`: seal non-span events into the chain
 
 ### Added

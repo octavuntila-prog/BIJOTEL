@@ -1,0 +1,35 @@
+{
+  "label": "ARA",
+  "measured_at_utc": "2026-09-10T13:53:48Z",
+  "bijotel_version": "2.16.0",
+  "chain": {
+    "path": "/app/data/bijotel_chain.db",
+    "count": 21784,
+    "seq_min": 1,
+    "seq_max": 21784,
+    "first_ts_utc": "2026-05-25T06:33:48Z",
+    "last_ts_utc": "2026-09-10T10:48:21Z",
+    "days_running": 108,
+    "head_age_min": 185.4,
+    "seq_gaps": false,
+    "link_check_n": 1000,
+    "link_valid_last_n": {
+      "valid": true,
+      "n_checked": 1000,
+      "first_seq": 20785,
+      "last_seq": 21784,
+      "broken_at": null,
+      "reason": null
+    },
+    "rows_last_7_days": {
+      "2026-09-04": 173,
+      "2026-09-05": 171,
+      "2026-09-06": 318,
+      "2026-09-07": 512,
+      "2026-09-08": 155,
+      "2026-09-09": 165,
+      "2026-09-10": 88
+    }
+  },
+  "federation": null
+}

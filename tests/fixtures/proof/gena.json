@@ -1,0 +1,35 @@
+{
+  "label": "GENA",
+  "measured_at_utc": "2026-09-10T13:53:42Z",
+  "bijotel_version": "2.15.0",
+  "chain": {
+    "path": "/data/bijotel_chain.db",
+    "count": 74773,
+    "seq_min": 1,
+    "seq_max": 74773,
+    "first_ts_utc": "2026-05-10T09:14:54Z",
+    "last_ts_utc": "2026-09-10T13:51:36Z",
+    "days_running": 123,
+    "head_age_min": 2.1,
+    "seq_gaps": false,
+    "link_check_n": 1000,
+    "link_valid_last_n": {
+      "valid": true,
+      "n_checked": 1000,
+      "first_seq": 73774,
+      "last_seq": 74773,
+      "broken_at": null,
+      "reason": null
+    },
+    "rows_last_7_days": {
+      "2026-09-04": 683,
+      "2026-09-05": 496,
+      "2026-09-06": 475,
+      "2026-09-07": 674,
+      "2026-09-08": 579,
+      "2026-09-09": 597,
+      "2026-09-10": 503
+    }
+  },
+  "federation": null
+}

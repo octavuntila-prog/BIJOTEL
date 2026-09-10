@@ -4,8 +4,8 @@
 [![CI](https://github.com/octavuntila-prog/BIJOTEL/actions/workflows/ci.yml/badge.svg)](https://github.com/octavuntila-prog/BIJOTEL/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/pypi/pyversions/bijotel.svg)](https://pypi.org/project/bijotel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-1000%20passing%20%C2%B7%209%20skipped-brightgreen.svg)](#)
-[![Coverage](https://img.shields.io/badge/coverage-84%25-green.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1016%20passed%20%C2%B7%209%20skipped%20%C2%B7%202026--09--10-brightgreen.svg)](#)
+[![Coverage](https://img.shields.io/badge/coverage-88%25%20%C2%B7%202026--09--10-green.svg)](#)
 [![Layers](https://img.shields.io/badge/layers-14%2F14%20active-brightgreen.svg)](#)
 [![Providers](https://img.shields.io/badge/chain%20providers-Anthropic%20%C2%B7%20xAI%20%28OpenAI%20adapter%29-blue.svg)](#)
 
@@ -18,19 +18,26 @@ It's a plug-in to whatever tracer you have (OpenLLMetry,
 `AnthropicInstrumentor`, custom wrappers) — it does not replace your
 tracer; it extends it.
 
-**Status:** v2.16.0 on PyPI (41 releases). Validated on **2 independent
-production systems**: **GENA** (9-ecosystem AI mesh, x86_64, Nuremberg
-— running BIJOTEL since 2026-05-10; 4 ecosystems on 2.15.0) and
-**ARA** (AI Research Agency, aarch64, Helsinki — since 2026-05-25;
-backend + MCP on 2.16.0). Deployed versions verified in-container
-2026-07-24.
-Production-validated through 70+ consecutive days: **37,500+ chain
-entries (GENA) + 8,800+ (ARA) as of 2026-07-19, both `Chain VALID`,
-0 chain breaks, 2 LLM providers in the
-same chain** (Anthropic + xAI; the OpenAI SDK adapter is shipped).
-Both chain heads are **anchored daily in Sigstore Rekor** (public,
-third-party timestamps).
-**All 14 bijuterii layers active** at the default `bijotel serve` engine.
+**Status:** v2.17.0 (this release; the latest on PyPI at the time of
+writing is 2.16.0, 41 releases, counted 2026-09-10). Production: **GENA**
+(9-ecosystem AI mesh, x86_64, Nuremberg) running BIJOTEL since 2026-05-10,
+currently 2.15.0 in the 4 of its 9 containers that carry bijotel, and
+**ARA** (AI Research Agency, aarch64, Helsinki) since 2026-05-25,
+currently 2.16.0 (both verified in-container 2026-09-10; 2.15.0 was
+released 2026-06-08 and 2.16.0 on 2026-06-15, see the changelog).
+Chains as of 2026-09-10T13:53Z, from [PROOF.md](PROOF.md): **GENA 74,773
+entries over 123 days, ARA 21,784 entries over 108 days**, each
+`seq 1..N` with no gaps, keyless link check VALID over the last 1,000 rows
+of each; both chain heads are witnessed daily in Sigstore Rekor through
+the federation cross-anchor (100 anchors since 2026-06-05, all 100 with a
+Rekor log index, as of 2026-09-10T13:53Z). 2 LLM providers in the same
+chain (Anthropic + xAI; the OpenAI SDK adapter is shipped). The dated
+snapshot is in [PROOF.md](PROOF.md) (regenerated manually for now; see
+[docs/ops/proof-page.md](docs/ops/proof-page.md)).
+The 14 bijuterii layers report `active` on `GET /layers` of a default
+`bijotel serve` engine; which capabilities run in production versus ship
+only is listed in the three-state table in
+[docs/threat-model.md](docs/threat-model.md).
 
 ## Multi-provider chain (v2.0.0)
 
@@ -88,9 +95,11 @@ docker run -p 8080:8080 \
 ```
 
 Then open <http://localhost:8080/> for the dashboard and
-<http://localhost:8080/api/health> for the REST liveness probe. Versioned
-tags (`:2.15.1`, `:latest`) live at
-[ghcr.io/octavuntila-prog/bijotel](https://github.com/octavuntila-prog/BIJOTEL/pkgs/container/bijotel).
+<http://localhost:8080/api/health> for the REST liveness probe. The
+release workflow pushes a `:<version>` tag on each release to
+[ghcr.io/octavuntila-prog/bijotel](https://github.com/octavuntila-prog/BIJOTEL/pkgs/container/bijotel)
+(`:2.16.0` and `:latest` present on 2026-09-10; `:2.17.0` exists only
+once this release is tagged).
 
 ## Quickstart
 
@@ -227,6 +236,11 @@ report ``active`` immediately once their evidence trigger is met
 (see column "active when…"). The empty-chain edge case is the only
 one where ``forensic_chain``/``regression`` start as
 ``available`` — they flip to ``active`` after the first sealed span.
+These states describe a `bijotel serve` process; for which capabilities
+are exercised on the production hosts versus shipped only (and for the
+boundary with substrate-guard's eBPF / OPA / Z3 / ZK-SNM / TPM claims,
+none of which are in this table), see the three-state table in
+[docs/threat-model.md](docs/threat-model.md).
 
 | # | Bijuterie | Layer | Active when… | v2.0.0 |
 |---|---|---|---|---|
@@ -288,10 +302,13 @@ v2.0.0 is the tag for the moment the column emptied.
   ``opentelemetry-instrumentation-openai`` chain. It never wraps the
   SDK call itself, so there's no provider-specific glue to maintain.
 
-## Production validated (v2.14.1, 2026-06-07)
+## Production validation (history)
 
 GENA's production agent ecosystem (Aisophical) has been the rolling
-integration test since v0.5.0:
+integration test since v0.5.0. Each snapshot below is dated; its figures
+were measured on that date and are not updated in place.
+
+**Snapshot 2026-06-07 (v2.14.1):**
 
 * **28+ days continuous operation** (2026-05-10 → 2026-06-07), **30+
   wheel deploys** on GENA spanning v0.5.0 → v2.14.1. GENA + ARA both run
@@ -320,10 +337,56 @@ integration test since v0.5.0:
   on a factual prompt scored 1.00 agreement (same answer);
   on a creative prompt scored 0.15 (genuine disagreement → flag).
 
+**Snapshot 2026-09-10** (figures from [PROOF.md](PROOF.md), measured
+2026-09-10T13:53Z; per-source measurement times below):
+
+* **GENA: 74,773 chain entries** (seq 1..74773, no gaps), 123 days since
+  2026-05-10; head age 2.1 min at 2026-09-10T13:53:42Z; keyless link
+  check VALID over the last 1,000 rows (seq 73774..74773); bijotel
+  2.15.0 in-container.
+* **ARA: 21,784 chain entries** (seq 1..21784, no gaps), 108 days since
+  2026-05-25; head age 185.4 min at 2026-09-10T13:53:48Z; keyless link
+  check VALID over the last 1,000 rows (seq 20785..21784); bijotel
+  2.16.0 in-container.
+* **Federation: 100 cross-anchors since 2026-06-05, all 100 with a
+  Sigstore Rekor log index** (measured 2026-09-10T13:53:53Z); 2
+  operators with 100 submissions each; last anchor
+  `anchor_20260910T034501Z_9224cd` at 2026-09-10T03:45:01Z, Rekor log
+  index 2777280145. Each operator submits the last 10 entries of its
+  chain once a day, so the entries between two daily submissions are
+  not individually witnessed.
+* **Daily export verification:** each host exports its chain and runs
+  the keyed `bijotel verify-export` daily; the 2026-09-10 05:30Z runs
+  reported VALID on both GENA and ARA (host logs read 2026-09-10
+  12:40–13:03Z). The submitted chain heads were checked by hand against
+  the live chains the same day (GENA seq 74377, ARA seq 21696: both
+  match the chain's `hmac_hash`).
+* **Entries per UTC day, 2026-09-04 → 2026-09-10:** GENA 475–683, ARA
+  88–512 per day (2026-09-10 is a partial day).
+* **Not verified by this page:** the content correctness of any entry
+  (whether a span records what the model actually did); the keyed HMAC
+  over the full chain in this snapshot (the keyless link check covers
+  the last 1,000 rows; `bijotel verify` with the operator key covers
+  all rows); and the federation's `continuity_verified` flag, which is
+  not evidence of a continuity check — operators compare heads by hand.
+  This is a measurement, not a certification and not a compliance claim.
+
 For deep production validation across Rounds 1–3 (46 tests, 0
 partial/fail), see release notes in
 [`CHANGELOG.md`](CHANGELOG.md) and the live demo with a
 verify-yourself chain at <https://bijotel.whiteandpoint.com>.
+
+## Verifiable production proof
+
+[PROOF.md](PROOF.md) is a dated, read-only snapshot of both production
+chains and of the federation cross-anchors. It is produced by
+`python -m bijotel.tools.proof_stats collect --chain <chain.db> [--federation <federation.db>] --label <NAME>`
+(one JSON per source; SQLite opened with `?mode=ro`; keyless link check
+over the last N rows; no network) followed by
+`python -m bijotel.tools.proof_stats render <a.json> <b.json> -o PROOF.md`.
+Every number carries its measurement time, and the page states what it
+proves and what it does not. Regeneration procedure and the intended
+cron: [docs/ops/proof-page.md](docs/ops/proof-page.md).
 
 ## Known issues
 

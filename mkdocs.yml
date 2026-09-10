@@ -71,6 +71,7 @@ nav:
       - Secret Rotation: operations/secret-rotation.md
       - Multi-Provider Setup: operations/multi-provider.md
       - Chain Archival: operations/chain-archival.md
+      - Proof Page: ops/proof-page.md
   - Design:
       - OTel Collector Exporter: design/otel-collector-exporter.md
       - TEE-Anchored Chains: design/tee-anchored-chains.md

@@ -1,0 +1,103 @@
+{
+  "label": "FEDERATION",
+  "measured_at_utc": "2026-09-10T13:53:53Z",
+  "bijotel_version": null,
+  "chain": null,
+  "federation": {
+    "path": "/opt/bijotel-federation/data/federation.db",
+    "operators": {
+      "count": 2,
+      "ids": [
+        "op_7138892a052e",
+        "op_fe8857864f33"
+      ],
+      "items": [
+        {
+          "operator_id": "op_7138892a052e",
+          "org_name": "ARA",
+          "registered_at": "2026-06-05T14:48:20Z",
+          "last_submission_at": "2026-09-10T03:00:05Z",
+          "submissions": 100
+        },
+        {
+          "operator_id": "op_fe8857864f33",
+          "org_name": "GENA",
+          "registered_at": "2026-06-05T14:49:30Z",
+          "last_submission_at": "2026-09-10T03:00:03Z",
+          "submissions": 100
+        }
+      ]
+    },
+    "submissions_total": 200,
+    "last_submission": {
+      "submission_id": "sub_a86d51b3074368be",
+      "operator_id": "op_7138892a052e",
+      "entry_count": 10,
+      "first_seq": 21687,
+      "last_seq": 21696,
+      "submitted_at": "2026-09-10T03:00:05Z",
+      "cross_anchor_id": "anchor_20260910T034501Z_9224cd"
+    },
+    "anchors_total": 100,
+    "rekor_anchored": 100,
+    "first_anchor_at": "2026-06-05T14:54:05Z",
+    "last_anchor": {
+      "anchor_id": "anchor_20260910T034501Z_9224cd",
+      "anchored_at": "2026-09-10T03:45:01Z",
+      "rekor_log_index": 2777280145,
+      "rekor_url": "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=2777280145",
+      "participants": 2
+    },
+    "last_7_anchors": [
+      {
+        "anchor_id": "anchor_20260910T034501Z_9224cd",
+        "anchored_at": "2026-09-10T03:45:01Z",
+        "rekor_log_index": 2777280145,
+        "rekor_url": "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=2777280145",
+        "participants": 2
+      },
+      {
+        "anchor_id": "anchor_20260909T034501Z_da2a67",
+        "anchored_at": "2026-09-09T03:45:01Z",
+        "rekor_log_index": 2764940634,
+        "rekor_url": "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=2764940634",
+        "participants": 2
+      },
+      {
+        "anchor_id": "anchor_20260908T034501Z_75ed61",
+        "anchored_at": "2026-09-08T03:45:01Z",
+        "rekor_log_index": 2754876362,
+        "rekor_url": "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=2754876362",
+        "participants": 2
+      },
+      {
+        "anchor_id": "anchor_20260907T034501Z_90c923",
+        "anchored_at": "2026-09-07T03:45:01Z",
+        "rekor_log_index": 2746515307,
+        "rekor_url": "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=2746515307",
+        "participants": 2
+      },
+      {
+        "anchor_id": "anchor_20260906T034501Z_92ad1e",
+        "anchored_at": "2026-09-06T03:45:01Z",
+        "rekor_log_index": 2733807883,
+        "rekor_url": "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=2733807883",
+        "participants": 2
+      },
+      {
+        "anchor_id": "anchor_20260905T034501Z_f09838",
+        "anchored_at": "2026-09-05T03:45:01Z",
+        "rekor_log_index": 2720262499,
+        "rekor_url": "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=2720262499",
+        "participants": 2
+      },
+      {
+        "anchor_id": "anchor_20260904T034501Z_772268",
+        "anchored_at": "2026-09-04T03:45:01Z",
+        "rekor_log_index": 2706686333,
+        "rekor_url": "https://rekor.sigstore.dev/api/v1/log/entries?logIndex=2706686333",
+        "participants": 2
+      }
+    ]
+  }
+}
