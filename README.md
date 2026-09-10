@@ -4,8 +4,8 @@
 [![CI](https://github.com/octavuntila-prog/BIJOTEL/actions/workflows/ci.yml/badge.svg)](https://github.com/octavuntila-prog/BIJOTEL/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/pypi/pyversions/bijotel.svg)](https://pypi.org/project/bijotel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-983%20passing-brightgreen.svg)](#)
-[![Coverage](https://img.shields.io/badge/coverage-86%25-green.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1000%20passing%20%C2%B7%209%20skipped-brightgreen.svg)](#)
+[![Coverage](https://img.shields.io/badge/coverage-84%25-green.svg)](#)
 [![Layers](https://img.shields.io/badge/layers-14%2F14%20active-brightgreen.svg)](#)
 [![Providers](https://img.shields.io/badge/chain%20providers-Anthropic%20%C2%B7%20xAI%20%28OpenAI%20adapter%29-blue.svg)](#)
 
@@ -18,14 +18,15 @@ It's a plug-in to whatever tracer you have (OpenLLMetry,
 `AnthropicInstrumentor`, custom wrappers) — it does not replace your
 tracer; it extends it.
 
-**Status:** v2.15.1 on PyPI (test/CI-only patch — no runtime changes);
-**GENA + ARA production both run v2.15.0** (as of 2026-06-12). Validated on **2 independent
+**Status:** v2.16.0 on PyPI (41 releases). Validated on **2 independent
 production systems**: **GENA** (9-ecosystem AI mesh, x86_64, Nuremberg
-— running BIJOTEL since 2026-05-10) and **ARA** (AI Research Agency,
-aarch64, Helsinki — running since 2026-05-25).
-Production-validated through 28+ consecutive days on GENA: **12,900+
-chain entries (GENA) + 1,400+ (ARA), both `Chain VALID`, 30+ wheel
-deploys (v0.5.0 → v2.14.1), 0 chain breaks, 2 LLM providers in the
+— running BIJOTEL since 2026-05-10; 4 ecosystems on 2.15.0) and
+**ARA** (AI Research Agency, aarch64, Helsinki — since 2026-05-25;
+backend + MCP on 2.16.0). Deployed versions verified in-container
+2026-07-24.
+Production-validated through 70+ consecutive days: **37,500+ chain
+entries (GENA) + 8,800+ (ARA) as of 2026-07-19, both `Chain VALID`,
+0 chain breaks, 2 LLM providers in the
 same chain** (Anthropic + xAI; the OpenAI SDK adapter is shipped).
 Both chain heads are **anchored daily in Sigstore Rekor** (public,
 third-party timestamps).
